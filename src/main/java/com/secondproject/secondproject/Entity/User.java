@@ -21,6 +21,15 @@ public class User {
 
     private String password;
 
+    private LocalDate birth;
+
+    private String email;
+
+    private String gender;
+
+
+
+
 
 
 
