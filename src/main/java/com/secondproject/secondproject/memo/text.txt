@@ -1,22 +1,23 @@
-학적변경신청(student_record)
-학적 기록 번호(PK)	record_id	int	not null
-유저ID(FK)	user_id	number	not null
-상태기록번호(FK)	status_id	number	not null
-제목	title	varchar	not null
-본문	content	varchar	not null
-신청일	applied_date	date
-처리일	processed_date	date
-처리상태	process_status	enum	default pending
-변경신청학적	academic_request	enum	not null
-
-
-
-
-
-
+출결기록(attendance_records)
+출결ID(PK)	attendance_id	int	not null
+유저ID(FK)	student_id	varchar(20)	not null
+수강ID(FK)	enroll_Id	number	not null
+출결일	attendance_date	date	not null
+출결상태	attendance_status	enum	not null
 
 
 
 
 @Enumerated(EnumType.STRING)
+
 @JsonFormat(pattern = "yyyy-MM-dd")
+
+@Id
+@GeneratedValue(strategy = GenerationType.AUTO)
+@Column(name = "user_id")
+
+columnDefinition
+
+ @Column(name = "score", precision = 4, scale = 2, nullable = false) // => DECIMAL(4,2)
+ @Digits(integer = 2, fraction = 2)  // Bean Validation (00.00 ~ 99.99)
+ private BigDecimal score;
