@@ -18,7 +18,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "user_id")
-    private long id; // 유저 아이디,
+    private Long id; // 유저 아이디,
 
     @Column(nullable = false, length = 50)
     private String u_name; // 유저 이름
@@ -39,7 +39,7 @@ public class User {
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="major_id")
-    private String major; // 소속 학과
+    private Major major; // 소속 학과
 
     @Enumerated(EnumType.STRING)
     private UserType u_type; // 유저 구분 (학생, 교수, 관리자)
