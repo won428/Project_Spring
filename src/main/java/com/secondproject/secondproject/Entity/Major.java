@@ -15,7 +15,7 @@ public class Major {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long major_id; // 학과 코드
+    private Long id; // 학과 코드
 
     @Column(nullable = false)
     private String m_name; // 학과 이름
