@@ -1,12 +1,13 @@
-출결기록(attendance_records)
-출결ID(PK)	attendance_id	int	not null
-유저ID(FK)	student_id	varchar(20)	not null
-수강ID(FK)	enroll_Id	number	not null
-출결일	attendance_date	date	not null
-출결상태	attendance_status	enum	not null
-
-
-
+이의제기(appeal)
+이의제기코드(PK)	appeal_id	number	PK
+보낸사람	sending_id	number	FK
+받는사람	receiver_id	number	FK
+수강ID(FK)	enroll_Id	number	FK
+제목	title	varchar	not null
+본문	content	varchar	not null
+이의제기일	appeal_date	date	not null
+처리상태	a_status	ENUM	not null
+구분	appealType	ENUM	not null
 
 @Enumerated(EnumType.STRING)
 

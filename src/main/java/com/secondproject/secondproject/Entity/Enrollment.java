@@ -18,22 +18,22 @@ public class Enrollment {
     private Long id; // 수강id
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user; // 수강중인 유저 id
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lecture_id")
+    @JoinColumn(name = "lecture_id", nullable = false)
     private Lecture lecture; // 수강중인 강의 코드
 
-
+    @OneToOne
+    @JoinColumn(name = "grade_id", nullable = false)
     private Grade grade; // 성적 정보 id
 
     @Column(nullable = false)
     private String completionDiv; // 이수구분
 
-    private Attendance_records attendance_records; // 출결 id
-
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Status status; // 수강 상태(수강중인지, 종강인지), 일단 Status Enum클래스로 한번에 관리하려고 하는데 분리 필요하면 분리하셔도 될 것 같습니다.
 
 }

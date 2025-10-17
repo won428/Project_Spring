@@ -36,5 +36,5 @@ public class Attachment {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate upload_at; // 업로드일
 
-    private String sha256;
+    private String sha256; // 해시검증용 입니다.
 }

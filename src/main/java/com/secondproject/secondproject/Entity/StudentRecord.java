@@ -37,10 +37,10 @@ public class StudentRecord {
     private LocalDate processed_date;      // 처리일(date), null 허용
 
     @Enumerated(EnumType.STRING)
-    private String process_status;         // 처리상태(enum: default pending, varchar)
+    private Status status;         // 처리상태
 
     @Enumerated(EnumType.STRING)
-    private String academic_request;       // 변경신청목적(enum, varchar)
+    private Student_status studentStatus;     // 변경신청목적(enum, varchar)
 
     // 연관관계 매핑이 필요하면 @ManyToOne, @JoinColumn(userId) 등 추가
 }

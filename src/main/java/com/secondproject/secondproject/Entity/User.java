@@ -44,7 +44,7 @@ public class User {
 
     @ManyToOne(fetch=FetchType.LAZY)
     @Column(nullable = false)
-    @JoinColumn(name="major_id")
+    @JoinColumn(name="major_id", nullable = false)
     private Major major; // 소속학과ID (number, FK)
 
     @Enumerated(EnumType.STRING)
