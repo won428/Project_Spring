@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 @Getter @Setter @ToString
 @Entity
-@Table(name = "class")
+@Table(name = "lecture")
 public class Lecture {
     // 강의 테이블
 
@@ -47,6 +47,7 @@ public class Lecture {
     @Column(nullable = false)
     private int total_student; // 정원이 몇명인지 표기합니다. 정원을 초과하여 유저(학생이) 강의를 수강 할 수 없습니다.
 
+    // 수정필요
     private long ol_id; // 강의와 관련된 온라인 강의 정보를 표기합니다. << 강의당 온라인 강의 1개인게 아니면 매핑 필요할거 같아요
 
 
