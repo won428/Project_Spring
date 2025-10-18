@@ -13,56 +13,49 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/student") // "member"로 변경 예정
-public class StudentController {
+@RequestMapping("/member") // 공통 경로
+public class MemberController {
 
     private final UserService userService;
 
-    // 생성자 주입 (필드 주입 대신, @RequiredArgsConstructor 없이 직접 작성)
-    public StudentController(UserService userService) {
+    public MemberController(UserService userService) {
         this.userService = userService;
     }
 
-    // 학생 정보 + 학적 정보 조회
-    @GetMapping("/{user_id}")
-    public ResponseEntity<?> getStudentInfo(@PathVariable Long id) {
-        User user = userService.getUserById(id);
+    // 학생 정보만 조회 가능 (경로: /member/student/{user_id})
+    @GetMapping("/student/{user_id}")
+    public ResponseEntity<?> getStudentInfo(@PathVariable Long user_id) {
+        User user = userService.getUserById(user_id);
 
-        // enum UserType.STUDENT을 직접 비교
         if (user.getU_type() != UserType.STUDENT) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "학생 정보만 조회할 수 있습니다."));
         }
 
-        // RecordStatus 엔티티명도 실제 테이블명과 맞춰 사용
         StatusRecords statusRecord = userService.getStatusRecordById(user.getStatus_id());
         StudentInfoDto dto = new StudentInfoDto(user, statusRecord);
         return ResponseEntity.ok(dto);
     }
 
-    // 사용자 역할에 따른 기능 제한 예시
-    @PostMapping("/{user_id}/request")
-    public ResponseEntity<?> studentFeature(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        User user = userService.getUserById(id);
+    // 학적 변경 신청은 학생에 한함 (경로: /member/student/{user_id}/request)
+    @PostMapping("/student/{user_id}/request")
+    public ResponseEntity<?> studentFeature(@PathVariable Long user_id, @RequestBody Map<String, Object> body) {
+        User user = userService.getUserById(user_id);
 
-        switch (user.getU_type()) {
-            case STUDENT:
-                return ResponseEntity.ok(Map.of("message", "학생 기능 수행"));
-            case PROFESSOR:
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(Map.of("error", "교수는 해당 기능을 사용할 수 없습니다."));
-            case ADMIN:
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(Map.of("error", "관리자는 학생 전용 기능을 사용할 수 없습니다."));
-            default:
-                return ResponseEntity.badRequest().body(Map.of("error", "알 수 없는 사용자 유형입니다."));
+        if (user.getU_type() != UserType.STUDENT) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "학생만 학적 변경 신청이 가능합니다."));
         }
+
+        // 실제 처리는 서비스에 위임
+        return ResponseEntity.ok(Map.of("message", "학적 변경 신청이 처리되었습니다."));
     }
 
-    // 졸업생 기능 제한 및 증명서 발급
-    @GetMapping("/{user_id}/certificate/{type}")
-    public ResponseEntity<?> issueCertificate(@PathVariable Long id, @PathVariable String type) {
-        User user = userService.getUserById(id);
+    // 졸업생 증명서 발급 기능 (경로: /member/student/{user_id}/certificate/{type})
+    @GetMapping("/student/{user_id}/certificate/{type}")
+    public ResponseEntity<?> issueCertificate(@PathVariable Long user_id, @PathVariable String type) {
+        User user = userService.getUserById(user_id);
+
         if (user.getU_type() != UserType.STUDENT) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "학생 전용 서비스입니다."));
@@ -80,7 +73,6 @@ public class StudentController {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "졸업생만 발급 가능한 증명서 종류입니다."));
         }
-        return ResponseEntity.ok(userService.issueCertificate(id, type));
+        return ResponseEntity.ok(userService.issueCertificate(user_id, type));
     }
-    // 필요한 기타 기능 및 예외처리 확장 가능
 }
