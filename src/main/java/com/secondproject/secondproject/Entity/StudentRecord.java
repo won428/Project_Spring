@@ -26,12 +26,15 @@ public class StudentRecord {
     private Long record_id;                  // 유저ID(FK), number
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumns({
+            @JoinColumn(name = "user_id_part1", referencedColumnName = "user_id_part1", nullable = false),
+            @JoinColumn(name = "user_id_part2", referencedColumnName = "user_id_part2", nullable = false)
+    })
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "status_id", nullable = false)
-    private Status statusRecords;                // 상태/학적번호(FK), number
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_id", nullable = false)
+    private Status statusRecords;               // 상태/학적번호(FK), number
 
     @Column(nullable = false)
     private String title;                 // 제목(varchar)
@@ -46,8 +49,8 @@ public class StudentRecord {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate processed_date;      // 처리일(date), null 허용
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private Status status;         // 처리상태
 
     @Column(nullable = false)

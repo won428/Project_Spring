@@ -23,8 +23,11 @@ public class SubmitAsgmt {
     @JoinColumn(name = "assignment_id",nullable = false, foreignKey = @ForeignKey(name = "fk_submit_user"))
     private Assignment assignment; //교수공지ID(FK)
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false) // 제출자(학생)
-    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_submit_user"))
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumns({
+            @JoinColumn(name = "user_id_part1", referencedColumnName = "user_id_part1", nullable = false, foreignKey = @ForeignKey(name = "fk_submit_user_part1")),
+            @JoinColumn(name = "user_id_part2", referencedColumnName = "user_id_part2", nullable = false, foreignKey = @ForeignKey(name = "fk_submit_user_part2"))
+    })
     private User user;
 
     @Column(name = "submit_title", length = 200, nullable = false)

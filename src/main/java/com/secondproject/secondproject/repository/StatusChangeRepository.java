@@ -2,8 +2,11 @@ package com.secondproject.secondproject.repository;
 
 import com.secondproject.secondproject.Entity.StatusRecords;
 import com.secondproject.secondproject.Entity.StudentRecord;
+import com.secondproject.secondproject.Enum.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface StatusChangeRepository extends JpaRepository<StatusRecords, Long> {
@@ -13,4 +16,7 @@ public interface StatusChangeRepository extends JpaRepository<StatusRecords, Lon
 
     // 커스텀 메서드를 쓰려면 아래처럼 선언만 해두고 구현은 필요
     // void saveStatusChange(StatusChangeRequestDto dto);
+
+    List<StudentRecord> findByUserIdAndStatusIn(Long userId, List<Status> validStatuses);
+
 }

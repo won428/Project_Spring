@@ -1,6 +1,7 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Entity.Attachment;
+import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.dto.StatusChangeRequestDto;
 import com.secondproject.secondproject.Entity.StudentRecord;
 import com.secondproject.secondproject.Enum.UserType;
@@ -40,6 +41,16 @@ public class StatusService {
         record.setStudentStatus(dto.getAcademicRequest());
         // 처리 상태 없이 단순 저장 (승인/거부 상태는 별도 관리)
         StatusChangeRepository.save(record);
+    }
+
+    // 특정 학생의 학적변경신청 상태(PENDING, APPROVED, REJECTED) 목록 조회
+    public List<StudentRecord> getStudentChangeRequestsStatus(Long userId) {
+        // userId가 학생인지 미리 확인해도 좋음
+
+        // 상태 세 가지만 필터링해 조회 (임의 메서드명, 구현된 리포지토리 메서드 필요)
+        List<Status> validStatuses = List.of(Status.PENDING, Status.APPROVED, Status.REJECTED);
+
+        return statusChangeRepository.findByUserIdAndStatusIn(userId, validStatuses);
     }
 
     // 간단 첨부파일 저장 (파일명만 저장)

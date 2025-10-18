@@ -20,7 +20,10 @@ public class CourseRegistration {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumns({
+            @JoinColumn(name = "user_id_part1", referencedColumnName = "user_id_part1", nullable = false),
+            @JoinColumn(name = "user_id_part2", referencedColumnName = "user_id_part2", nullable = false)
+    })
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)

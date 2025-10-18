@@ -19,7 +19,10 @@ public class Grade {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumns({
+            @JoinColumn(name = "user_id_part1", referencedColumnName = "user_id_part1"),
+            @JoinColumn(name = "user_id_part2", referencedColumnName = "user_id_part2")
+    })
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)

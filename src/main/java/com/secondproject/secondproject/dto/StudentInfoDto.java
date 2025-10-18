@@ -1,7 +1,7 @@
 package com.secondproject.secondproject.dto;
 
-import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.Entity.StatusRecords;
+import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.Enum.Student_status;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,17 +36,17 @@ public class StudentInfoDto {
     private Double currentCredit;
     private String studentImage;
 
-        // 매핑용 생성자
+    // 매핑용 생성자
     public StudentInfoDto(User user, StatusRecords statusRecords) {
-            this.userId = user.getId();             // getId() → getUserId()
-            this.uName = user.getU_name();              // getU_name()
-            this.email = user.getEmail();             // getEmail() → getU_email()
-            this.phone = user.getPhone();             // getPhone() → getU_phone()
-            this.gender = user.getGender();             // getGender()
+        this.userId = user.getId();             // getId() → getUserId()
+        this.uName = user.getU_name();              // getU_name()
+        this.email = user.getEmail();             // getEmail() → getU_email()
+        this.phone = user.getPhone();             // getPhone() → getU_phone()
+        this.gender = user.getGender();             // getGender()
         /* (10/18 수정사항) getMajor() -> getMajor().getId()
         getMajor_id() 요망 시 타 클래스에 Major 객체 내 ID를 직접 반환하는 메서드 구현 필요
          */
-            this.majorId = user.getMajor_id();          // getMajor() → getMajor_id()
+        this.majorId = user.getMajor();          // getMajor() → getMajor_id()
         this.birthdate = user.getBirthdate();       // LocalDate 타입 그대로
         this.uType = user.getU_type().name();       // getUType() → getU_type()
         this.statusId = user.getStatus_id();        // getStatusId() → getStatus_id()
