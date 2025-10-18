@@ -32,6 +32,7 @@ public class MemberDetailService implements UserDetailsService {
                 .build();
     }
 
+    //test용
     public static UserDetails loadUserByEmail(String userEmail) throws UsernameNotFoundException {
         if ("testEmail".equals(userEmail)) {
             return User.builder()

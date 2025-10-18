@@ -33,7 +33,13 @@ public class SecurityConfig {
         String[] permitAllowed = {
                 "/**"
         };
-
+            /* JWT 토큰 방식
+            {
+              "sub": "teacher1@example.com",
+              "roles": ["ROLE_TEACHER"],
+              "exp": 1726765200
+            }
+             */
 
         http
                 .csrf(csrf -> csrf.disable())
@@ -41,7 +47,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(permitAllowed).permitAll()
-                        .requestMatchers("/api/protected").authenticated()
+                        .requestMatchers("/lms/student/**").hasRole("STUDENT")
+                        .requestMatchers("/lms/teacher/**").hasRole("TEACHER")
+                        .requestMatchers("/lms/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
