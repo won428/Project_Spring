@@ -10,44 +10,49 @@ import lombok.ToString;
 
 import java.time.LocalDate;
 
-@Getter @Setter @ToString
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "user")
 public class User {
-    // 유저 테이블입니다. 유저 테이블에서 학생, 교수, 관리자를 모두 관리합니다. 관리자는 관리자 내에서 분기 처리할지 회의 필요
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "user_id")
-    private long id; // 유저 아이디,
+    private Long id; // 유저 아이디(PK, number type)
 
     @Column(nullable = false, length = 50)
-    private String u_name; // 유저 이름
+    private String u_name; // 이름
 
     @Column(nullable = false)
-    private String password; // 유저 비밀번호
+    private String password; // 비밀번호
     // 비밀번호에 제약조건 안걸려있는 이유는 초기 비밀번호를 학번이나 전화번호로 설정하게 만들고 그 후에 수정할때 제약조건 걸어야합니다.
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate birthdate; // 유저 생년월일
+    private LocalDate birthdate; // 생년월일 (date 타입)
 
     @Email
-    @Column(unique = true, nullable = false)
-    private String email; // 유저 이메일
+    @Column(unique = true, nullable = false, length = 100)
+    private String email; // 이메일
 
-    @Column(nullable=false)
-    private String gender; // 유저 성별
+    @Column(unique = true, nullable = false, length = 20)
+    private String phone; // 휴대전화
+
+    @Column(nullable = false)
+    private String gender; // 성별 (enum, 문자열 컬럼)
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="major_id")
-    private String major; // 소속 학과
+    @Column(nullable = false)
+    @JoinColumn(name="major_id", nullable = false)
+    private Major major; // 소속학과ID (number, FK)
 
     @Enumerated(EnumType.STRING)
-    private UserType u_type; // 유저 구분 (학생, 교수, 관리자)
+    @Column(nullable = false)
+    private UserType u_type; // 구분: 학생, 교수, 관리자 (enum)
 
+    @Column(nullable = false)
+    private Long status_id; // 상세/학적번호 (FK, number)
 
-
-
-
-
-
+    // 필요시 생성자, equals/hashCode 등 추가 가능
 }

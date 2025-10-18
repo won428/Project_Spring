@@ -15,12 +15,17 @@ public class Major {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long major_id; // 학과 코드
+    @Column(name = "major_id")
+    private Long id; // 학과 코드
 
     @Column(nullable = false)
     private String m_name; // 학과 이름
 
     private int m_office; // 학과 전화번호
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "college_id", nullable = false)
+    private College college; // 소속 단과대학 코드
 
 
 
