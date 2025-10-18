@@ -14,16 +14,16 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "assignment")
 public class Assignment {
-// 교수 과제 공지 테이블
+    // 교수 과제 공지 테이블
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "assignment_id", columnDefinition = "BIGINT")
     private long assignmentId; // 과제ID(PK)
 
-    @Column(name = "ass_title",nullable = false, length = 200)
+    @Column(name = "ass_title", nullable = false, length = 200)
     private String title; // 공지 제목
 
-    @Column(name = "ass_content", columnDefinition = "MEDIUMTEXT",  nullable = false)
+    @Column(name = "ass_content", columnDefinition = "MEDIUMTEXT", nullable = false)
     private String content; // 공지 본문
 
     @Column(name = "is_enabled", columnDefinition = "TINYINT(1) NOT NULL DEFAULT 1")
@@ -45,7 +45,7 @@ public class Assignment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user; // 공지한사람(=교수이름)
+    private Member member; // 공지한사람(=교수이름)
 
     @Column(name = "create_at", columnDefinition = "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")

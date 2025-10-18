@@ -21,11 +21,11 @@ public class Notice {
     private Long noticeId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false,foreignKey = @ForeignKey(name = "fk_notice_author_user"
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_notice_author_user"
     ))
-    private User user;
+    private Member member;
 
-    @Column(name = "notice_title",nullable = false, length = 200)
+    @Column(name = "notice_title", nullable = false, length = 200)
     private String noticeTitle;
 
     @Lob

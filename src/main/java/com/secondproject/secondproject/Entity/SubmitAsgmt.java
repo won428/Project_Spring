@@ -20,12 +20,12 @@ public class SubmitAsgmt {
     private Long submitId; // 과제제출ID(PK)
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false) // 교수공지 삭제기능 대신 비활성화 기능
-    @JoinColumn(name = "assignment_id",nullable = false, foreignKey = @ForeignKey(name = "fk_submit_user"))
+    @JoinColumn(name = "assignment_id", nullable = false, foreignKey = @ForeignKey(name = "fk_submit_user"))
     private Assignment assignment; //교수공지ID(FK)
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false) // 제출자(학생)
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_submit_user"))
-    private User user;
+    private Member member;
 
     @Column(name = "submit_title", length = 200, nullable = false)
     private String submitTitle; // 제출 폼 제목

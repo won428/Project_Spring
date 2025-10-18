@@ -8,7 +8,9 @@ import lombok.ToString;
 
 import java.time.LocalDate;
 
-@Getter @Setter @ToString
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "attendance_records")
 public class Attendance_records {
@@ -20,7 +22,7 @@ public class Attendance_records {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user; // 유저id
+    private Member member; // 유저id
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "enroll_Id", nullable = false)

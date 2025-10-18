@@ -1,11 +1,19 @@
 package com.secondproject.secondproject.config;
 
+import com.secondproject.secondproject.config.JWT.JwtAuthenticationFilter;
+import com.secondproject.secondproject.config.JWT.JwtTokenProvider;
+import com.secondproject.secondproject.handler.CustomLoginFailureHandler;
+import com.secondproject.secondproject.handler.CustomLoginSuccessHandler;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.stereotype.Component;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -14,40 +22,51 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        // 접근 허용
+        // 접근 허용 할 것
         String[] permitAllowed = {
                 "/**"
         };
-        //권한 필요
-        String[] needAuthenticated = {
 
-        };
 
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(permitAllowed).permitAll()
-                        .requestMatchers(needAuthenticated).authenticated()
+                        .requestMatchers("/api/protected").authenticated()
                         .anyRequest().authenticated()
-
-                );
-
-        http
+                )
                 .formLogin(form -> form
-                                .loginProcessingUrl("")
-                                .usernameParameter("")
-                                .passwordParameter("")
-                                .permitAll()
-//                        .successHandler("")
-                );
+                        .loginProcessingUrl("/login")
+                        .usernameParameter("email")
+                        .passwordParameter("password")
+                        .permitAll()
+                        .successHandler(handler())
+                        .failureHandler(failHandler())
+                )
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
+
+
+    @Bean
+    public CustomLoginSuccessHandler handler() {
+        return new CustomLoginSuccessHandler();
+    }
+
+    @Bean
+    public CustomLoginFailureHandler failHandler() {
+        return new CustomLoginFailureHandler();
+    }
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @ToString
 @Entity
 @Table(name = "user")
-public class User {
+public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -42,9 +42,8 @@ public class User {
     @Column(nullable = false)
     private String gender; // 성별 (enum, 문자열 컬럼)
 
-    @ManyToOne(fetch=FetchType.LAZY)
-    @Column(nullable = false)
-    @JoinColumn(name="major_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "major_id", nullable = false)
     private Major major; // 소속학과ID (number, FK)
 
     @Enumerated(EnumType.STRING)

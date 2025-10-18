@@ -1,6 +1,6 @@
 package com.secondproject.secondproject.dto;
 
-import com.secondproject.secondproject.Entity.User;
+import com.secondproject.secondproject.Entity.Member;
 import com.secondproject.secondproject.Entity.StatusRecords;
 import com.secondproject.secondproject.Enum.Student_status;
 import lombok.Getter;
@@ -37,16 +37,16 @@ public class StudentInfoDto {
     private String studentImage;
 
     // 매핑용 생성자
-    public StudentInfoDto(User user, StatusRecords statusRecords) {
-        this.userId = user.getId();             // getId() → getUserId()
-        this.uName = user.getU_name();              // getU_name()
-        this.email = user.getEmail();             // getEmail() → getU_email()
-        this.phone = user.getPhone();             // getPhone() → getU_phone()
-        this.gender = user.getGender();             // getGender()
-        this.majorId = user.getMajor();          // getMajor() → getMajor_id()
-        this.birthdate = user.getBirthdate();       // LocalDate 타입 그대로
-        this.uType = user.getU_type().name();       // getUType() → getU_type()
-        this.statusId = user.getStatus_id();        // getStatusId() → getStatus_id()
+    public StudentInfoDto(Member member, StatusRecords statusRecords) {
+        this.userId = member.getId();             // getId() → getUserId()
+        this.uName = member.getU_name();              // getU_name()
+        this.email = member.getEmail();             // getEmail() → getU_email()
+        this.phone = member.getPhone();             // getPhone() → getU_phone()
+        this.gender = member.getGender();             // getGender()
+        this.majorId = member.getMajor().getId();         // getMajor() → getMajor_id()
+        this.birthdate = member.getBirthdate();       // LocalDate 타입 그대로
+        this.uType = member.getU_type().name();       // getUType() → getU_type()
+        this.statusId = member.getStatus_id();        // getStatusId() → getStatus_id()
         // RecordStatus 정보도 아래에 추가
 
         if (statusRecords != null) {

@@ -10,7 +10,9 @@ import org.hibernate.mapping.ToOne;
 
 import java.time.LocalDate;
 
-@Getter @Setter @ToString
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "lecture")
 public class Lecture {
@@ -26,7 +28,7 @@ public class Lecture {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user; // 유저(교수)아이디가 들어갑니다
+    private Member member; // 유저(교수)아이디가 들어갑니다
 
     @Column(nullable = false)
     private int credit; // 몇 학점인지 표기합니다.(2학점, 3학점)
@@ -55,9 +57,6 @@ public class Lecture {
 
     // 수정필요
     private long ol_id; // 강의와 관련된 온라인 강의 정보를 표기합니다. << 강의당 온라인 강의 1개인게 아니면 매핑 필요할거 같아요
-
-
-
 
 
 }

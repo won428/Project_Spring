@@ -9,7 +9,9 @@ import lombok.ToString;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Getter @Setter @ToString
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "course_registration")
 public class CourseRegistration {
@@ -21,7 +23,7 @@ public class CourseRegistration {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecture_id", nullable = false)
