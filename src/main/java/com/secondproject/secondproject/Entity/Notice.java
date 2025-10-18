@@ -21,10 +21,8 @@ public class Notice {
     private Long noticeId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumns({
-            @JoinColumn(name = "user_id_part1", referencedColumnName = "user_id_part1", nullable = false, foreignKey = @ForeignKey(name = "fk_notice_author_user_part1")),
-            @JoinColumn(name = "user_id_part2", referencedColumnName = "user_id_part2", nullable = false, foreignKey = @ForeignKey(name = "fk_notice_author_user_part2"))
-    })
+    @JoinColumn(name = "user_id", nullable = false,foreignKey = @ForeignKey(name = "fk_notice_author_user"
+    ))
     private User user;
 
     @Column(name = "notice_title",nullable = false, length = 200)

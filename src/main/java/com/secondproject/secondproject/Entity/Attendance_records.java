@@ -19,10 +19,7 @@ public class Attendance_records {
     private Long id; // 출결 기록 id
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name = "user_id_part1", referencedColumnName = "user_id_part1", nullable = false),
-            @JoinColumn(name = "user_id_part2", referencedColumnName = "user_id_part2", nullable = false)
-    })
+    @JoinColumn(name = "user_id", nullable = false)
     private User user; // 유저id
 
     @ManyToOne(fetch = FetchType.LAZY)

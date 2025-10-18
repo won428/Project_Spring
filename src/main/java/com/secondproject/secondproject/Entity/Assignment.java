@@ -44,10 +44,7 @@ public class Assignment {
     private int max_size_mb = 50; // 파일 최대 용량(mb), 기본값 50
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({ // 10/18 수정됨
-            @JoinColumn(name = "user_id_part1", referencedColumnName = "user_id_part1", nullable = false),
-            @JoinColumn(name = "user_id_part2", referencedColumnName = "user_id_part2", nullable = false)
-    })
+    @JoinColumn(name = "user_id", nullable = false)
     private User user; // 공지한사람(=교수이름)
 
     @Column(name = "create_at", columnDefinition = "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP")

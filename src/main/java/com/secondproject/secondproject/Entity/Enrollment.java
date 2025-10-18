@@ -18,11 +18,8 @@ public class Enrollment {
     private Long id; // 수강id
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name = "user_id_part1", referencedColumnName = "user_id_part1", nullable = false),
-            @JoinColumn(name = "user_id_part2", referencedColumnName = "user_id_part2", nullable = false)
-    })
-    private User user;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user; // 수강중인 유저 id
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecture_id", nullable = false)

@@ -25,11 +25,8 @@ public class Lecture {
     private String lec_name; // 강의명
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name = "user_id_part1", referencedColumnName = "user_id_part1"),
-            @JoinColumn(name = "user_id_part2", referencedColumnName = "user_id_part2")
-    })
-    private User user;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user; // 유저(교수)아이디가 들어갑니다
 
     @Column(nullable = false)
     private int credit; // 몇 학점인지 표기합니다.(2학점, 3학점)

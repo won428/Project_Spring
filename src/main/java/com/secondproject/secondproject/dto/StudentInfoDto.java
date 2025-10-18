@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.dto;
 
+import com.secondproject.secondproject.Entity.Major;
 import com.secondproject.secondproject.Entity.StatusRecords;
 import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.Enum.Student_status;
@@ -19,7 +20,7 @@ public class StudentInfoDto {
     private String email;
     private String phone;
     private String gender;
-    private Long majorId;
+    private Major majorId;
     private LocalDate birthdate;
     private String uType;
     private Long statusId;
