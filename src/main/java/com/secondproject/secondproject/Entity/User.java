@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.secondproject.secondproject.Enum.UserType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -23,6 +24,7 @@ public class User {
     private Long id; // 유저 아이디(PK, number type)
 
     @Column(nullable = false, length = 50)
+    @NotBlank
     private String u_name; // 이름
 
     @Column(nullable = false)
@@ -43,7 +45,6 @@ public class User {
     private String gender; // 성별 (enum, 문자열 컬럼)
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @Column(nullable = false)
     @JoinColumn(name="major_id")
     private Long major; // 소속학과ID (number, FK)
 
@@ -51,7 +52,9 @@ public class User {
     @Column(nullable = false)
     private UserType u_type; // 구분: 학생, 교수, 관리자 (enum)
 
-    @Column(nullable = false)
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "status_id")
     private Long status_id; // 상세/학적번호 (FK, number)
 
     // 필요시 생성자, equals/hashCode 등 추가 가능
