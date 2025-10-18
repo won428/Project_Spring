@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/student")
+@RequestMapping("/student") // "member"로 변경 예정
 public class StudentController {
 
     private final UserService userService;
