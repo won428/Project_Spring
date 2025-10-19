@@ -40,11 +40,11 @@ public class Assignment {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dueAt; // 제출 마감일
 
-    @Column(name = "max_files")
+    @Column(name = "max_files", nullable = false)
     @ColumnDefault("3")
     private int max_files; // 업로드 가능한 파일 최대 갯수
 
-    @Column(name = "max_size_mb")
+    @Column(name = "max_size_mb", nullable = false)
     @ColumnDefault("50")
     private int max_size_mb = 50; // 파일 최대 용량(mb), 기본값 50
 
