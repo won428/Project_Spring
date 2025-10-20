@@ -1,11 +1,10 @@
 package com.secondproject.secondproject.config.JWT;
 
-import com.secondproject.secondproject.service.MemberDetailService;
+import com.secondproject.secondproject.service.UserDetailService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +24,13 @@ public class JwtTokenProvider {
     private final long validityInMs = 3600000; //1시간
 
     @Autowired
-    private final MemberDetailService detailService;
+    private final UserDetailService detailService;
 
 
     //JWT 토큰 생성
     public String createToken(String email, List<String> roles) {
         Claims claims = Jwts.claims().setSubject(email); //JWT의 정보조각 Key-Value data <HEADER>.<PAYLOAD>.<SIGNATURE> 중 Payload
-        claims.put("roles", roles);
+//        claims.put("roles", roles); Token에 User roles 추가
 
         Date now = new Date();
         Date expireDate = new Date(now.getTime() + validityInMs);//토큰 만료 시간
@@ -64,12 +63,12 @@ public class JwtTokenProvider {
     }
 
     public Authentication getAuthentication(String token) {
-        String userEmail = getMemberName(token);
-        UserDetails userDetails = MemberDetailService.loadUserByEmail(userEmail);
+        String userEmail = getUserName(token);
+        UserDetails userDetails = UserDetailService.loadUserByEmail(userEmail);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    public String getMemberName(String token) {
+    public String getUserName(String token) {
         return Jwts.parser().setSigningKey(tokenKey).parseClaimsJwt(token).getBody().getSubject();
     }
 

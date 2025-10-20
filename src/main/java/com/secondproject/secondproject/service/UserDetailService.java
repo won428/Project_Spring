@@ -10,13 +10,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class MemberDetailService implements UserDetailsService {
-    private final MemberService memberService;
+public class UserDetailService implements UserDetailsService {
+    private final UserService userService;
 
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = memberService.findByEmail(email);
+        User user = userService.findByEmail(email);
 
         if (user == null) {
             String msg = "Id/Pw Error";

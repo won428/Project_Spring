@@ -4,28 +4,31 @@ package com.secondproject.secondproject.service;
 import com.secondproject.secondproject.Entity.StatusRecords;
 import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.Enum.UserType;
-import com.secondproject.secondproject.repository.MemberRepository;
+import com.secondproject.secondproject.repository.UserRepository;
 import com.secondproject.secondproject.repository.RecordStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
-public class MemberService {
+public class UserService {
 
-    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
     private final RecordStatusRepository recordStatusRepository;
 
     @Autowired
-    public MemberService(MemberRepository memberRepository, RecordStatusRepository recordStatusRepository) {
-        this.memberRepository = memberRepository;
+    public UserService(UserRepository userRepository, RecordStatusRepository recordStatusRepository) {
+        this.userRepository = userRepository;
         this.recordStatusRepository = recordStatusRepository;
     }
 
+
     public User getUserById(Long id) {
-        User user = memberRepository.findByUid(id).orElse(null);
+//        User user = userRepository.findByUid(id).orElse(null);
+        User user = userRepository.getUserById(id);
         if (user == null) {
             // throw new RuntimeException("해당 유저 없음");
             return null;
@@ -71,6 +74,6 @@ public class MemberService {
     }
 
     public User findByEmail(String email) {
-        return memberRepository.findByEmail(email);
+        return userRepository.findByEmail(email);
     }
 }

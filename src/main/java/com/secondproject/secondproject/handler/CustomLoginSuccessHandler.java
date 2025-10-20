@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.secondproject.secondproject.Entity.User;
-import com.secondproject.secondproject.service.MemberService;
+import com.secondproject.secondproject.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,11 +20,11 @@ import java.util.Map;
 
 @Component
 public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
-    private MemberService memberService;
+    private UserService userService;
 
     @Autowired
-    public void setMemberService(MemberService memberService) {
-        this.memberService = memberService;
+    public void setMemberService(UserService userService) {
+        this.userService = userService;
     }
 
     //    UserService
@@ -37,7 +37,7 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
         response.setContentType("application/json;charset=UTF-8");
         User user = (User) authentication.getPrincipal();
         String email = user.getEmail();
-        User member = memberService.findByEmail(email);
+        User member = userService.findByEmail(email);
 
         Map<String, Object> data = new HashMap<>();
         data.put("msg", "success");

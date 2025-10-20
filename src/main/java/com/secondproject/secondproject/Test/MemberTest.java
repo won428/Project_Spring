@@ -1,10 +1,5 @@
 package com.secondproject.secondproject.Test;
 
-import com.secondproject.secondproject.Entity.Member;
-import com.secondproject.secondproject.repository.MemberRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 
 public class MemberTest {
 //    @Autowired
