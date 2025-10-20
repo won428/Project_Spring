@@ -23,11 +23,11 @@ public class StudentRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "record_id")
-    private Long record_id;                  // 유저ID(FK), number
+    private Long record_id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private User user;                      // 유저ID(FK), number
 
     @Enumerated(EnumType.STRING)
     private Status statusRecords;                // 상태/학적번호(FK), number
@@ -52,6 +52,7 @@ public class StudentRecord {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Student_status studentStatus;     // 변경신청목적(enum, varchar)
+    
 
     // 연관관계 매핑이 필요하면 @ManyToOne, @JoinColumn(userId) 등 추가
 }

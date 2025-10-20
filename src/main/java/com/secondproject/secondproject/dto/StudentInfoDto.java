@@ -46,7 +46,6 @@ public class StudentInfoDto {
         this.majorId = user.getMajor().getId();         // getMajor() → getMajor_id()
         this.birthdate = user.getBirthdate();       // LocalDate 타입 그대로
         this.uType = user.getU_type().name();       // getUType() → getU_type()
-        this.statusId = user.getStatus_id();        // getStatusId() → getStatus_id()
         // RecordStatus 정보도 아래에 추가
 
         if (statusRecords != null) {

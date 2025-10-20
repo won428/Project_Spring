@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
 import java.time.LocalDate;
 
 @Getter
@@ -20,7 +21,7 @@ public class StatusRecords {
     @Column(name = "status_id")
     private Long id;                    // 상태/학적번호(PK)
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private Student_status student_status; // 학적 상태(재학, 휴학, 복학, 퇴학, 졸업)
 
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -43,12 +44,13 @@ public class StatusRecords {
     // 제적일
 
     @Column(nullable = false)
-    private int  totalCredit = 0;               // 총 학점 (number)
+    private int totalCredit = 0;               // 총 학점 (number)
 
     @Column(nullable = false)
     private double currentCredit = 0;              // 학기별 설정 (String, default "*")
 
     private String student_image;              // 증명사진 (이미지 저장경로 등)
+
 
     // 생성자, toString 등 추가 필요시 Lombok @NoArgsConstructor 사용 가능
 }

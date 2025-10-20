@@ -63,12 +63,12 @@ public class JwtTokenProvider {
     }
 
     public Authentication getAuthentication(String token) {
-        String userEmail = getUserName(token);
+        String userEmail = getUserEmail(token);
         UserDetails userDetails = UserDetailService.loadUserByEmail(userEmail);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    public String getUserName(String token) {
+    public String getUserEmail(String token) {
         return Jwts.parser().setSigningKey(tokenKey).parseClaimsJwt(token).getBody().getSubject();
     }
 
