@@ -14,16 +14,17 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-@Table(name = "Inquiry")
+@Table(name = "inquiry")
 @Entity
 public class Inquiry {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "inquiry_id")
     private long inquiry_id; // 게시번호(PK)
 
-    @Column(name = "WriterId", nullable = false)
-    private Long WriterId; // 작성자 ID, FK 아님
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user; // 작성자 ID
 
     @Column(name = "inquiry_title", nullable = false, length = 200)
     private String inquiry_title; // 문의글 제목
@@ -35,12 +36,10 @@ public class Inquiry {
     private boolean is_private = false; // 비공개 여부, 디폴트 = 공개
 
     @Column(name = "inquiry_created_at", nullable = false)
-    @ColumnDefault("CURRENT_TIMESTAMP")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime inquiry_created_at; // 작성일(insert), 직전 자동으로 채워짐
 
     @Column(name = "inquiry_updated_at", nullable = false)
-    @ColumnDefault("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime inquiry_updated_at; // 수정일(update) 직전 자동으로 채워짐
 

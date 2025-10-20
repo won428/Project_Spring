@@ -16,7 +16,7 @@ public class CourseRegistration {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "_id")
+    @Column(name = "enrollment_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

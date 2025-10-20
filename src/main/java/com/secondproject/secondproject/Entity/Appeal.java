@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.Entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.secondproject.secondproject.Enum.AppealType;
 import com.secondproject.secondproject.Enum.Status;
 import jakarta.persistence.*;
@@ -36,6 +37,7 @@ public class Appeal {
     @Column(nullable = false)
     private String content; // 이의제기 내용입니다.
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(nullable = false)
     private LocalDate appeal_date; // 처리 신청 날짜 입니다. 처리 완료 날짜도 칼럼으로 넣을지는 고민이 필요합니다.
 

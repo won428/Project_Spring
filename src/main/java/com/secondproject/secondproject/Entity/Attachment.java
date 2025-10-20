@@ -22,6 +22,10 @@ public class Attachment {
     @Column(name = "attachment_id")
     private Long id; // 저장 경로 PK
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @Column(name = "original_name")
     private String name; // 원본 이름
 

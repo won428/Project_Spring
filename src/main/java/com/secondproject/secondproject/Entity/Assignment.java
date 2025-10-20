@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class Assignment {
     // 교수 과제 공지 테이블
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "assignment_id", columnDefinition = "BIGINT")
     private long assignmentId; // 과제ID(PK)
 
@@ -49,7 +49,7 @@ public class Assignment {
     private int max_size_mb = 50; // 파일 최대 용량(mb), 기본값 50
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user; // 공지한사람(=교수이름)
 
     @Column(name = "create_at", columnDefinition = "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP")

@@ -22,7 +22,7 @@ public class Enrollment {
     private User user; // 수강중인 유저 id
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lecture_id", nullable = false)
+    @JoinColumn(name = "lecture_id")
     private Lecture lecture; // 수강중인 강의 코드
 
     @OneToOne
