@@ -49,7 +49,7 @@ public class Assignment {
     private int max_size_mb = 50; // 파일 최대 용량(mb), 기본값 50
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_assignment_user"))
     private User user; // 공지한사람(=교수이름)
 
     @Column(name = "create_at", columnDefinition = "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP")
@@ -61,6 +61,6 @@ public class Assignment {
     private LocalDateTime updateAt; // 공지 수정일
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lecture_id", nullable = false)
+    @JoinColumn(name = "lecture_id", nullable = false, foreignKey = @ForeignKey(name = "fk_assignment_lecture"))
     private Lecture lecture; // Lecture(강의) 테이블 FK참조
 }

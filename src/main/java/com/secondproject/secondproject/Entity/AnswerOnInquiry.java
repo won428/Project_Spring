@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @Entity
-@Table(name = "AnswerOnInquiry")
+@Table(name = "answeroninquiry")
 public class AnswerOnInquiry {
 
 
@@ -24,11 +24,11 @@ public class AnswerOnInquiry {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "inquiry_id", nullable = false)
+    @JoinColumn(name = "inquiry_id", nullable = false, foreignKey = @ForeignKey(name = "fk_answer_inquiry"))
     private Inquiry inquiry;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_answer_user"))
     private User user;
 
     @Column(nullable = false)
