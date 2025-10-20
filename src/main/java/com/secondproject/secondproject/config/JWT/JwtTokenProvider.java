@@ -37,17 +37,18 @@ public class JwtTokenProvider {
         Date expireDate = new Date(now.getTime() + validityInMs);//토큰 만료 시간
 
         return Jwts.builder()
+                .setSubject(email)
                 .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(expireDate)
-                .signWith(SignatureAlgorithm.ES256, tokenKey)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 3600000))
+                .signWith(SignatureAlgorithm.HS256, tokenKey)
                 .compact();
     }
 
     //  토큰 검증
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(tokenKey).parseClaimsJwt(token);
+            Jwts.parser().setSigningKey(tokenKey).parseClaimsJws(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
@@ -67,7 +68,7 @@ public class JwtTokenProvider {
     //토큰 내 정보 로딩
     public Authentication getAuthentication(String token) {
         String userEmail = getUserEmail(token);
-        UserDetails userDetails = UserDetailService.loadUserByEmail(userEmail);
+        UserDetails userDetails = detailService.loadUserByEmail(userEmail);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 

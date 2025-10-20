@@ -34,7 +34,6 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
             HttpServletResponse response,
             Authentication authentication
     ) throws IOException, ServletException {
-        System.out.println(request);
         response.setContentType("application/json;charset=UTF-8");
         User user = (User) authentication.getPrincipal();
         String email = user.getEmail();

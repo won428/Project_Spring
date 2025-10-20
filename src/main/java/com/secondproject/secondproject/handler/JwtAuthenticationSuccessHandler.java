@@ -14,7 +14,9 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -44,12 +46,17 @@ public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHan
         //user 이름 추가
         LoginResponseDto responseDto = new LoginResponseDto(token, user.getU_name());
 
+        Map<String, Object> result = new HashMap<>();
+        result.put("token", token);
+        result.put("msg", "success");
+        result.put("user", user);
+
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         String jsonResponse = objectMapper.writeValueAsString(responseDto); //Json 으로 변환 해줌
-        System.out.println(jsonResponse);
-        response.getWriter().write("{\"token\": \"" + token + "\"}");
+
+        response.getWriter().write(objectMapper.writeValueAsString(result));
 
     }
 }

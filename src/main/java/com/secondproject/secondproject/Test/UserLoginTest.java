@@ -15,14 +15,14 @@ public class UserLoginTest extends AbstractTestNGSpringContextTests {
     @Autowired
     private UserRepository userRepository;
 
-//    @Autowired
-//    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Test
     public void insertUserList() {
         User user01 = new User();
         user01.setEmail("Admin123@Admin");
-        user01.setPassword("Admin123");
+        user01.setPassword(passwordEncoder.encode("Admin123"));
         user01.setU_name("Kim");
         user01.setU_type(UserType.ADMIN);
         userRepository.save(user01);
