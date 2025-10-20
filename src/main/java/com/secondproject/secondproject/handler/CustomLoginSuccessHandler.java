@@ -34,6 +34,7 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
             HttpServletResponse response,
             Authentication authentication
     ) throws IOException, ServletException {
+        System.out.println(request);
         response.setContentType("application/json;charset=UTF-8");
         User user = (User) authentication.getPrincipal();
         String email = user.getEmail();
@@ -50,5 +51,6 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         response.getWriter().write(mapper.writeValueAsString(data));
+        System.out.println("성공 시 " + response);
     }
 }

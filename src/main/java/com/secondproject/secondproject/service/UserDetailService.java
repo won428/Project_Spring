@@ -16,6 +16,7 @@ public class UserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        System.out.println(email);
         User user = userService.findByEmail(email);
 
         if (user == null) {
@@ -33,11 +34,12 @@ public class UserDetailService implements UserDetailsService {
 
     //test용
     public static UserDetails loadUserByEmail(String userEmail) throws UsernameNotFoundException {
-        if ("testEmail".equals(userEmail)) {
+        System.out.println("Email : " + userEmail);
+        if ("Admin123@Admin".equals(userEmail)) {
             return org.springframework.security.core.userdetails.User.builder()
-                    .username("testEmail")
-                    .password(new BCryptPasswordEncoder().encode("1234"))
-                    .roles("USER")
+                    .username("Admin123@Admin")
+                    .password(new BCryptPasswordEncoder().encode("Admin123"))
+                    .roles("ADMIN")
                     .build();
         }
         throw new UsernameNotFoundException("계정 정보를 찾을 수 없습니다.");

@@ -40,6 +40,7 @@ public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHan
 
         //token 생성
         String token = jwtTokenProvider.createToken(userEmail, roles);
+        System.out.println(token);
         //user 이름 추가
         LoginResponseDto responseDto = new LoginResponseDto(token, user.getU_name());
 
@@ -47,7 +48,7 @@ public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHan
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         String jsonResponse = objectMapper.writeValueAsString(responseDto); //Json 으로 변환 해줌
-
+        System.out.println(jsonResponse);
         response.getWriter().write("{\"token\": \"" + token + "\"}");
 
     }
