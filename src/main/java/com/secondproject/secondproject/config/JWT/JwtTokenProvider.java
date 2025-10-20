@@ -26,11 +26,12 @@ public class JwtTokenProvider {
     @Autowired
     private final UserDetailService detailService;
 
-
     //JWT 토큰 생성
     public String createToken(String email, List<String> roles) {
+
+
         Claims claims = Jwts.claims().setSubject(email); //JWT의 정보조각 Key-Value data <HEADER>.<PAYLOAD>.<SIGNATURE> 중 Payload
-//        claims.put("roles", roles); Token에 User roles 추가
+        claims.put("roles", roles); //Token에 User roles 추가
 
         Date now = new Date();
         Date expireDate = new Date(now.getTime() + validityInMs);//토큰 만료 시간
@@ -43,6 +44,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    //  토큰 검증
     public boolean validateToken(String token) {
         try {
             Jwts.parser().setSigningKey(tokenKey).parseClaimsJwt(token);
@@ -53,7 +55,7 @@ public class JwtTokenProvider {
 
     }
 
-
+    //토큰 해체
     public String resolveToken(HttpServletRequest request) {
         String bearer = request.getHeader("Authorization");
         return (//"Authorization: Bearer <토큰>" 형태 확인
@@ -62,6 +64,7 @@ public class JwtTokenProvider {
                 null;
     }
 
+    //토큰 내 정보 로딩
     public Authentication getAuthentication(String token) {
         String userEmail = getUserEmail(token);
         UserDetails userDetails = UserDetailService.loadUserByEmail(userEmail);

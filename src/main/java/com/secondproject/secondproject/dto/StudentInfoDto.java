@@ -1,6 +1,5 @@
 package com.secondproject.secondproject.dto;
 
-import com.secondproject.secondproject.Entity.StatusRecords;
 import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.Enum.Student_status;
 import lombok.Getter;
@@ -24,41 +23,19 @@ public class StudentInfoDto {
     private String uType;
     private Long statusId;
 
-    // RecordStatus 주요 필드
-    private Student_status student_status;
-    private LocalDate admissionDate;
-    private LocalDate leaveDate;
-    private LocalDate returnDate;
-    private LocalDate graduationDate;
-    private LocalDate retentionDate;
-    private LocalDate expelledDate;
-    private Number totalCredit;
-    private Double currentCredit;
-    private String studentImage;
 
     // 매핑용 생성자
-    public StudentInfoDto(User user, StatusRecords statusRecords) {
+    public StudentInfoDto(User user) {
         this.userId = user.getId();             // getId() → getUserId()
         this.uName = user.getU_name();              // getU_name()
         this.email = user.getEmail();             // getEmail() → getU_email()
-        this.phone = user.getPhone();             // getPhone() → getU_phone()
-        this.gender = user.getGender();             // getGender()
-        this.majorId = user.getMajor().getId();         // getMajor() → getMajor_id()
-        this.birthdate = user.getBirthdate();       // LocalDate 타입 그대로
+//        this.phone = user.getPhone();             // getPhone() → getU_phone()
+//        this.gender = user.getGender();             // getGender()
+//        this.majorId = user.getMajor().getId();         // getMajor() → getMajor_id()
+//        this.birthdate = user.getBirthdate();       // LocalDate 타입 그대로
         this.uType = user.getU_type().name();       // getUType() → getU_type()
         // RecordStatus 정보도 아래에 추가
 
-        if (statusRecords != null) {
-            this.student_status = statusRecords.getStudent_status();
-            this.admissionDate = statusRecords.getAdmissionDate();
-            this.leaveDate = statusRecords.getLeaveDate();
-            this.returnDate = statusRecords.getReturnDate();            // 반환일 누락된 부분 추가
-            this.graduationDate = statusRecords.getGraduation_date();   // 필드명과 Getter 명 주의:
-            this.retentionDate = statusRecords.getRetention_date();     // 필드명 retention_date
-            this.expelledDate = statusRecords.getExpelled_date();       // 필드명 expelled_date
-            this.totalCredit = statusRecords.getTotalCredit();
-            this.currentCredit = statusRecords.getCurrentCredit();
-            this.studentImage = statusRecords.getStudent_image();       // 필드명 student_image
-        }
+
     }
 }
