@@ -32,5 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
         filterChain.doFilter(request, response);
+        System.out.println("▶ 토큰: " + token);
+        System.out.println("▶ 유효성: " + jwtTokenProvider.validateToken(token));
     }
 }

@@ -17,13 +17,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
-    private JwtTokenProvider jwtTokenProvider;
-    private final UserRepository userRepository;
+    private final JwtTokenProvider jwtTokenProvider;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -33,30 +33,22 @@ public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHan
             Authentication authentication
     ) throws IOException, ServletException {
         String userEmail = authentication.getName();
-        User user = userRepository.findByEmail(userEmail);
-
+        User user = (User) authentication.getPrincipal();
         List<String> roles = authentication.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
         //token 생성
-        String token = jwtTokenProvider.createToken(userEmail, roles);
+        String token = jwtTokenProvider.createToken(userEmail, roles.toString());
         System.out.println(token);
         //user 이름 추가
         LoginResponseDto responseDto = new LoginResponseDto(token, user.getU_name());
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("token", token);
-        result.put("msg", "success");
-        result.put("user", user);
-
-
-        response.setContentType("application/json");
+        response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         String jsonResponse = objectMapper.writeValueAsString(responseDto); //Json 으로 변환 해줌
 
-        response.getWriter().write(objectMapper.writeValueAsString(result));
+        response.getWriter().write(jsonResponse);
 
     }
 }

@@ -27,6 +27,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
+    private final CustomLoginSuccessHandler customLoginSuccessHandler;
+    private final CustomLoginFailureHandler customLoginFailureHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -35,12 +37,14 @@ public class SecurityConfig {
         String[] permitAllowed = {
                 "/**"
         };
-            /* JWT 토큰 방식
+            /* JWT 토큰 방식 Json Web Token
+            {header h2256 type jwt}
             {
               "sub": "teacher1@example.com",
               "roles": ["ROLE_TEACHER"],
               "exp": 1726765200
             }
+            {Secret key}
              */
 
         http
@@ -49,30 +53,20 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(permitAllowed).permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginProcessingUrl("/login")
                         .usernameParameter("email")
                         .passwordParameter("password")
+                        .successHandler(customLoginSuccessHandler)
+                        .failureHandler(customLoginFailureHandler)
                         .permitAll()
-                        .successHandler(handler())
-                        .failureHandler(failHandler())
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-    }
-
-
-    @Bean
-    public CustomLoginSuccessHandler handler() {
-        return new CustomLoginSuccessHandler();
-    }
-
-    @Bean
-    public CustomLoginFailureHandler failHandler() {
-        return new CustomLoginFailureHandler();
     }
 
 

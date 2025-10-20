@@ -86,10 +86,4 @@ public class UserController {
 //    }
 
 
-    @PostMapping("/Find/{email}")
-    public ResponseEntity<?> findUserInfo(String email) {
-        User user = userService.findByEmail(email);
-
-        return null;
-    }
 }

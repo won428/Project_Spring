@@ -56,7 +56,5 @@ public class UserService {
 //        return Map.of("message", type + " 발급 완료 (유저ID: " + id + ")");
 //    }
 
-    public User findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
+
 }
