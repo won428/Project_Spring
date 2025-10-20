@@ -25,9 +25,8 @@ public class StudentRecord {
     @Column(name = "record_id")
     private Long record_id;                  // 유저ID(FK), number
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "applierId", nullable = false) // 신청자ID, number, FK 아님
+    private Long applierId;
 
     @Enumerated(EnumType.STRING)
     private Status statusRecords;                // 상태/학적번호(FK), number
