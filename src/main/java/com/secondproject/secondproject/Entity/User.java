@@ -50,8 +50,9 @@ public class User {
     @Column(nullable = false)
     private UserType u_type; // 구분: 학생, 교수, 관리자 (enum)
 
-    @Column(nullable = false)
-    private Long status_id; // 상세/학적번호 (FK, number)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "status_id")
+    private StatusRecords statusRecords; // 상세/학적번호 (FK, number)
 
     // 필요시 생성자, equals/hashCode 등 추가 가능
 }

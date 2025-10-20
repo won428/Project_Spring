@@ -23,7 +23,7 @@ public class StudentInfoDto {
     private Major majorId;
     private LocalDate birthdate;
     private String uType;
-    private Long statusId;
+    private StatusRecords statusRecords;
 
     // RecordStatus 주요 필드
     private Student_status student_status;
@@ -50,7 +50,7 @@ public class StudentInfoDto {
         this.majorId = user.getMajor();          // getMajor() → getMajor_id()
         this.birthdate = user.getBirthdate();       // LocalDate 타입 그대로
         this.uType = user.getU_type().name();       // getUType() → getU_type()
-        this.statusId = user.getStatus_id();        // getStatusId() → getStatus_id()
+        this.statusRecords = user.getStatusRecords();
         // RecordStatus 정보도 아래에 추가
 
         if (statusRecords != null) {

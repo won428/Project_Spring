@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.Entity.StudentRecord;
 import com.secondproject.secondproject.dto.StatusChangeRequestDto;
 import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.service.StatusService;
@@ -9,12 +10,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/student-record")
+@RequestMapping("/student_record")
 public class StatusController {
 
     @Autowired
-    private StatusService statusService;
+    private  StatusService statusService;
 
     @PostMapping("/change")
     public ResponseEntity<String> applyStatusChange(@RequestPart("dto") StatusChangeRequestDto dto,
@@ -30,5 +33,12 @@ public class StatusController {
 
         statusService.changeStatusWithEvidence(dto);
         return ResponseEntity.ok("학적 변경 신청이 완료되었습니다.");
+    }
+
+    // 특정 학생의 학적 변경 신청 상태 목록 조회 API
+    @GetMapping("/change-requests/{userId}")
+    public ResponseEntity<List<StudentRecord>> getStudentChangeRequestsStatus(@PathVariable Long userId) {
+        List<StudentRecord> records = statusService.getStudentChangeRequestsStatus(userId);
+        return ResponseEntity.ok(records);
     }
 }
