@@ -43,9 +43,8 @@ public class User {
     private String gender; // 성별 (enum, 문자열 컬럼)
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @Column(nullable = false)
-    @JoinColumn(name="major_id")
-    private Long major; // 소속학과ID (number, FK)
+    @JoinColumn(name="major_id", nullable = false)
+    private Major major; // 소속학과ID (number, FK)
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
