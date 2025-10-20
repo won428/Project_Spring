@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.secondproject.secondproject.Enum.UserType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -24,7 +23,6 @@ public class User {
     private Long id; // 유저 아이디(PK, number type)
 
     @Column(nullable = false, length = 50)
-    @NotBlank
     private String u_name; // 이름
 
     @Column(nullable = false)
