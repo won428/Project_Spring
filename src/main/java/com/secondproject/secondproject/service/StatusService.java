@@ -1,15 +1,12 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Entity.Attachment;
+import com.secondproject.secondproject.Entity.StatusRecords;
+import com.secondproject.secondproject.Entity.StudentRecord;
 import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.dto.StatusChangeRequestDto;
-import com.secondproject.secondproject.Entity.StudentRecord;
-import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.repository.AttachmentRepository;
 import com.secondproject.secondproject.repository.StatusChangeRepository;
-/*import com.secondproject.secondproject.repository.StudentRecordRepository;
-    추가 구현 메소드 필요 시 재활성화
-*/
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -30,16 +28,18 @@ public class StatusService {
 
     // 학적 변경 신청 저장 (처리 상태 지정 없이 기본 저장)
     public void changeStatusWithEvidence(StatusChangeRequestDto dto) {
-        if (dto.getUserType() != UserType.STUDENT) {
-            throw new IllegalArgumentException("학생만 학적 변경 신청이 가능합니다.");
-        }
+        // 학생 여부 검증은 컨트롤러 등 상위 계층에서 처리한다고 가정
+
         StudentRecord record = new StudentRecord();
         record.setTitle(dto.getTitle());
         record.setContent(dto.getContent());
         record.setApplied_date(dto.getAppliedDate());
         record.setProcessed_date(dto.getProcessedDate());
         record.setStudentStatus(dto.getAcademicRequest());
-        // 처리 상태 없이 단순 저장 (승인/거부 상태는 별도 관리)
+        // 신청자 ID를 그대로 기록
+        record.setApplierId(dto.getApplier());
+
+        // 학적 변경 신청 기본 저장
         StatusChangeRepository.save(record);
     }
 
@@ -50,7 +50,7 @@ public class StatusService {
         // 상태 세 가지만 필터링해 조회 (임의 메서드명, 구현된 리포지토리 메서드 필요)
         List<Status> validStatuses = List.of(Status.PENDING, Status.APPROVED, Status.REJECTED);
 
-        return statusChangeRepository.findByUserIdAndStatusIn(userId, validStatuses);
+        return statusChangeRepository.findByApplierIdAndStatusIn(userId, validStatuses);
     }
 
     // 간단 첨부파일 저장 (파일명만 저장)
@@ -67,6 +67,38 @@ public class StatusService {
         } catch (Exception e) {
             throw new RuntimeException("첨부파일 저장 중 오류 발생: " + e.getMessage());
         }
+    }
+
+    // PK로 단일 학적변경신청 상세내역 조회
+    public StatusChangeRequestDto getChangeRequestDetail(Long recordId) {
+        Optional<StatusRecords> optionalRecord = statusChangeRepository.findById(recordId);
+        if (optionalRecord.isEmpty()) {
+            return null; // 또는 적절한 예외 처리
+        }
+        StatusRecords record = optionalRecord.get();
+
+        StatusChangeRequestDto dto = new StatusChangeRequestDto();
+        dto.setRecordId(record.getId());                  // PK (status_id)
+        dto.setApplier(record.getApplierId());            // 신청자 ID
+        dto.setStatusId(record.getId());                   // 참조용 상태 ID (recordId 재사용)
+        dto.setTitle(null);                                // title 필드가 없으므로 null 설정
+        dto.setContent(null);                              // content 필드가 없으므로 null 설정
+        dto.setAppliedDate(record.getAdmissionDate());     // 입학일
+        dto.setProcessedDate(null);                        // 처리일 엔티티에 없으면 null
+        dto.setAcademicRequest(record.getStudent_status()); // 학생 상태(enum)
+        dto.setAttachmentId(null);                         // 첨부파일ID는 별도 필드/관계 필요 시 처리
+
+        // 필요하면 아래와 같이 추가 상세 필드도 DTO에 매핑 가능
+        dto.setLeaveDate(record.getLeaveDate());
+        dto.setReturnDate(record.getReturnDate());
+        dto.setGraduationDate(record.getGraduation_date());
+        dto.setRetentionDate(record.getRetention_date());
+        dto.setExpelledDate(record.getExpelled_date());
+        dto.setTotalCredit(record.getTotalCredit());
+        dto.setCurrentCredit(record.getCurrentCredit());
+        dto.setStudentImage(record.getStudent_image());
+
+        return dto;
     }
 
     // 추가 구현 가능한 메소드 목록

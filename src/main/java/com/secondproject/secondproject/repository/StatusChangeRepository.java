@@ -17,6 +17,6 @@ public interface StatusChangeRepository extends JpaRepository<StatusRecords, Lon
     // 커스텀 메서드를 쓰려면 아래처럼 선언만 해두고 구현은 필요
     // void saveStatusChange(StatusChangeRequestDto dto);
 
-    List<StudentRecord> findByUserIdAndStatusIn(Long userId, List<Status> validStatuses);
+    List<StudentRecord> findByApplierIdAndStatusIn(Long userId, List<Status> validStatuses);
 
 }

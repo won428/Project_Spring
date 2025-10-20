@@ -17,6 +17,6 @@ public class AnswerOnInquiry {
     private Long inquiry_id;
     private String user;
     private String answer_content;
-    private Long answer_id;
+
 
 }
