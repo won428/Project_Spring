@@ -24,7 +24,7 @@ public class SubmitAsgmt {
     private Assignment assignment; //교수공지ID(FK)
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false) // 제출자(학생)
-    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_submit_user"))
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_submit_user"))
     private User user;
 
     @Column(name = "submit_title", length = 200, nullable = false)

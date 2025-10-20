@@ -22,8 +22,9 @@ public class Inquiry {
     @Column(name = "inquiry_id")
     private long inquiry_id; // 게시번호(PK)
 
-    @Column(name = "WriterId", nullable = false)
-    private Long WriterId; // 작성자 ID, FK 아님
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user; // 작성자 ID
 
     @Column(name = "inquiry_title", nullable = false, length = 200)
     private String inquiry_title; // 문의글 제목

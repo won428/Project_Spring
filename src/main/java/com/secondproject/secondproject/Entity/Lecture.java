@@ -25,7 +25,7 @@ public class Lecture {
     private String lec_name; // 강의명
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user; // 유저(교수)아이디가 들어갑니다
 
     @Column(nullable = false)
@@ -40,7 +40,7 @@ public class Lecture {
     private String lec_description; // 강의를 등록할때 작성하는 강의 한 줄 소개 입니다.
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "major_id", nullable = false)
+    @JoinColumn(name = "major_id")
     private Major major; // 어느 학과 강의인지 표기합니다.
 
     @Column(nullable = false)

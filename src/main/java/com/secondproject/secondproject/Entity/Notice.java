@@ -20,8 +20,9 @@ public class Notice {
     @Column(name = "notice_id")
     private Long noticeId; // 공지사항 게시번호(PK)
 
-    @Column(name = "WriterId", nullable = false)
-    private Long WriterId; // 작성자 ID, FK 아님
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user; // 작성자 ID
 
     @Column(name = "notice_title",nullable = false, length = 200)
     private String noticeTitle; // 공지사항 제목

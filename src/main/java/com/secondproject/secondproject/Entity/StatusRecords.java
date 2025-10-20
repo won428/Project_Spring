@@ -24,8 +24,9 @@ public class StatusRecords {
     @Column(nullable=false)
     private Student_status student_status; // 학적 상태(재학, 휴학, 복학, 퇴학, 졸업)
 
-    @Column(name = "applierId", nullable = false) // 신청자ID, number, FK 아님
-    private Long applierId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "applierId", nullable = false) // 학적 유저ID, FK
+    private User user;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(nullable = false)
