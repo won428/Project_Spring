@@ -13,7 +13,7 @@ import java.time.LocalDate;
 public class AcademicCalendar {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "calendar_id")
     private Long calendarId;
 

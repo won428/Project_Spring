@@ -16,7 +16,7 @@ import java.util.Locale;
 public class Notice {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "notice_id")
     private Long noticeId; // 공지사항 게시번호(PK)
 
