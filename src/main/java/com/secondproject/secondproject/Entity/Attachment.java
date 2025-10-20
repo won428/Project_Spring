@@ -21,7 +21,7 @@ public class Attachment {
     private Long id; // 저장 경로 PK
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_attachment_user"))
     private User user;
 
     @Column(name = "original_name")

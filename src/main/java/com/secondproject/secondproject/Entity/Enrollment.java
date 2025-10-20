@@ -18,11 +18,11 @@ public class Enrollment {
     private Long id; // 수강id
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_enrollment_user"))
     private User user; // 수강중인 유저 id
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lecture_id")
+    @JoinColumn(name = "lecture_id", foreignKey = @ForeignKey(name = "fk_enrollment_lecture"))
     private Lecture lecture; // 수강중인 강의 코드
 
     @OneToOne

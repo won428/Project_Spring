@@ -26,7 +26,7 @@ public class StudentRecord {
     private Long record_id;                  // 유저ID(FK), number
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false) // 신청자ID
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_studentRecord_user")) // 신청자ID
     private User user;
 
     @Enumerated(EnumType.STRING)
