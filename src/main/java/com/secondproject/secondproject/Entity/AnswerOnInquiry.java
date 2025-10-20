@@ -19,4 +19,6 @@ public class AnswerOnInquiry {
     private String answer_content;
 
 
+
+
 }
