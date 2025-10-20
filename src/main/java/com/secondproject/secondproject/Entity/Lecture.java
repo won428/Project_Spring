@@ -28,7 +28,7 @@ public class Lecture {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private Member member; // 유저(교수)아이디가 들어갑니다
+    private User user; // 유저(교수)아이디가 들어갑니다
 
     @Column(nullable = false)
     private int credit; // 몇 학점인지 표기합니다.(2학점, 3학점)

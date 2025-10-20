@@ -1,7 +1,7 @@
 package com.secondproject.secondproject.controller;
 
-import com.secondproject.secondproject.Entity.Member;
 import com.secondproject.secondproject.Entity.StatusRecords;
+import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.dto.StudentInfoDto;
 import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.service.MemberService;
@@ -27,26 +27,26 @@ public class MemberController {
     // 학생 정보 + 학적 정보 조회
     @GetMapping("/{user_id}")
     public ResponseEntity<?> getStudentInfo(@PathVariable Long id) {
-        Member member = memberService.getUserById(id);
+        User user = memberService.getUserById(id);
 
         // enum UserType.STUDENT을 직접 비교
-        if (member.getU_type() != UserType.STUDENT) {
+        if (user.getU_type() != UserType.STUDENT) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "학생 정보만 조회할 수 있습니다."));
         }
 
         // RecordStatus 엔티티명도 실제 테이블명과 맞춰 사용
-        StatusRecords statusRecord = memberService.getStatusRecordById(member.getStatus_id());
-        StudentInfoDto dto = new StudentInfoDto(member, statusRecord);
+        StatusRecords statusRecord = memberService.getStatusRecordById(user.getStatus_id());
+        StudentInfoDto dto = new StudentInfoDto(user, statusRecord);
         return ResponseEntity.ok(dto);
     }
 
     // 사용자 역할에 따른 기능 제한 예시
     @PostMapping("/{user_id}/request")
     public ResponseEntity<?> studentFeature(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        Member member = memberService.getUserById(id);
+        User user = memberService.getUserById(id);
         //
-        switch (member.getU_type()) {
+        switch (user.getU_type()) {
             case STUDENT:
                 return ResponseEntity.ok(Map.of("message", "학생 기능 수행"));
             case PROFESSOR:
@@ -63,13 +63,13 @@ public class MemberController {
     // 졸업생 기능 제한 및 증명서 발급
     @GetMapping("/{user_id}/certificate/{type}")
     public ResponseEntity<?> issueCertificate(@PathVariable Long id, @PathVariable String type) {
-        Member member = memberService.getUserById(id);
-        if (member.getU_type() != UserType.STUDENT) {
+        User user = memberService.getUserById(id);
+        if (user.getU_type() != UserType.STUDENT) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "학생 전용 서비스입니다."));
         }
 
-        StatusRecords sr = memberService.getStatusRecordById(member.getStatus_id());
+        StatusRecords sr = memberService.getStatusRecordById(user.getStatus_id());
         boolean isGraduated = "졸업".equals(sr.getStudent_status());
 
         if (!isGraduated) {

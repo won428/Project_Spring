@@ -4,14 +4,13 @@ package com.secondproject.secondproject.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.secondproject.secondproject.Entity.Member;
+import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.service.MemberService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -37,8 +36,8 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
     ) throws IOException, ServletException {
         response.setContentType("application/json;charset=UTF-8");
         User user = (User) authentication.getPrincipal();
-        String email = user.getUsername();
-        Member member = memberService.findByEmail(email);
+        String email = user.getEmail();
+        User member = memberService.findByEmail(email);
 
         Map<String, Object> data = new HashMap<>();
         data.put("msg", "success");

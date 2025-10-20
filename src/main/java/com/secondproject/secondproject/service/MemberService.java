@@ -1,7 +1,8 @@
 package com.secondproject.secondproject.service;
 
-import com.secondproject.secondproject.Entity.Member;
+
 import com.secondproject.secondproject.Entity.StatusRecords;
+import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.repository.MemberRepository;
 import com.secondproject.secondproject.repository.RecordStatusRepository;
@@ -23,13 +24,13 @@ public class MemberService {
         this.recordStatusRepository = recordStatusRepository;
     }
 
-    public Member getUserById(Long id) {
-        Member member = memberRepository.findByUid(id).orElse(null);
-        if (member == null) {
+    public User getUserById(Long id) {
+        User user = memberRepository.findByUid(id).orElse(null);
+        if (user == null) {
             // throw new RuntimeException("해당 유저 없음");
             return null;
         }
-        return member;
+        return user;
     }
 
     public StatusRecords getStatusRecordById(Long statusId) {
@@ -43,13 +44,13 @@ public class MemberService {
 
     public Object issueCertificate(Long id, String type) {
         // 1. 유저 조회
-        Member member = getUserById(id);
-        if (member == null || member.getU_type() != UserType.STUDENT) {
+        User user = getUserById(id);
+        if (user == null || user.getU_type() != UserType.STUDENT) {
             return Map.of("error", "학생 전용 서비스입니다.");
         }
 
         // 2. 학적 정보(RecordStatus) 조회
-        StatusRecords sr = getStatusRecordById(member.getStatus_id());
+        StatusRecords sr = getStatusRecordById(user.getStatus_id());
         if (sr == null) {
             return Map.of("error", "학적 정보가 없습니다.");
         }
@@ -69,7 +70,7 @@ public class MemberService {
         return Map.of("message", type + " 발급 완료 (유저ID: " + id + ")");
     }
 
-    public Member findByEmail(String email) {
+    public User findByEmail(String email) {
         return memberRepository.findByEmail(email);
     }
 }

@@ -50,7 +50,7 @@ public class Assignment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private Member member; // 공지한사람(=교수이름)
+    private User user; // 공지한사람(=교수이름)
 
     @Column(name = "create_at", columnDefinition = "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")

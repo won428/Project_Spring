@@ -1,8 +1,7 @@
 package com.secondproject.secondproject.service;
 
-import com.secondproject.secondproject.Entity.Member;
+import com.secondproject.secondproject.Entity.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,25 +16,25 @@ public class MemberDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Member member = memberService.findByEmail(email);
+        User user = memberService.findByEmail(email);
 
-        if (member == null) {
+        if (user == null) {
             String msg = "Id/Pw Error";
             throw new UsernameNotFoundException(msg);
         }
 
 
-        return User.builder()
-                .username(member.getEmail())
-                .password(member.getPassword())
-                .roles(member.getU_type().name())
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getEmail())
+                .password(user.getPassword())
+                .roles(user.getU_type().name())
                 .build();
     }
 
     //test용
     public static UserDetails loadUserByEmail(String userEmail) throws UsernameNotFoundException {
         if ("testEmail".equals(userEmail)) {
-            return User.builder()
+            return org.springframework.security.core.userdetails.User.builder()
                     .username("testEmail")
                     .password(new BCryptPasswordEncoder().encode("1234"))
                     .roles("USER")

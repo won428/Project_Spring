@@ -25,7 +25,7 @@ public class SubmitAsgmt {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false) // 제출자(학생)
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_submit_user"))
-    private Member member;
+    private User user;
 
     @Column(name = "submit_title", length = 200, nullable = false)
     private String submitTitle; // 제출 폼 제목

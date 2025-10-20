@@ -23,7 +23,7 @@ public class Notice {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_notice_author_user"
     ))
-    private Member member;
+    private User user;
 
     @Column(name = "notice_title", nullable = false, length = 200)
     private String noticeTitle;
