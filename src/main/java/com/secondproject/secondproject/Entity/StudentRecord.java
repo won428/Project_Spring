@@ -29,8 +29,7 @@ public class StudentRecord {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "status_id", nullable = false)
+    @Enumerated(EnumType.STRING)
     private Status statusRecords;                // 상태/학적번호(FK), number
 
     @Column(nullable = false)
