@@ -20,25 +20,30 @@ public class StatusRecords {
     @Column(name = "status_id")
     private Long id;                    // 상태/학적번호(PK)
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable=false)
     private Student_status student_status; // 학적 상태(재학, 휴학, 복학, 퇴학, 졸업)
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate admissionDate;           // 입학일
+    @Column(name = "applierId", nullable = false) // 신청자ID, number, FK 아님
+    private Long applierId;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate leaveDate; // 휴학일
+    @Column(nullable = false)
+    private LocalDate admissionDate; // 입학일
 
-    @JsonFormat(pattern = "yyyy-MM-dd")// 복학일
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate leaveDate; // 휴학일, NULL 허용
+
+    @JsonFormat(pattern = "yyyy-MM-dd")// 복학일, NULL 허용
     private LocalDate returnDate;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")// 졸업
+    @JsonFormat(pattern = "yyyy-MM-dd")// 졸업일, NULL 허용
     private LocalDate graduation_date;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")// 유급
+    @JsonFormat(pattern = "yyyy-MM-dd")// 유급일, NULL 허용
     private LocalDate retention_date;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")// 퇴학
+    @JsonFormat(pattern = "yyyy-MM-dd")// 퇴학일, NULL 허용
     private LocalDate expelled_date;
     // 제적일
 
