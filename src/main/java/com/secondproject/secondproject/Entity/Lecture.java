@@ -17,7 +17,7 @@ public class Lecture {
     // 강의 테이블
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "lecture_id")
     private Long id; // 강의코드
 

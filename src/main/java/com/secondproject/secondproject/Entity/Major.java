@@ -14,7 +14,7 @@ public class Major {
     // 학과 테이블 입니다.
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "major_id")
     private Long id; // 학과 코드
 

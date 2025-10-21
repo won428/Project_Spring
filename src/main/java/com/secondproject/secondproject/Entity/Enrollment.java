@@ -13,7 +13,7 @@ public class Enrollment {
     // 수강 엔터티 입니다.
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "enroll_Id")
     private Long id; // 수강id
 

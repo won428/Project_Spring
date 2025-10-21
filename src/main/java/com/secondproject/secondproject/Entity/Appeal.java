@@ -17,7 +17,7 @@ public class Appeal {
     // 이의제기 엔터티입니다.
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "appeal_id")
     private Long id; // 이의제기 코드
 

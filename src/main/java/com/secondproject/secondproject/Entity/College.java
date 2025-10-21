@@ -12,7 +12,7 @@ public class College {
     // 단과대학 엔터티 입니다.
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "college_id")
     private Long id; // 단과대학코드
 

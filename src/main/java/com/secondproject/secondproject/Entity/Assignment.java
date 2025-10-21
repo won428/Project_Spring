@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class Assignment {
     // 교수 과제 공지 테이블
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "assignment_id", columnDefinition = "BIGINT")
     private long assignmentId; // 과제ID(PK)
 

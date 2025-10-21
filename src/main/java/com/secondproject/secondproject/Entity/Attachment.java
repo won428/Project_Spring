@@ -18,7 +18,7 @@ public class Attachment {
     private Long attachment_id; // 저장 경로 PK
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "attachment_id")
     private Long id; // 저장 경로 PK
 

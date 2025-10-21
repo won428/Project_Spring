@@ -16,7 +16,7 @@ import java.time.LocalDate;
 public class StatusRecords {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "status_id")
     private Long id;                    // 상태/학적번호(PK)
 
@@ -25,7 +25,7 @@ public class StatusRecords {
     private Student_status student_status; // 학적 상태(재학, 휴학, 복학, 퇴학, 졸업)
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "applierId", nullable = false) // 학적 유저ID, FK
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_stausRecord_user")) // 학적 유저ID, FK
     private User user;
 
     @JsonFormat(pattern = "yyyy-MM-dd")

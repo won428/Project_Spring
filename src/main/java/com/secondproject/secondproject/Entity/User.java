@@ -18,7 +18,7 @@ import java.time.LocalDate;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id; // 유저 아이디(PK, number type)
 
@@ -43,7 +43,7 @@ public class User {
     private String gender; // 성별 (enum, 문자열 컬럼)
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="major_id")
+    @JoinColumn(name="major_id", foreignKey = @ForeignKey(name = "fk_user_major"))
     private Major major; // 소속학과ID (number, FK)
 
     @Enumerated(EnumType.STRING)

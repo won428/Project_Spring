@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @Entity
 public class Inquiry {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "inquiry_id")
     private long inquiry_id; // 게시번호(PK)
 
