@@ -2,12 +2,14 @@ package com.secondproject.secondproject.config;
 
 import com.secondproject.secondproject.config.JWT.JwtAuthenticationFilter;
 import com.secondproject.secondproject.config.JWT.JwtTokenProvider;
-import com.secondproject.secondproject.handler.CustomLoginFailureHandler;
-import com.secondproject.secondproject.handler.CustomLoginSuccessHandler;
+import com.secondproject.secondproject.service.UserDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -26,17 +28,17 @@ import java.util.List;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final JwtTokenProvider jwtTokenProvider;
-    private final CustomLoginSuccessHandler customLoginSuccessHandler;
-    private final CustomLoginFailureHandler customLoginFailureHandler;
+
+    private final JwtAuthenticationFilter jwFilter;
+    private final UserDetailService userDetailService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        // 접근 허용 할 것
-        String[] permitAllowed = {
-                "/**"
-        };
+//        // 접근 허용 할 것
+//        String[] permitAllowed = {
+//                "/**"
+//        };
             /* JWT 토큰 방식 Json Web Token
             {header h2256 type jwt}
             {
@@ -49,22 +51,21 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
+                .formLogin(form -> form.disable())
+                .httpBasic(basic -> basic.disable())
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(permitAllowed).permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+//                        .requestMatchers(permitAllowed).permitAll()
+                                .requestMatchers("/auth/**", "/Home").permitAll()
+                                .anyRequest().authenticated()
                 )
-                .formLogin(form -> form
-                        .loginProcessingUrl("/login")
-                        .usernameParameter("email")
-                        .passwordParameter("password")
-                        .successHandler(customLoginSuccessHandler)
-                        .failureHandler(customLoginFailureHandler)
-                        .permitAll()
-                )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwFilter, UsernamePasswordAuthenticationFilter.class);
+//                .formLogin(form -> form
+//                        .loginPage("/login")
+//                        .permitAll()
+//                )
+
 
         return http.build();
     }
@@ -84,9 +85,21 @@ public class SecurityConfig {
     }
 
     @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
+
+    @Bean
     public PasswordEncoder passwordEncoder() { //decoding 시 필수
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
 
 }

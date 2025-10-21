@@ -4,6 +4,8 @@ package com.secondproject.secondproject.service;
 import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,7 +17,7 @@ public class UserService {
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-
+    
 
     public User getUserById(Long id) {
 //        User user = userRepository.findByUid(id).orElse(null);

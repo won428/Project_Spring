@@ -1,5 +1,0 @@
-app:
-  jwt:
-    secret: "my-super-secret-key-which-is-long-enough"
-    access-exp-min: 15
-    refresh-exp-days: 14

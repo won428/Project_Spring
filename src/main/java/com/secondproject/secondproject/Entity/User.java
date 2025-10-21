@@ -47,6 +47,7 @@ public class User implements UserDetails {
     // 필요시 생성자, equals/hashCode 등 추가 가능
 
 
+    // --------------------------------------------userDetail 설정
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + u_type.name()));
