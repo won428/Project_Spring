@@ -1,4 +1,4 @@
-package com.secondproject.secondproject.Entity;
+package com.secondproject.secondproject.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.secondproject.secondproject.Enum.SubmitStatus;
@@ -15,7 +15,7 @@ import java.time.LocalDate;
 public class SubmitAsgmt {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "submit_id", columnDefinition = "BIGINT")
     private Long submitId; // 과제제출ID(PK)
 
