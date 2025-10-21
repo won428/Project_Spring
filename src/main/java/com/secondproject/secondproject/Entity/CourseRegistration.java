@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class CourseRegistration {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "enrollment_id")
     private Long id;
 

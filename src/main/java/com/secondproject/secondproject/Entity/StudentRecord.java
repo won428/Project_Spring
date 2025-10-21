@@ -21,7 +21,7 @@ import java.time.LocalDate;
 public class StudentRecord {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "record_id")
     private Long record_id;                  // 유저ID(FK), number
 

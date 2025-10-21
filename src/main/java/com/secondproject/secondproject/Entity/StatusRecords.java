@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
+
 import java.time.LocalDate;
 
 @Getter
@@ -16,13 +18,13 @@ import java.time.LocalDate;
 public class StatusRecords {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "status_id")
     private Long id;                    // 상태/학적번호(PK)
 
     @Enumerated(EnumType.STRING)
     @Column(nullable=false)
-    private Student_status student_status; // 학적 상태(재학, 휴학, 복학, 퇴학, 졸업)
+    private Student_status student_status = Student_status.ENROLLED; // 학적 상태(재학, 휴학, 복학, 퇴학, 졸업), 기본값 재학
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_stausRecord_user")) // 학적 유저ID, FK

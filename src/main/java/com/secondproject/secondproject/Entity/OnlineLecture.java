@@ -14,7 +14,7 @@ import java.time.LocalDate;
 public class OnlineLecture {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ol_id")
     private Long id; // 온라인 강의 코드
 
