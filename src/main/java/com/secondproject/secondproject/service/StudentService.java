@@ -45,7 +45,7 @@ public class StudentService {
             return Map.of("error", "학생만 접근 가능한 서비스입니다.");
         }
 
-        StatusRecords sr = getStatusRecordById(user.getStatusRecords().getId());
+        StatusRecords sr = getStatusRecordById(user.getId());
         if (sr == null) {
             return Map.of("error", "학적 정보가 없습니다.");
         }
