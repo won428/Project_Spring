@@ -20,6 +20,7 @@ public class UserDto {
     private String email; // 이메일
     private String phone; // 휴대전화
     private String gender;
+    private String college;
     private Long major; // 소속학과ID (number, FK)
     private UserType u_type; // 구분: 학생, 교수, 관리자 (enum)
 

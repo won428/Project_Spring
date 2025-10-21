@@ -1,17 +1,16 @@
 package com.secondproject.secondproject.Controller;
 
 import com.secondproject.secondproject.Dto.UserDto;
+import com.secondproject.secondproject.Dto.UserListDto;
 import com.secondproject.secondproject.Entity.Major;
 import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.Service.MajorService;
 import com.secondproject.secondproject.Service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -39,6 +38,13 @@ public class UserController {
         this.userService.insertUser(user);
 
         return ResponseEntity.ok(200);
+    }
+
+    @GetMapping("/list")
+    public List<UserListDto> userList(){
+        List<UserListDto> userList = this.userService.findUserList();
+
+        return userList;
     }
 
 

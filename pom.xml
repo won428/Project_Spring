@@ -81,6 +81,16 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>           <!-- HSSF: xls -->
+			<version>5.2.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>     <!-- XSSF: xlsx -->
+			<version>5.2.5</version>
+		</dependency>
 	</dependencies>
 
 	<build>

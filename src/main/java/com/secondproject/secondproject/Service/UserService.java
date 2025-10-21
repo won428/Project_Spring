@@ -1,7 +1,12 @@
 package com.secondproject.secondproject.Service;
 
+import com.secondproject.secondproject.Dto.UserListDto;
+import com.secondproject.secondproject.Entity.College;
+import com.secondproject.secondproject.Entity.Major;
 import com.secondproject.secondproject.Entity.StatusRecords;
 import com.secondproject.secondproject.Entity.User;
+import com.secondproject.secondproject.Repository.CollegeRepository;
+import com.secondproject.secondproject.Repository.MajorRepository;
 import com.secondproject.secondproject.Repository.StatusRecordsRepository;
 import com.secondproject.secondproject.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +24,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final StatusRecordsRepository statusRecordsRepository;
+    private final MajorRepository majorRepository;
+    private final CollegeRepository collegeRepository;
 
     @Transactional
     public void insertUser(User newUser) {
@@ -42,5 +51,35 @@ public class UserService {
         Long studentId = Long.parseLong(stringStudentId);
 
         saved.setUser_code(studentId);
+    }
+
+    public List<UserListDto> findUserList() {
+        List<User> userList = this.userRepository.findAll();
+        List<UserListDto> userListDto = new ArrayList<>();
+
+
+        for(User user : userList){
+            UserListDto userDto = new UserListDto();
+            Major major = this.majorRepository.findMajorById(user.getMajor().getId());
+            College college = this.collegeRepository.findCollegeById(major.getCollege().getId());
+
+            String majorName = major.getM_name();
+            String collegeName = college.getC_type();
+
+            userDto.setU_name(user.getU_name());
+            userDto.setBirthdate(user.getBirthdate());
+            userDto.setGender(user.getGender());
+            userDto.setUser_code(user.getUser_code());
+            userDto.setPhone(user.getPhone());
+            userDto.setEmail(user.getEmail());
+            userDto.setPassword(user.getPassword());
+            userDto.setMajor(majorName);
+            userDto.setCollege(collegeName);
+            userDto.setU_type(user.getU_type());
+
+            userListDto.add(userDto);
+        }
+
+        return userListDto;
     }
 }

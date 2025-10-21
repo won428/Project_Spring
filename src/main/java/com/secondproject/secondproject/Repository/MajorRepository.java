@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface MajorRepository extends JpaRepository<Major,Long> {
     List<Major> findByCollege_Id(Long collegeId);
+
+    Major findMajorById(Long id);
 }
