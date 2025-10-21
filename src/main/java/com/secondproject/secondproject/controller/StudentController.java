@@ -33,7 +33,7 @@ public class StudentController {
                     .body(Map.of("error", "학생 정보만 조회할 수 있습니다."));
         }
 
-        StatusRecords statusRecord = studentService.getStatusRecordById(user.getStatusRecords().getId());
+        StatusRecords statusRecord = studentService.getStatusRecordById(user.getId());
         StudentInfoDto dto = new StudentInfoDto(user, statusRecord);
         return ResponseEntity.ok(dto);
     }
@@ -72,7 +72,7 @@ public class StudentController {
                     .body(Map.of("error", "학생 전용 서비스입니다."));
         }
 
-        StatusRecords sr = studentService.getStatusRecordById(user.getStatusRecords().getId());
+        StatusRecords sr = studentService.getStatusRecordById(user.getId());
         boolean isGraduated = "졸업".equals(sr.getStudent_status());
 
         if (!isGraduated) {
