@@ -1,9 +1,9 @@
-package com.secondproject.secondproject.Controller;
+package com.secondproject.secondproject.controller;
 
 import com.secondproject.secondproject.Entity.StudentRecord;
-import com.secondproject.secondproject.Dto.StatusChangeRequestDto;
+import com.secondproject.secondproject.dto.StatusChangeRequestDto;
 import com.secondproject.secondproject.Enum.UserType;
-import com.secondproject.secondproject.Service.StatusService;
+import com.secondproject.secondproject.service.StatusService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

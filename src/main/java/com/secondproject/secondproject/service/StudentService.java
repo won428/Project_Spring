@@ -1,11 +1,11 @@
-package com.secondproject.secondproject.Service;
+package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.Entity.StatusRecords;
 import com.secondproject.secondproject.Enum.UserType;
-import com.secondproject.secondproject.Repository.EnrollmentRepository;
-import com.secondproject.secondproject.Repository.UserRepository;
-import com.secondproject.secondproject.Repository.RecordStatusRepository;
+import com.secondproject.secondproject.repository.EnrollmentRepository;
+import com.secondproject.secondproject.repository.UserRepository;
+import com.secondproject.secondproject.repository.RecordStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
