@@ -2,12 +2,12 @@ package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.dto.CollegeCreateReq;
 import com.secondproject.secondproject.dto.ColResponseDto;
-import com.secondproject.secondproject.dto.CollegesList;
 import com.secondproject.secondproject.entity.College;
 import com.secondproject.secondproject.mapper.CollegeMapper;
 import com.secondproject.secondproject.repository.CollegeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -34,11 +34,11 @@ public class CollegeService {
         collegeRepository.deleteById(collegeId);
     }
 
-    public List<CollegesList> getList(){
-        List<College> collegeEntityList  = collegeRepository.findAll();
-        List<CollegesList> collegesLists = new ArrayList<>();
+    public List<ColResponseDto> getList(){
+        List<College> collegeEntityList  = collegeRepository.findAllOrderByCTypeAsc();
+        List<ColResponseDto> collegesLists = new ArrayList<>();
         for (College c : collegeEntityList){
-            CollegesList collegeResponse = new CollegesList();
+            ColResponseDto collegeResponse = new ColResponseDto();
             collegeResponse.setId(c.getId());
             collegeResponse.setC_type(c.getC_type());
             collegeResponse.setC_office(c.getC_office());

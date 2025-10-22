@@ -2,8 +2,6 @@ package com.secondproject.secondproject.controller;
 
 import com.secondproject.secondproject.dto.CollegeCreateReq;
 import com.secondproject.secondproject.dto.ColResponseDto;
-import com.secondproject.secondproject.dto.CollegesList;
-import com.secondproject.secondproject.entity.College;
 import com.secondproject.secondproject.service.CollegeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +33,7 @@ public class CollegeController {
     }
 
     @GetMapping("/list")
-    public List<CollegesList> list(){
+    public List<ColResponseDto> list(){
         return collegeService.getList();
     }
 
