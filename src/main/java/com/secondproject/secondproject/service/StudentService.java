@@ -1,7 +1,7 @@
 package com.secondproject.secondproject.service;
 
-import com.secondproject.secondproject.Entity.User;
-import com.secondproject.secondproject.Entity.StatusRecords;
+import com.secondproject.secondproject.entity.User;
+import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.repository.EnrollmentRepository;
 import com.secondproject.secondproject.repository.UserRepository;

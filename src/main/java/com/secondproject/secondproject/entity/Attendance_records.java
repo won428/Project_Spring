@@ -24,7 +24,7 @@ public class Attendance_records {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "enroll_Id", nullable = false, foreignKey = @ForeignKey(name = "fk_attendanceRecords_enroll"))
-    private com.secondproject.secondproject.Entity.Enrollment enrollment; // 수강id
+    private com.secondproject.secondproject.entity.Enrollment enrollment; // 수강id
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(nullable = false)

@@ -29,7 +29,7 @@ public class Appeal {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "enroll_Id", nullable = false,foreignKey = @ForeignKey(name = "fk_appeal_enroll"))
-    private com.secondproject.secondproject.Entity.Enrollment enrollment;
+    private com.secondproject.secondproject.entity.Enrollment enrollment;
 
     @Column(nullable = false)
     private String title; // 이의제기 제목입니다.

@@ -61,5 +61,5 @@ public class Assignment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecture_id", nullable = false, foreignKey = @ForeignKey(name = "fk_assignment_lecture"))
-    private com.secondproject.secondproject.Entity.Lecture lecture; // Lecture(강의) 테이블 FK참조
+    private com.secondproject.secondproject.entity.Lecture lecture; // Lecture(강의) 테이블 FK참조
 }

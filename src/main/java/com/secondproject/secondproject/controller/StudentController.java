@@ -1,7 +1,7 @@
 package com.secondproject.secondproject.controller;
 
-import com.secondproject.secondproject.Entity.User;
-import com.secondproject.secondproject.Entity.StatusRecords;
+import com.secondproject.secondproject.entity.User;
+import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.dto.StudentInfoDto;
 import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.service.StudentService;

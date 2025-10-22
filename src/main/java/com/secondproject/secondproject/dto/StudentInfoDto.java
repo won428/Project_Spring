@@ -1,8 +1,8 @@
 package com.secondproject.secondproject.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.secondproject.secondproject.Entity.StatusRecords;
-import com.secondproject.secondproject.Entity.User;
+import com.secondproject.secondproject.entity.StatusRecords;
+import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.Enum.Student_status;
 import com.secondproject.secondproject.Enum.UserType;
 import lombok.AllArgsConstructor;

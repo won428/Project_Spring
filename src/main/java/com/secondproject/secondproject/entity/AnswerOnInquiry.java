@@ -24,7 +24,7 @@ public class AnswerOnInquiry {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "inquiry_id", nullable = false, foreignKey = @ForeignKey(name = "fk_answer_inquiry"))
-    private com.secondproject.secondproject.Entity.Inquiry inquiry;
+    private com.secondproject.secondproject.entity.Inquiry inquiry;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_answer_user"))

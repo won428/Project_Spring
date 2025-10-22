@@ -1,8 +1,8 @@
 package com.secondproject.secondproject.service;
 
-import com.secondproject.secondproject.Entity.Attachment;
-import com.secondproject.secondproject.Entity.StatusRecords;
-import com.secondproject.secondproject.Entity.StudentRecord;
+import com.secondproject.secondproject.entity.Attachment;
+import com.secondproject.secondproject.entity.StatusRecords;
+import com.secondproject.secondproject.entity.StudentRecord;
 import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.dto.StatusChangeRequestDto;
 import com.secondproject.secondproject.repository.AttachmentRepository;

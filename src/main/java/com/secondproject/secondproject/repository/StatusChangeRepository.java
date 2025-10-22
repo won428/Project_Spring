@@ -1,7 +1,7 @@
 package com.secondproject.secondproject.repository;
 
-import com.secondproject.secondproject.Entity.StatusRecords;
-import com.secondproject.secondproject.Entity.StudentRecord;
+import com.secondproject.secondproject.entity.StatusRecords;
+import com.secondproject.secondproject.entity.StudentRecord;
 import com.secondproject.secondproject.Enum.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

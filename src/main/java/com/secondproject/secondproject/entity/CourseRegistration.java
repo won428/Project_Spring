@@ -24,7 +24,7 @@ public class CourseRegistration {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecture_id",foreignKey = @ForeignKey(name = "fk_courseRegister_lecture"))
-    private com.secondproject.secondproject.Entity.Lecture lecture;
+    private com.secondproject.secondproject.entity.Lecture lecture;
 
     @Column(nullable = false)
     private LocalDateTime date; // 신청날짜 ~년도 ~월 ~일 ~몇분 ~몇초

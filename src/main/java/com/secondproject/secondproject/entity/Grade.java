@@ -24,7 +24,7 @@ public class Grade {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecture_id", nullable = false, foreignKey = @ForeignKey(name = "fk_grade_lecture"))
-    private com.secondproject.secondproject.Entity.Lecture lecture;
+    private com.secondproject.secondproject.entity.Lecture lecture;
 
     @Column(name = "a_score", precision = 4, scale = 2, nullable = false) // => DECIMAL(4,2)
     @Digits(integer = 2, fraction = 2)  // Bean Validation (00.00 ~ 99.99)
