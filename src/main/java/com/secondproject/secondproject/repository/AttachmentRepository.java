@@ -1,8 +1,9 @@
-package com.secondproject.secondproject.repository;
+package com.secondproject.secondproject.Repository;
 
 import com.secondproject.secondproject.Entity.Attachment;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface AttachmentRepository {
+public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
     static void fSave(Attachment attachment) {
 
     }

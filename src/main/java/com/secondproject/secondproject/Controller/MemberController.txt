@@ -1,4 +1,4 @@
-package com.secondproject.secondproject.controller;
+package com.secondproject.secondproject.Controller;
 
 import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.Entity.StatusRecords;

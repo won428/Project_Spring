@@ -1,8 +1,11 @@
-package com.secondproject.secondproject.dto;
+package com.secondproject.secondproject.Dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.secondproject.secondproject.Entity.StatusRecords;
 import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.Enum.Student_status;
+import com.secondproject.secondproject.Enum.UserType;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,15 +14,21 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
+@AllArgsConstructor
 @NoArgsConstructor
 public class StudentInfoDto {
 
     // User 주요 필드
-    private Long userId;
-    private String uName;
-    private String email;
-    private String phone;
+    private String u_name; // 이름
+    private String password; // 비밀번호
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate birthdate; // 생년월일 (date 타입)
+    private String email; // 이메일
+    private String phone; // 휴대전화
     private String gender;
+    private String college;
+    private Long major; // 소속학과ID (number, FK)
+    private UserType u_type; // 구분: 학생, 교수, 관리자 (enum)
 
     // User 소속 학과 등 필요한 필드 추가
     // 예) 전공명 majorName; 필요시 추가
@@ -33,25 +42,6 @@ public class StudentInfoDto {
     private LocalDate retentionDate;
     private LocalDate expelledDate;
 
-    // 생성자 (User, StatusRecords 객체 받아 필드 할당)
-    public StudentInfoDto(User user, StatusRecords statusRecords) {
-        if (user != null) {
-            this.userId = user.getId();
-            this.uName = user.getU_name();
-            this.email = user.getEmail();
-            this.phone = user.getPhone();
-            this.gender = user.getGender();
-            // 전공 등 추가 필드 필요 시 user에서 가져오기
-        }
-
-        if (statusRecords != null) {
-            this.student_status = statusRecords.getStudent_status();
-            this.admissionDate = statusRecords.getAdmissionDate();
-            this.leaveDate = statusRecords.getLeaveDate();
-            this.returnDate = statusRecords.getReturnDate();
-            this.graduationDate = statusRecords.getGraduation_date();
-            this.retentionDate = statusRecords.getRetention_date();
-            this.expelledDate = statusRecords.getExpelled_date();
-        }
+    public StudentInfoDto(User user, StatusRecords statusRecord) {
     }
 }

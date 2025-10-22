@@ -1,12 +1,12 @@
-package com.secondproject.secondproject.service;
+package com.secondproject.secondproject.Service;
 
 import com.secondproject.secondproject.Entity.Attachment;
 import com.secondproject.secondproject.Entity.StatusRecords;
 import com.secondproject.secondproject.Entity.StudentRecord;
 import com.secondproject.secondproject.Enum.Status;
-import com.secondproject.secondproject.dto.StatusChangeRequestDto;
-import com.secondproject.secondproject.repository.AttachmentRepository;
-import com.secondproject.secondproject.repository.StatusChangeRepository;
+import com.secondproject.secondproject.Dto.StatusChangeRequestDto;
+import com.secondproject.secondproject.Repository.AttachmentRepository;
+import com.secondproject.secondproject.Repository.StatusChangeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +37,7 @@ public class StatusService {
         record.setProcessed_date(dto.getProcessedDate());
         record.setStudentStatus(dto.getAcademicRequest());
         // 신청자 ID를 그대로 기록
-        record.setApplierId(dto.getApplier());
+        record.setUser(dto.getUser());
 
         // 학적 변경 신청 기본 저장
         StatusChangeRepository.save(record);
@@ -50,7 +50,7 @@ public class StatusService {
         // 상태 세 가지만 필터링해 조회 (임의 메서드명, 구현된 리포지토리 메서드 필요)
         List<Status> validStatuses = List.of(Status.PENDING, Status.APPROVED, Status.REJECTED);
 
-        return statusChangeRepository.findByApplierIdAndStatusIn(userId, validStatuses);
+        return statusChangeRepository.findByUserIdAndStatusIn(userId, validStatuses);
     }
 
     // 간단 첨부파일 저장 (파일명만 저장)
@@ -79,7 +79,7 @@ public class StatusService {
 
         StatusChangeRequestDto dto = new StatusChangeRequestDto();
         dto.setRecordId(record.getId());                  // PK (status_id)
-        dto.setApplier(record.getApplierId());            // 신청자 ID
+        dto.setUser(record.getUser());            // 신청자 ID
         dto.setStatusId(record.getId());                   // 참조용 상태 ID (recordId 재사용)
         dto.setTitle(null);                                // title 필드가 없으므로 null 설정
         dto.setContent(null);                              // content 필드가 없으므로 null 설정

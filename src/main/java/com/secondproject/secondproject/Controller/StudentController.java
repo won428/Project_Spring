@@ -1,14 +1,16 @@
-package com.secondproject.secondproject.controller;
+package com.secondproject.secondproject.Controller;
 
 import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.Entity.StatusRecords;
-import com.secondproject.secondproject.dto.StudentInfoDto;
+import com.secondproject.secondproject.Dto.StudentInfoDto;
 import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.Service.StudentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -86,5 +88,40 @@ public class StudentController {
         }
 
         return ResponseEntity.ok(studentService.issueCertificate(id, type));
+    }
+
+    /* ====================== [ 교수 전용 기능 ] ====================== */
+
+    @GetMapping("/professor/{professor_id}/students")
+    public ResponseEntity<?> getStudentsByProfessor(@PathVariable("professor_id") Long professorId,
+                                                    @RequestParam(required = false) String name,
+                                                    @RequestParam(required = false) Long studentId) {
+        // 1. 교수 계정 확인
+        User professor = studentService.getStudentById(professorId);
+        if (professor == null || professor.getU_type() != UserType.PROFESSOR) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "교수 전용 서비스입니다."));
+        }
+
+        // 교수로 로그인 시 수업별로 수강중인 학생 리스트 출력
+        List<User> students = studentService.getStudentsByLecture(professorId);
+
+        // 필터링
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (User s : students) {
+            if ((name == null || s.getU_name().contains(name)) &&
+                    (studentId == null || s.getId().equals(studentId))) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", s.getId());
+                map.put("name", s.getU_name());
+                result.add(map);
+            }
+        }
+
+        if (result.isEmpty()) {
+            return ResponseEntity.ok(Map.of("message", "조건에 맞는 학생이 없습니다."));
+        }
+
+        return ResponseEntity.ok(result);
     }
 }

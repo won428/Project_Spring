@@ -1,4 +1,4 @@
-package com.secondproject.secondproject.dto;
+package com.secondproject.secondproject.Dto;
 
 import com.secondproject.secondproject.Entity.Lecture;
 import com.secondproject.secondproject.Entity.User;

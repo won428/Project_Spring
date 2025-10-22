@@ -1,0 +1,18 @@
+package com.secondproject.secondproject.Repository;
+
+import com.secondproject.secondproject.Entity.Enrollment;
+import com.secondproject.secondproject.Entity.User;
+import com.secondproject.secondproject.Enum.UserType;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+
+public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
+
+    @Query("SELECT e.user FROM Enrollment e WHERE e.lecture.id = :lectureId AND e.user.u_type = :studentType")
+    List<User> findStudentsByLectureIdAndUserType(@Param("lectureId") Long lectureId,
+                                                  @Param("studentType") UserType studentType);
+}
+

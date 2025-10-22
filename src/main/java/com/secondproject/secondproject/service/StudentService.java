@@ -1,10 +1,11 @@
-package com.secondproject.secondproject.service;
+package com.secondproject.secondproject.Service;
 
 import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.Entity.StatusRecords;
 import com.secondproject.secondproject.Enum.UserType;
-import com.secondproject.secondproject.repository.UserRepository;
-import com.secondproject.secondproject.repository.RecordStatusRepository;
+import com.secondproject.secondproject.Repository.EnrollmentRepository;
+import com.secondproject.secondproject.Repository.UserRepository;
+import com.secondproject.secondproject.Repository.RecordStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,11 +17,13 @@ import java.util.Optional;
 public class StudentService {
 
     private final UserRepository userRepository;
+    private final EnrollmentRepository enrollmentRepository;
     private final RecordStatusRepository recordStatusRepository;
 
     @Autowired
-    public StudentService(UserRepository userRepository, RecordStatusRepository recordStatusRepository) {
+    public StudentService(UserRepository userRepository, EnrollmentRepository enrollmentRepository, RecordStatusRepository recordStatusRepository) {
         this.userRepository = userRepository;
+        this.enrollmentRepository = enrollmentRepository;
         this.recordStatusRepository = recordStatusRepository;
     }
 
@@ -35,7 +38,7 @@ public class StudentService {
 
     // 학적 정보 조회
     public StatusRecords getStatusRecordById(Long statusId) {
-        return recordStatusRepository.findByStatusId(statusId).orElse(null);
+        return recordStatusRepository.findById(statusId).orElse(null);
     }
 
     // 증명서 발급(학생, 졸업생 검증 포함)
@@ -62,5 +65,10 @@ public class StudentService {
 
         // 증명서 발급 성공 처리 로직 (예시)
         return Map.of("message", type + " 발급 완료 (유저ID: " + id + ")");
+    }
+
+    // 교수별 학생 목록 조회
+    public List<User> getStudentsByLecture(Long lectureId) {
+        return enrollmentRepository.findStudentsByLectureIdAndUserType(lectureId, UserType.STUDENT);
     }
 }
