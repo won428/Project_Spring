@@ -11,8 +11,8 @@ public class CollegeMapper {
     // 새 데이터 삽입, 생성Dto -> entity로 변환
     public College InsertToEntity(CollegeCreateReq req){
         College college = new College();
-        college.setC_type(normalizeType(req.getC_type()));
-        college.setC_office(normalizeOffice(req.getC_office()));
+        college.setType(normalizeType(req.getC_type()));
+        college.setCOffice(normalizeOffice(req.getC_office()));
         return college;
     }
 
@@ -21,7 +21,7 @@ public class CollegeMapper {
 
     // 응답Dto ->  entity로 변환
     public ColResponseDto toResponse(College college){
-        return new ColResponseDto(college.getId(), college.getC_type(), college.getC_office());
+        return new ColResponseDto(college.getId(), college.getType(), college.getCOffice());
     }
 
 

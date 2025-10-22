@@ -16,11 +16,11 @@ public class College {
     @Column(name = "college_id")
     private Long id; // 단과대학코드
 
-    @Column(nullable = false)
-    private String c_type; // 계열(ENUM으로 바꿀건지 의논해봐야합니다)
+    @Column(name = "c_type", nullable = false)
+    private String type; // 계열(ENUM으로 바꿀건지 의논해봐야합니다)
 
-
-    private String c_office; // 행정실 전화번호
+    @Column(name = "c_office")
+    private String cOffice; // 행정실 전화번호
 
 
 

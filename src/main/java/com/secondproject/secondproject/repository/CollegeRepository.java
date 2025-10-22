@@ -11,7 +11,6 @@ public interface CollegeRepository extends JpaRepository<College, Long> {
 
     boolean existsById(Long collegeId);
 
-    // 변수명 카멜케이스로 변경시 @Query 삭제
-    @Query("select c from College c order by c.c_type asc")
-    List<College> findAllOrderByCTypeAsc();
+
+    List<College> findAllByOrderByTypeAsc();
 }

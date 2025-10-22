@@ -5,8 +5,6 @@ import com.secondproject.secondproject.dto.ColResponseDto;
 import com.secondproject.secondproject.service.CollegeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
