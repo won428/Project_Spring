@@ -1,4 +1,4 @@
-package com.secondproject.secondproject.Entity;
+package com.secondproject.secondproject.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.secondproject.secondproject.Enum.AppealType;
@@ -29,7 +29,7 @@ public class Appeal {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "enroll_Id", nullable = false,foreignKey = @ForeignKey(name = "fk_appeal_enroll"))
-    private Enrollment enrollment;
+    private com.secondproject.secondproject.Entity.Enrollment enrollment;
 
     @Column(nullable = false)
     private String title; // 이의제기 제목입니다.

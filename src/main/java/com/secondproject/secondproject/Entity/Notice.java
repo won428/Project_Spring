@@ -1,4 +1,4 @@
-package com.secondproject.secondproject.Entity;
+package com.secondproject.secondproject.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;

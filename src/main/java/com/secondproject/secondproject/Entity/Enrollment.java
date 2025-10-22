@@ -1,4 +1,4 @@
-package com.secondproject.secondproject.Entity;
+package com.secondproject.secondproject.entity;
 
 import com.secondproject.secondproject.Enum.Status;
 import jakarta.persistence.*;
@@ -23,11 +23,11 @@ public class Enrollment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecture_id", foreignKey = @ForeignKey(name = "fk_enrollment_lecture"))
-    private Lecture lecture; // 수강중인 강의 코드
+    private com.secondproject.secondproject.Entity.Lecture lecture; // 수강중인 강의 코드
 
     @OneToOne
     @JoinColumn(name = "grade_id", nullable = false)
-    private Grade grade; // 성적 정보 id
+    private com.secondproject.secondproject.Entity.Grade grade; // 성적 정보 id
 
     @Column(nullable = false)
     private String completionDiv; // 이수구분

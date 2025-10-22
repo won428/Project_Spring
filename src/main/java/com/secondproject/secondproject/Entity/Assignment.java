@@ -1,4 +1,4 @@
-package com.secondproject.secondproject.Entity;
+package com.secondproject.secondproject.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
@@ -62,5 +62,5 @@ public class Assignment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecture_id", nullable = false, foreignKey = @ForeignKey(name = "fk_assignment_lecture"))
-    private Lecture lecture; // Lecture(강의) 테이블 FK참조
+    private com.secondproject.secondproject.Entity.Lecture lecture; // Lecture(강의) 테이블 FK참조
 }

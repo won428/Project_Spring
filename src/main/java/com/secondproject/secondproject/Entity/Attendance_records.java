@@ -1,4 +1,4 @@
-package com.secondproject.secondproject.Entity;
+package com.secondproject.secondproject.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
@@ -24,7 +24,7 @@ public class Attendance_records {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "enroll_Id", nullable = false, foreignKey = @ForeignKey(name = "fk_attendanceRecords_enroll"))
-    private Enrollment enrollment; // 수강id
+    private com.secondproject.secondproject.Entity.Enrollment enrollment; // 수강id
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(nullable = false)

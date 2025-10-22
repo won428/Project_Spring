@@ -1,4 +1,4 @@
-package com.secondproject.secondproject.Entity;
+package com.secondproject.secondproject.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.secondproject.secondproject.Enum.Status;
@@ -41,7 +41,7 @@ public class Lecture {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "major_id", foreignKey = @ForeignKey(name = "fk_lecture_major"))
-    private Major major; // 어느 학과 강의인지 표기합니다.
+    private com.secondproject.secondproject.Entity.Major major; // 어느 학과 강의인지 표기합니다.
 
     @Column(nullable = false)
     private int total_student; // 정원이 몇명인지 표기합니다. 정원을 초과하여 유저(학생이) 강의를 수강 할 수 없습니다.

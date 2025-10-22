@@ -1,4 +1,4 @@
-package com.secondproject.secondproject.Entity;
+package com.secondproject.secondproject.entity;
 
 import com.secondproject.secondproject.Enum.Status;
 import jakarta.persistence.*;
@@ -25,7 +25,7 @@ public class CourseRegistration {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecture_id",foreignKey = @ForeignKey(name = "fk_courseRegister_lecture"))
-    private Lecture lecture;
+    private com.secondproject.secondproject.Entity.Lecture lecture;
 
     @Column(nullable = false)
     private LocalDateTime date; // 신청날짜 ~년도 ~월 ~일 ~몇분 ~몇초

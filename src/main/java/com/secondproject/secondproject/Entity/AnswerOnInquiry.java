@@ -1,4 +1,4 @@
-package com.secondproject.secondproject.Entity;
+package com.secondproject.secondproject.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -25,7 +25,7 @@ public class AnswerOnInquiry {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "inquiry_id", nullable = false, foreignKey = @ForeignKey(name = "fk_answer_inquiry"))
-    private Inquiry inquiry;
+    private com.secondproject.secondproject.Entity.Inquiry inquiry;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_answer_user"))
