@@ -21,7 +21,7 @@ import java.util.List;
 @ToString
 @Entity
 @Table(name = "user")
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,14 +51,13 @@ public class User {
     @Column(nullable = false)
     private String gender; // 성별 (enum, 문자열 컬럼)
 
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="major_id", foreignKey = @ForeignKey(name = "fk_user_major"))
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "major_id", foreignKey = @ForeignKey(name = "fk_user_major"))
     private Major major; // 소속학과ID (number, FK)
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserType u_type; // 구분: 학생, 교수, 관리자 (enum)
-
 
     // 필요시 생성자, equals/hashCode 등 추가 가능
 

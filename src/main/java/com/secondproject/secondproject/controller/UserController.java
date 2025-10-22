@@ -37,23 +37,23 @@ public class UserController {
 //    }
 
     // 사용자 역할에 따른 기능 제한 예시
-    @PostMapping("/{user_id}/request")
-    public ResponseEntity<?> studentFeature(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        User user = userService.getUserById(id);
-        //
-        switch (user.getU_type()) {
-            case STUDENT:
-                return ResponseEntity.ok(Map.of("message", "학생 기능 수행"));
-            case PROFESSOR:
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(Map.of("error", "교수는 해당 기능을 사용할 수 없습니다."));
-            case ADMIN:
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(Map.of("error", "관리자는 학생 전용 기능을 사용할 수 없습니다."));
-            default:
-                return ResponseEntity.badRequest().body(Map.of("error", "알 수 없는 사용자 유형입니다."));
-        }
-    }
+//    @PostMapping("/{user_id}/request")
+//    public ResponseEntity<?> studentFeature(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+//        User user = userService.getUserById(id);
+//        //
+//        switch (user.getU_type()) {
+//            case STUDENT:
+//                return ResponseEntity.ok(Map.of("message", "학생 기능 수행"));
+//            case PROFESSOR:
+//                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+//                        .body(Map.of("error", "교수는 해당 기능을 사용할 수 없습니다."));
+//            case ADMIN:
+//                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+//                        .body(Map.of("error", "관리자는 학생 전용 기능을 사용할 수 없습니다."));
+//            default:
+//                return ResponseEntity.badRequest().body(Map.of("error", "알 수 없는 사용자 유형입니다."));
+//        }
+//    }
 
 //    // 졸업생 기능 제한 및 증명서 발급
 //    @GetMapping("/{user_id}/certificate/{type}")

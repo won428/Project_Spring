@@ -81,13 +81,13 @@ public class JwtTokenProvider {
     }
 
 
-    public String getUsername(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
+//    public String getUsername(String token) {
+//        return Jwts.parserBuilder()
+//                .setSigningKey(getSigningKey())
+//                .build()
+//                .parseClaimsJws(token)
+//                .getBody()
+//                .getSubject();
+//    }
 
 }
