@@ -1,15 +1,14 @@
 package com.secondproject.secondproject.Service;
 
-import com.secondproject.secondproject.Dto.MajorInCollegeDto;
-import com.secondproject.secondproject.Entity.Major;
-import com.secondproject.secondproject.Repository.MajorRepository;
+import com.secondproject.secondproject.dto.MajorInCollegeDto;
+import com.secondproject.secondproject.entity.Major;
+import com.secondproject.secondproject.repository.MajorRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
