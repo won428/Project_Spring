@@ -17,6 +17,7 @@ public class MajorService {
 
     private final MajorRepository majorRepository;
 
+    // 단과대학에 속한 학과 리스트 조회
     public List<MajorInCollegeDto> getMajorListByCollege(Long collegeId) {
          List<Major> majorList = this.majorRepository.findByCollege_Id(collegeId);
          List<MajorInCollegeDto> result = new ArrayList<>();
@@ -33,6 +34,7 @@ public class MajorService {
          return result;
     }
 
+    // 학과 코드로 학과 찾기
     public Major findMajor(Long major) {
         return majorRepository.findById(major)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 학과: " + major));
