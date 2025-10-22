@@ -17,7 +17,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/college")
 @RequiredArgsConstructor
-@RequestMapping("/college")
 public class CollegeController {
     private final CollegeService collegeService;
 
