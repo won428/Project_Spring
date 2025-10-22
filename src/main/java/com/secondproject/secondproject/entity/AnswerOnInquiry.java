@@ -30,13 +30,15 @@ public class AnswerOnInquiry {
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_answer_user"))
     private User user;
 
-    @Column(nullable = false)
-    private String answer_content;
+    @Column(name = "answer_content", nullable = false)
+    private String answerContent;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime answer_created_at;
+    @Column(name = "answer_created_at")
+    private LocalDateTime answerCreatedAt;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime answer_updated_at;
+    @Column(name = "answer_updated_at")
+    private LocalDateTime answerUpdatedAt;
 
 }
