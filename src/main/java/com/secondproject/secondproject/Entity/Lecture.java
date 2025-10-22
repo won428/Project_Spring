@@ -25,7 +25,7 @@ public class Lecture {
     private String lec_name; // 강의명
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_lecture_user"))
     private User user; // 유저(교수)아이디가 들어갑니다
 
     @Column(nullable = false)
@@ -40,7 +40,7 @@ public class Lecture {
     private String lec_description; // 강의를 등록할때 작성하는 강의 한 줄 소개 입니다.
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "major_id")
+    @JoinColumn(name = "major_id", foreignKey = @ForeignKey(name = "fk_lecture_major"))
     private Major major; // 어느 학과 강의인지 표기합니다.
 
     @Column(nullable = false)
@@ -52,12 +52,6 @@ public class Lecture {
     // 관리자가 강의를 직접 등록 할 수도 있게 기능 구상을 해놨습니다.
     @Enumerated(EnumType.STRING)
     private Status status;
-
-    // 수정필요
-    private long ol_id; // 강의와 관련된 온라인 강의 정보를 표기합니다. << 강의당 온라인 강의 1개인게 아니면 매핑 필요할거 같아요
-
-
-
 
 
 }

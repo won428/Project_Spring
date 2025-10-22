@@ -14,13 +14,16 @@ import java.time.LocalDate;
 @Setter
 @ToString
 @Entity
-@Table(name = "user")
+@Table(name = "`user`")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id; // 유저 아이디(PK, number type)
+
+    @Column(name = "user_code", unique = true) // 단일 컬럼 고유
+    private Long user_code;
 
     @Column(nullable = false, length = 50)
     private String u_name; // 이름

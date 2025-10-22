@@ -23,7 +23,7 @@ public class Inquiry {
     private long inquiry_id; // 게시번호(PK)
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_inquiry_user"))
     private User user; // 작성자 ID
 
     @Column(name = "inquiry_title", nullable = false, length = 200)

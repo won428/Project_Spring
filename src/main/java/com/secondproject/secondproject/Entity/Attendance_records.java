@@ -19,11 +19,11 @@ public class Attendance_records {
     private Long id; // 출결 기록 id
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_attendanceRecords_user"))
     private User user; // 유저id
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "enroll_Id", nullable = false)
+    @JoinColumn(name = "enroll_Id", nullable = false, foreignKey = @ForeignKey(name = "fk_attendanceRecords_enroll"))
     private Enrollment enrollment; // 수강id
 
     @JsonFormat(pattern = "yyyy-MM-dd")

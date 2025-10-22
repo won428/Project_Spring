@@ -28,7 +28,7 @@ public class Appeal {
     private String receiver_id; // 받는 유저 아이디 입니다
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "enroll_Id", nullable = false)
+    @JoinColumn(name = "enroll_Id", nullable = false,foreignKey = @ForeignKey(name = "fk_appeal_enroll"))
     private Enrollment enrollment;
 
     @Column(nullable = false)

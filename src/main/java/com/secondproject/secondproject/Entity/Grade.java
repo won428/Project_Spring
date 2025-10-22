@@ -19,11 +19,11 @@ public class Grade {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_grade_user"))
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lecture_id", nullable = false)
+    @JoinColumn(name = "lecture_id", nullable = false, foreignKey = @ForeignKey(name = "fk_grade_lecture"))
     private Lecture lecture;
 
     @Column(name = "a_score", precision = 4, scale = 2, nullable = false) // => DECIMAL(4,2)

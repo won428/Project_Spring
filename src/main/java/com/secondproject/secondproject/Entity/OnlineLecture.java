@@ -18,6 +18,10 @@ public class OnlineLecture {
     @Column(name = "ol_id")
     private Long id; // 온라인 강의 코드
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lecture_id", nullable = false, foreignKey = @ForeignKey(name = "fk_onlineLecture_lecture"))
+    private Lecture lecture_id;
+
     @Column(nullable = false)
     private String ol_path; // 온라인 로컬주소 << 매핑관련 확인해주세요
 
