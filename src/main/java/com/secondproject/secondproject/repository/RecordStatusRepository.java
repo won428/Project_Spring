@@ -1,4 +1,4 @@
-package com.secondproject.secondproject.Repository;
+package com.secondproject.secondproject.repository;
 
 import com.secondproject.secondproject.Entity.StatusRecords;
 import org.springframework.data.jpa.repository.JpaRepository;

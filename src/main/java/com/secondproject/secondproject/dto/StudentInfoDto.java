@@ -1,4 +1,4 @@
-package com.secondproject.secondproject.Dto;
+package com.secondproject.secondproject.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.secondproject.secondproject.Entity.StatusRecords;

@@ -1,12 +1,12 @@
-package com.secondproject.secondproject.Service;
+package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Entity.Attachment;
 import com.secondproject.secondproject.Entity.StatusRecords;
 import com.secondproject.secondproject.Entity.StudentRecord;
 import com.secondproject.secondproject.Enum.Status;
-import com.secondproject.secondproject.Dto.StatusChangeRequestDto;
-import com.secondproject.secondproject.Repository.AttachmentRepository;
-import com.secondproject.secondproject.Repository.StatusChangeRepository;
+import com.secondproject.secondproject.dto.StatusChangeRequestDto;
+import com.secondproject.secondproject.repository.AttachmentRepository;
+import com.secondproject.secondproject.repository.StatusChangeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

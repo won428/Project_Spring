@@ -1,4 +1,4 @@
-package com.secondproject.secondproject.Dto;
+package com.secondproject.secondproject.dto;
 
 import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.Enum.Status;
