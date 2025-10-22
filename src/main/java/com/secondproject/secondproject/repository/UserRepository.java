@@ -2,13 +2,11 @@ package com.secondproject.secondproject.Repository;
 
 import com.secondproject.secondproject.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-import java.util.Optional;
+public interface UserRepository extends JpaRepository<User,Long> {
 
-// 사용자 데이터를 조회, 저장, 삭제, 수정 등 데이터베이스 조작을 담당
-public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> getUserById(Long userId);
-    // 기존 findByUid 메서드는 삭제 혹은 미사용 처리
 }
