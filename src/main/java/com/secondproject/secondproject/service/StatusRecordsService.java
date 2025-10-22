@@ -1,4 +1,4 @@
-package com.secondproject.secondproject.Service;
+package com.secondproject.secondproject.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

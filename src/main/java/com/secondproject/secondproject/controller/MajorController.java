@@ -2,7 +2,7 @@ package com.secondproject.secondproject.controller;
 
 
 import com.secondproject.secondproject.dto.MajorInCollegeDto;
-import com.secondproject.secondproject.Service.MajorService;
+import com.secondproject.secondproject.service.MajorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

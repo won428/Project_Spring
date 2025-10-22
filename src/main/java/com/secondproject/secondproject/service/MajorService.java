@@ -1,4 +1,4 @@
-package com.secondproject.secondproject.Service;
+package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.dto.MajorInCollegeDto;
 import com.secondproject.secondproject.entity.Major;

@@ -1,6 +1,6 @@
 package com.secondproject.secondproject.controller;
 
-import com.secondproject.secondproject.Service.CollegeService;
+import com.secondproject.secondproject.service.CollegeService;
 import com.secondproject.secondproject.entity.College;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
