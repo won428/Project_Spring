@@ -3,13 +3,13 @@ package com.secondproject.secondproject.repository;
 import com.secondproject.secondproject.Entity.RefreshToken;
 import com.secondproject.secondproject.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-    User getUserById(Long userId);
-
-    Optional<User> findByEmail(String email);
 
     Optional<User> getByEmail(String email);
 
