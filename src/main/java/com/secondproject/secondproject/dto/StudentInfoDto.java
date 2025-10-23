@@ -1,6 +1,7 @@
 package com.secondproject.secondproject.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.secondproject.secondproject.entity.Major;
 import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.Enum.Student_status;
@@ -19,16 +20,16 @@ import java.time.LocalDate;
 public class StudentInfoDto {
 
     // User 주요 필드
-    private String u_name; // 이름
+    private Long id;          // 사용자 기본키
+    private Long userCode;    // 학번
+    private String name;      // 이름
     private String password; // 비밀번호
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate birthdate; // 생년월일 (date 타입)
-    private String email; // 이메일
-    private String phone; // 휴대전화
-    private String gender;
-    private String college;
-    private Long major; // 소속학과ID (number, FK)
-    private Long usercode; // 구분: 학생, 교수, 관리자 (enum)
+    private LocalDate birthDate; // 생일
+    private String email;     // 이메일
+    private String phone;     // 휴대전화
+    private String gender;    // 성별
+    private Major major; // 소속 학과명
+    private UserType type; // 구분자
 
     // User 소속 학과 등 필요한 필드 추가
     // 예) 전공명 majorName; 필요시 추가

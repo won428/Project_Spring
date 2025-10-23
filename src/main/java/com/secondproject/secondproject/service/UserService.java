@@ -89,4 +89,12 @@ public class UserService {
 
         return user;
     }
+
+    public Optional<User> findUserByEmail(String userEmail) {
+        return null;
+    }
+
+    public Optional<User> getByEmail(String email) {
+        return null;
+    }
 }
