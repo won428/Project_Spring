@@ -2,6 +2,7 @@ package com.secondproject.secondproject.controller;
 
 import com.secondproject.secondproject.dto.UserDto;
 import com.secondproject.secondproject.dto.UserListDto;
+import com.secondproject.secondproject.dto.UserUpdateDto;
 import com.secondproject.secondproject.entity.College;
 import com.secondproject.secondproject.entity.Major;
 import com.secondproject.secondproject.entity.User;
@@ -56,9 +57,9 @@ public class UserController {
     }
 
     @GetMapping("/selectUserCode/{id}")
-    public UserListDto findByUsercode(@PathVariable Long id){
+    public UserUpdateDto findByUsercode(@PathVariable Long id){
 
-        UserListDto userDto = new UserListDto();
+        UserUpdateDto userDto = new UserUpdateDto();
         Optional<User> optUser = this.userService.findByUsercode(id);
         User user = optUser
                 .orElseThrow(()->
@@ -67,8 +68,8 @@ public class UserController {
 
         userDto.setU_name(user.getName());
         userDto.setGender(user.getGender());
-        userDto.setMajor(user.getMajor().getName());
-        userDto.setCollege(college.getType());
+        userDto.setMajor(user.getMajor().getId());
+        userDto.setCollege(college.getId());
         userDto.setPhone(user.getPhone());
         userDto.setEmail(user.getEmail());
         userDto.setBirthdate(user.getBirthDate());
