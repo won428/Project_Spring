@@ -22,14 +22,14 @@ public class CollegeService {
     public CollegeResponseDto insert(CollegeInsertDto collegeInsertDto){
         College college = new College();
         college.setType(collegeInsertDto.getType());
-        college.setOffice(collegeInsertDto.getOfficeNumber());
+        college.setOffice(collegeInsertDto.getOffice());
 
         College saved = collegeRepository.save(college);
 
         CollegeResponseDto collegeResponseDto = new CollegeResponseDto();
         collegeResponseDto.setId(saved.getId());
         collegeResponseDto.setType(saved.getType());
-        collegeResponseDto.setOfficeNumber(saved.getOffice());
+        collegeResponseDto.setOffice(saved.getOffice());
 
         return collegeResponseDto;
     }
@@ -48,7 +48,7 @@ public class CollegeService {
             CollegeResponseDto collegeResponse = new CollegeResponseDto();
             collegeResponse.setId(c.getId());
             collegeResponse.setType(c.getType());
-            collegeResponse.setOfficeNumber(c.getOffice());
+            collegeResponse.setOffice(c.getOffice());
             collegesLists.add(collegeResponse);
         }
         return collegesLists;
@@ -66,12 +66,12 @@ public class CollegeService {
         College entity = collegeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 ID: " + id));
         entity.setType(req.getType());
-        entity.setOffice(req.getOfficeNumber());
+        entity.setOffice(req.getOffice());
 
         CollegeResponseDto collegeResponseDto = new CollegeResponseDto();
         collegeResponseDto.setId(entity.getId());
         collegeResponseDto.setType(entity.getType());
-        collegeResponseDto.setOfficeNumber(entity.getOffice());
+        collegeResponseDto.setOffice(entity.getOffice());
 
         return collegeResponseDto;
     }
@@ -85,7 +85,7 @@ public class CollegeService {
         CollegeResponseDto collegeResponseDto = new CollegeResponseDto();
         collegeResponseDto.setId(college.getId());
         collegeResponseDto.setType(college.getType());
-        collegeResponseDto.setOfficeNumber(college.getOffice());
+        collegeResponseDto.setOffice(college.getOffice());
 
         return collegeResponseDto;
     }

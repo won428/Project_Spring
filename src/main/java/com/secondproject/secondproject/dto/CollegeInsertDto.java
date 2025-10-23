@@ -22,6 +22,6 @@ public class CollegeInsertDto {
     @Pattern(regexp = "^(|\\d{2,3}-\\d{3,4}-\\d{4})$",
             message = "전화번호는 빈 값이거나 00(0)-000(0)-0000 형식이어야 합니다.")
     @Size(max = 20)
-    private String officeNumber; // 행정실 번호
+    private String office; // 행정실 번호
 
 }

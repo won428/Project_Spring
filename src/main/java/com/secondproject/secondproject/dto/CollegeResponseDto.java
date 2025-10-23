@@ -8,6 +8,6 @@ import lombok.*;
 public class CollegeResponseDto {
     private Long id;
     private String type;
-    private String officeNumber;
+    private String office;
 
 }
