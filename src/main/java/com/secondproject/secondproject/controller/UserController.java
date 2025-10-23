@@ -22,7 +22,7 @@ public class UserController {
     private final MajorService majorService;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> insertUser(@RequestBody UserDto userinfo) {
+    public ResponseEntity<?> insertUser(@RequestBody UserDto userinfo){
         User user = new User();
         Major major = this.majorService.findMajor(userinfo.getMajor());
 
@@ -41,7 +41,7 @@ public class UserController {
     }
 
     @GetMapping("/list")
-    public List<UserListDto> userList() {
+    public List<UserListDto> userList(){
         List<UserListDto> userList = this.userService.findUserList();
 
         return userList;
