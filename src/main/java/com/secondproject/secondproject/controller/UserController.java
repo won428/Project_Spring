@@ -1,11 +1,11 @@
-package com.secondproject.secondproject.Controller;
+package com.secondproject.secondproject.controller;
 
-import com.secondproject.secondproject.Dto.UserDto;
-import com.secondproject.secondproject.Dto.UserListDto;
-import com.secondproject.secondproject.Entity.Major;
-import com.secondproject.secondproject.Entity.User;
-import com.secondproject.secondproject.Service.MajorService;
-import com.secondproject.secondproject.Service.UserService;
+import com.secondproject.secondproject.dto.UserDto;
+import com.secondproject.secondproject.dto.UserListDto;
+import com.secondproject.secondproject.entity.Major;
+import com.secondproject.secondproject.entity.User;
+import com.secondproject.secondproject.service.MajorService;
+import com.secondproject.secondproject.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,14 +26,14 @@ public class UserController {
         User user = new User();
         Major major = this.majorService.findMajor(userinfo.getMajor());
 
-        user.setU_name(userinfo.getU_name());
+        user.setName(userinfo.getU_name());
         user.setGender(userinfo.getGender());
         user.setEmail(userinfo.getEmail());
-        user.setBirthdate(userinfo.getBirthdate());
+        user.setBirthDate(userinfo.getBirthdate());
         user.setPassword(userinfo.getPassword());
         user.setMajor(major);
         user.setPhone(userinfo.getPhone());
-        user.setU_type(userinfo.getU_type());
+        user.setType(userinfo.getU_type());
 
         this.userService.insertUser(user);
 

@@ -1,7 +1,12 @@
 package com.secondproject.secondproject.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.secondproject.secondproject.entity.StatusRecords;
+import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.Enum.Student_status;
+import com.secondproject.secondproject.Enum.UserType;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,32 +15,34 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-@NoArgsConstructor // 반드시 필요
+@AllArgsConstructor
+@NoArgsConstructor
 public class StudentInfoDto {
-    // User 주요 필드 (테이블 컬럼명 기준)
-    private Long userId;
-    private String uName;
-    private String email;
-    private String phone;
+
+    // User 주요 필드
+    private String u_name; // 이름
+    private String password; // 비밀번호
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate birthdate; // 생년월일 (date 타입)
+    private String email; // 이메일
+    private String phone; // 휴대전화
     private String gender;
-    private Long majorId;
-    private LocalDate birthdate;
-    private String uType;
-    private Long statusId;
+    private String college;
+    private Long major; // 소속학과ID (number, FK)
+    private Long usercode; // 구분: 학생, 교수, 관리자 (enum)
 
+    // User 소속 학과 등 필요한 필드 추가
+    // 예) 전공명 majorName; 필요시 추가
 
-    // 매핑용 생성자
-    public StudentInfoDto(User user) {
-        this.userId = user.getId();             // getId() → getUserId()
-        this.uName = user.getU_name();              // getU_name()
-        this.email = user.getEmail();             // getEmail() → getU_email()
-//        this.phone = user.getPhone();             // getPhone() → getU_phone()
-//        this.gender = user.getGender();             // getGender()
-//        this.majorId = user.getMajor().getId();         // getMajor() → getMajor_id()
-//        this.birthdate = user.getBirthdate();       // LocalDate 타입 그대로
-        this.uType = user.getU_type().name();       // getUType() → getU_type()
-        // RecordStatus 정보도 아래에 추가
+    // 학적 정보 (StatusRecords 필드)
+    private Student_status student_status;
+    private LocalDate admissionDate;
+    private LocalDate leaveDate;
+    private LocalDate returnDate;
+    private LocalDate graduationDate;
+    private LocalDate retentionDate;
+    private LocalDate expelledDate;
 
-
+    public StudentInfoDto(User user, StatusRecords statusRecord) {
     }
 }
