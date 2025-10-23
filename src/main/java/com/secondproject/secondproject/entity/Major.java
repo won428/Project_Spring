@@ -22,7 +22,7 @@ public class Major {
     private String name; // 학과 이름
 
     @Column(name = "m_office")
-    private String mOffice; // 학과 전화번호
+    private String office; // 학과 전화번호
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "college_id", foreignKey = @ForeignKey(name = "fk_major_college"))

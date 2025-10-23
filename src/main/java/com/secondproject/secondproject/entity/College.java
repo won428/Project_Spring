@@ -20,7 +20,7 @@ public class College {
     private String type; // 계열(ENUM으로 바꿀건지 의논해봐야합니다)
 
     @Column(name = "c_office")
-    private String cOffice; // 행정실 전화번호
+    private String office; // 행정실 전화번호
 
 
 

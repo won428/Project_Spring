@@ -18,7 +18,7 @@ public class Assignment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "assignment_id", columnDefinition = "BIGINT")
-    private long assignmentId; // 과제ID(PK)
+    private long id; // 과제ID(PK)
 
     @Column(name = "ass_title",nullable = false, length = 200)
     private String title; // 공지 제목

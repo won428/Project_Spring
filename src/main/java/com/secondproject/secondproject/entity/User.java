@@ -26,7 +26,7 @@ public class User {
     private Long userCode;
 
     @Column(name = "u_name", nullable = false, length = 50)
-    private String uName; // 이름
+    private String name; // 이름
 
     @Column(nullable = false)
     private String password; // 비밀번호
@@ -51,7 +51,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "u_type", nullable = false)
-    private UserType uType; // 구분: 학생, 교수, 관리자 (enum)
+    private UserType type; // 구분: 학생, 교수, 관리자 (enum)
 
 
     // 필요시 생성자, equals/hashCode 등 추가 가능

@@ -31,10 +31,10 @@ public class Appeal {
     @JoinColumn(name = "enroll_Id", nullable = false,foreignKey = @ForeignKey(name = "fk_appeal_enroll"))
     private Enrollment enrollment;
 
-    @Column(nullable = false)
+    @Column(name = "appeal_title", nullable = false)
     private String title; // 이의제기 제목입니다.
 
-    @Column(nullable = false)
+    @Column(name = "appeal_content", nullable = false)
     private String content; // 이의제기 내용입니다.
 
     @JsonFormat(pattern = "yyyy-MM-dd")

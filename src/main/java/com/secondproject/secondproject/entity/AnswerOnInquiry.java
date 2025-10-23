@@ -31,14 +31,14 @@ public class AnswerOnInquiry {
     private User user;
 
     @Column(name = "answer_content", nullable = false)
-    private String answerContent;
+    private String content;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "answer_created_at")
-    private LocalDateTime answerCreatedAt;
+    private LocalDateTime createdAt;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "answer_updated_at")
-    private LocalDateTime answerUpdatedAt;
+    private LocalDateTime updatedAt;
 
 }
