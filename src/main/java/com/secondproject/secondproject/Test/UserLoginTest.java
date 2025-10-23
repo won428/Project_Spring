@@ -25,6 +25,8 @@ public class UserLoginTest extends AbstractTestNGSpringContextTests {
         user01.setPassword(passwordEncoder.encode("Admin123"));
         user01.setGender("MALE");
         user01.setName("Kim");
+        user01.setGender("FEMALE");
+        user01.setPhone("01022223333");
         user01.setType(UserType.ADMIN);
         user01.setPhone("01012341234");
         userRepository.save(user01);

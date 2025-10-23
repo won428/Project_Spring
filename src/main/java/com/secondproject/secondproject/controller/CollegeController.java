@@ -1,7 +1,8 @@
 package com.secondproject.secondproject.controller;
 
-import com.secondproject.secondproject.dto.CollegeCreateReq;
-import com.secondproject.secondproject.dto.ColResponseDto;
+import com.secondproject.secondproject.dto.CollegeInsertDto;
+import com.secondproject.secondproject.dto.CollegeResponseDto;
+import com.secondproject.secondproject.entity.College;
 import com.secondproject.secondproject.service.CollegeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,19 +20,19 @@ public class CollegeController {
     private final CollegeService collegeService;
 
     @PostMapping("/insert") // 단과대학 등록
-    public ResponseEntity<ColResponseDto> insert(@RequestBody @Valid CollegeCreateReq collegeCreateReq){
-        ColResponseDto colResponseDto = collegeService.insert(collegeCreateReq);
+    public ResponseEntity<CollegeResponseDto> insert(@RequestBody @Valid CollegeInsertDto collegeInsertDto){
+        CollegeResponseDto collegeResponseDto = collegeService.insert(collegeInsertDto);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequestUri()
                 .replacePath("/college/{id}") // HTTP 헤더에 넣을
-                .buildAndExpand(colResponseDto.getId())
+                .buildAndExpand(collegeResponseDto.getId())
                 .toUri();
-        return ResponseEntity.created(location).body(colResponseDto);
+        return ResponseEntity.created(location).body(collegeResponseDto);
     }
 
     @GetMapping("/list")
-    public List<ColResponseDto> list(){
+    public List<CollegeResponseDto> list(){
         return collegeService.getList();
     }
 
@@ -47,17 +48,19 @@ public class CollegeController {
         return ResponseEntity.ok(msg);
     }
 
+    // College 정보 업데이트 시 폼에 기존 정보 가져오는 메소드
     @GetMapping("/{id}")
-    public ResponseEntity<ColResponseDto> findOne(@PathVariable Long id) {
+    public ResponseEntity<CollegeResponseDto> findOne(@PathVariable Long id) {
         return collegeService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // 수정한 실제 정보로 UPDATE하는 메소드
     @PutMapping("/{id}")
-    public ResponseEntity<ColResponseDto> update(@PathVariable Long id,
-                                                 @RequestBody @Valid CollegeCreateReq req) {
-        ColResponseDto updated = collegeService.update(id, req);
+    public ResponseEntity<CollegeResponseDto> update(@PathVariable Long id,
+                                                     @RequestBody @Valid CollegeInsertDto req) {
+        CollegeResponseDto updated = collegeService.update(id, req);
         return ResponseEntity.ok(updated);
     }
 
