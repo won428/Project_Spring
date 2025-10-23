@@ -28,7 +28,7 @@ public class StudentInfoDto {
     private String gender;
     private String college;
     private Long major; // 소속학과ID (number, FK)
-    private UserType u_type; // 구분: 학생, 교수, 관리자 (enum)
+    private Long usercode; // 구분: 학생, 교수, 관리자 (enum)
 
     // User 소속 학과 등 필요한 필드 추가
     // 예) 전공명 majorName; 필요시 추가
