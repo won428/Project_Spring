@@ -60,4 +60,3 @@ public class Inquiry {
         updateAt = LocalDateTime.now();                // 수정될 때마다 갱신
     }
 }
-
