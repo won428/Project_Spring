@@ -11,6 +11,7 @@ import com.secondproject.secondproject.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -25,17 +26,19 @@ public class UserController {
     private final UserService userService;
     private final MajorService majorService;
     private final CollegeService collegeService;
+    private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/signup")
     public ResponseEntity<?> insertUser(@RequestBody UserDto userinfo){
         User user = new User();
         Major major = this.majorService.findMajor(userinfo.getMajor());
+        String encodePassWord  = passwordEncoder.encode(userinfo.getPhone());
 
         user.setName(userinfo.getU_name());
         user.setGender(userinfo.getGender());
         user.setEmail(userinfo.getEmail());
         user.setBirthDate(userinfo.getBirthdate());
-        user.setPassword(userinfo.getPassword());
+        user.setPassword(encodePassWord);
         user.setMajor(major);
         user.setPhone(userinfo.getPhone());
         user.setType(userinfo.getU_type());
