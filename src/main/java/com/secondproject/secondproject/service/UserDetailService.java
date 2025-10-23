@@ -1,6 +1,6 @@
-package com.secondproject.secondproject.Service;
+package com.secondproject.secondproject.service;
 
-import com.secondproject.secondproject.Repository.UserRepository;
+import com.secondproject.secondproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

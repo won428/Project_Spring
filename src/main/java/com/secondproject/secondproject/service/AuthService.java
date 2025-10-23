@@ -1,7 +1,7 @@
-package com.secondproject.secondproject.Service;
+package com.secondproject.secondproject.service;
 
-import com.secondproject.secondproject.Entity.User;
-import com.secondproject.secondproject.Repository.UserRepository;
+import com.secondproject.secondproject.entity.User;
+import com.secondproject.secondproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +16,9 @@ public class AuthService {
         return userRepository.findByEmail(email);
     }
 
-    public User setPasswordByEmail(String email) {
-        return userRepository.setPasswordByEmail(email);
-    }
+//    public User setPasswordByEmail(String email) {
+//        return userRepository.setPasswordByEmail(email);
+//    }
 
     public Optional<User> getByEmail(String email) {
         return userRepository.getByEmail(email);

@@ -1,7 +1,7 @@
-package Config;
+package com.secondproject.secondproject.config;
 
-import Config.JWT.JwtAuthenticationFilter;
-import com.secondproject.secondproject.Service.UserDetailService;
+import com.secondproject.secondproject.config.JWT.JwtAuthenticationFilter;
+import com.secondproject.secondproject.service.UserDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -99,5 +99,4 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-
 }

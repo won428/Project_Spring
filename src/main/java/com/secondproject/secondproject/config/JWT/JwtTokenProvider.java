@@ -1,4 +1,4 @@
-package Config.JWT;
+package com.secondproject.secondproject.config.JWT;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

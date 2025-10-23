@@ -1,6 +1,6 @@
-package Config.JWT;
+package com.secondproject.secondproject.config.JWT;
 
-import com.secondproject.secondproject.Service.UserDetailService;
+import com.secondproject.secondproject.service.UserDetailService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,9 +1,9 @@
 package com.secondproject.secondproject.controller;
 
 import com.secondproject.secondproject.Entity.RefreshToken;
-import Config.JWT.JwtTokenProvider;
-import com.secondproject.secondproject.Repository.RefreshTokenRepo;
-import com.secondproject.secondproject.Service.AuthService;
+import com.secondproject.secondproject.config.JWT.JwtTokenProvider;
+import com.secondproject.secondproject.repository.RefreshTokenRepo;
+import com.secondproject.secondproject.service.AuthService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -41,9 +41,9 @@ public class AuthController {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password)
             );
-            com.secondproject.secondproject.Entity.User user = (com.secondproject.secondproject.Entity.User) authentication.getPrincipal();
+            com.secondproject.secondproject.entity.User user = (com.secondproject.secondproject.entity.User) authentication.getPrincipal();
 
-            String role = user.getU_type().name();
+            String role = user.getType().name();
             System.out.println("역할  :" + role);
             String access = jwtTokenProvider.createAccessToken(email, role);
             String refresh = jwtTokenProvider.createRefreshToken(email);
