@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface CollegeRepository extends JpaRepository<College,Long> {
+
     boolean existsById(Long collegeId);
 
     // 변수명 카멜케이스로 변경시 @Query 삭제
