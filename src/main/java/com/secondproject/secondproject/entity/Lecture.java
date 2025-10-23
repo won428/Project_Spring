@@ -20,8 +20,8 @@ public class Lecture {
     @Column(name = "lecture_id")
     private Long id; // 강의코드
 
-    @Column(name = "lec_name", nullable = false)
-    private String name; // 강의명
+    @Column(nullable = false)
+    private String lec_name; // 강의명
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_lecture_user"))
@@ -31,15 +31,12 @@ public class Lecture {
     private int credit; // 몇 학점인지 표기합니다.(2학점, 3학점)
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    @Column(name = "lec_startDate")
-    private LocalDate startDate; // 강의 시작일
+    private LocalDate lec_startDate; // 강의 시작일
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    @Column(name = "lec_endDate")
-    private LocalDate endDate; // 강의 종강일
+    private LocalDate lec_endDate; // 강의 종강일
 
-    @Column(name = "lec_description")
-    private String description; // 강의를 등록할때 작성하는 강의 한 줄 소개 입니다.
+    private String lec_description; // 강의를 등록할때 작성하는 강의 한 줄 소개 입니다.
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "major_id", foreignKey = @ForeignKey(name = "fk_lecture_major"))

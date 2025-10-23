@@ -18,7 +18,7 @@ public class Assignment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "assignment_id", columnDefinition = "BIGINT")
-    private long id; // 과제ID(PK)
+    private long assignmentId; // 과제ID(PK)
 
     @Column(name = "ass_title",nullable = false, length = 200)
     private String title; // 공지 제목
@@ -28,7 +28,7 @@ public class Assignment {
 
     @Column(name = "is_enabled", nullable = false)
     @ColumnDefault("1")
-    private boolean isEnabled = true;
+    private boolean is_enabled = true;
     // 제출창구(제출 마감시 비활성화(0), 제출 진행중일시 활성화(1))
 
     @Column(name = "open_at", nullable = false)
