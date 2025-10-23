@@ -1,10 +1,8 @@
 package com.secondproject.secondproject.controller;
 
 import com.secondproject.secondproject.Entity.RefreshToken;
-import com.secondproject.secondproject.Entity.User;
-import com.secondproject.secondproject.config.JWT.JwtTokenProvider;
-import com.secondproject.secondproject.repository.RefreshTokenRepo;
-import com.secondproject.secondproject.repository.UserRepository;
+import Config.JWT.JwtTokenProvider;
+import com.secondproject.secondproject.Repository.RefreshTokenRepo;
 import com.secondproject.secondproject.service.AuthService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,12 +13,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.parameters.P;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 import java.util.Optional;
 
 @RestController

@@ -1,8 +1,8 @@
 package com.secondproject.secondproject.controller;
 
 import com.secondproject.secondproject.Entity.RefreshToken;
-import com.secondproject.secondproject.config.JWT.JwtTokenProvider;
-import com.secondproject.secondproject.repository.RefreshTokenRepo;
+import Config.JWT.JwtTokenProvider;
+import com.secondproject.secondproject.Repository.RefreshTokenRepo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

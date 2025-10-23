@@ -1,4 +1,4 @@
-package com.secondproject.secondproject.service;
+package com.secondproject.secondproject.Service;
 
 import com.secondproject.secondproject.Dto.UserListDto;
 import com.secondproject.secondproject.Entity.College;
@@ -8,7 +8,7 @@ import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.Repository.CollegeRepository;
 import com.secondproject.secondproject.Repository.MajorRepository;
 import com.secondproject.secondproject.Repository.StatusRecordsRepository;
-import com.secondproject.secondproject.repository.UserRepository;
+import com.secondproject.secondproject.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

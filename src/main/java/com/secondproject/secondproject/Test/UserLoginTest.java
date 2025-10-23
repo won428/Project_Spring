@@ -3,7 +3,7 @@ package com.secondproject.secondproject.Test;
 
 import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.Enum.UserType;
-import com.secondproject.secondproject.repository.UserRepository;
+import com.secondproject.secondproject.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;

@@ -6,7 +6,14 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface UserRepository extends JpaRepository<User,Long> {
+import java.util.Optional;
 
+public interface UserRepository extends JpaRepository<User, Long> {
 
+    Optional<User> getByEmail(String email);
+
+    User setPasswordByEmail(String email);
+
+//    Optional<User> findByUsername(String username);
 }
+

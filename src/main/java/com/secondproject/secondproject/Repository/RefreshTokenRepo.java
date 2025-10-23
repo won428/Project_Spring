@@ -1,7 +1,6 @@
-package com.secondproject.secondproject.repository;
+package com.secondproject.secondproject.Repository;
 
 import com.secondproject.secondproject.Entity.RefreshToken;
-import com.secondproject.secondproject.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
