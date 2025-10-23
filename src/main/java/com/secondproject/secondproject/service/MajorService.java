@@ -23,7 +23,7 @@ public class MajorService {
 
          for (Major m : majorList){
              Long id = m.getId();
-             String name = m.getM_name();
+             String name = m.getName();
              Long college = m.getCollege().getId();
 
              MajorInCollegeDto major = new MajorInCollegeDto(id, name, college);

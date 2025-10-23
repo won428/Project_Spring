@@ -29,18 +29,18 @@ public class Attachment {
     @Column(name = "original_name")
     private String name; // 원본 이름
 
-    @Column(nullable = false)
-    private String stored_key;  // 변환된 파일명(로컬주소)
+    @Column(name = "stored_key", nullable = false)
+    private String storedKey;  // 변환된 파일명(로컬주소)
 
-    @Column(nullable = false)
-    private String content_type; // 파일 타입
+    @Column(name = "content_type", nullable = false)
+    private String contentType; // 파일 타입
 
-    @Column(nullable = false)
-    private Long size_bytes; // 파일 용량
+    @Column(name = "size_bytes", nullable = false)
+    private Long sizeBytes; // 파일 용량
 
-    @Column(nullable = false)
+    @Column(name = "upload_at", nullable = false)
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate upload_at; // 업로드일
+    private LocalDate uploadAt; // 업로드일
 
     private String sha256; // 해시검증용 입니다.
 }

@@ -18,7 +18,7 @@ public class Assignment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "assignment_id", columnDefinition = "BIGINT")
-    private long assignmentId; // 과제ID(PK)
+    private long id; // 과제ID(PK)
 
     @Column(name = "ass_title",nullable = false, length = 200)
     private String title; // 공지 제목
@@ -28,7 +28,7 @@ public class Assignment {
 
     @Column(name = "is_enabled", nullable = false)
     @ColumnDefault("1")
-    private boolean is_enabled = true;
+    private boolean isEnabled = true;
     // 제출창구(제출 마감시 비활성화(0), 제출 진행중일시 활성화(1))
 
     @Column(name = "open_at", nullable = false)
@@ -41,11 +41,11 @@ public class Assignment {
 
     @Column(name = "max_files", nullable = false)
     @ColumnDefault("3")
-    private int max_files; // 업로드 가능한 파일 최대 갯수
+    private int maxFiles; // 업로드 가능한 파일 최대 갯수
 
     @Column(name = "max_size_mb", nullable = false)
     @ColumnDefault("50")
-    private int max_size_mb = 50; // 파일 최대 용량(mb), 기본값 50
+    private int maxSizeMb = 50; // 파일 최대 용량(mb), 기본값 50
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_assignment_user"))

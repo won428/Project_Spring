@@ -27,10 +27,10 @@ public class Attendance_records {
     private com.secondproject.secondproject.entity.Enrollment enrollment; // 수강id
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    @Column(nullable = false)
-    private LocalDate attendance_date; //출결일
+    @Column(name = "attendance_date", nullable = false)
+    private LocalDate attendanceDate; //출결일
 
-    @Column(nullable = false)
-    private String attendance_status; // 츨결상태
+    @Column(name = "attendance_status", nullable = false)
+    private String attendanceStatus; // 츨결상태
     // 일단 String인데 ENUM으로 관리하실거면 수정 필요합니다.
 }
