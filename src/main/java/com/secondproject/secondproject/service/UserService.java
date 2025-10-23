@@ -47,7 +47,7 @@ public class UserService {
         String stringMajor = Long.toString(major); // 학과 코드 문자열로 변환
         String stringId = Long.toString(id); // id 문자열로 변환
 
-        String stringStudentId =  stringYear + stringId + stringMajor;
+        String stringStudentId = stringYear + stringId + stringMajor;
 
         Long studentId = Long.parseLong(stringStudentId);
 
@@ -59,7 +59,7 @@ public class UserService {
         List<UserListDto> userListDto = new ArrayList<>();
 
 
-        for(User user : userList){
+        for (User user : userList) {
             UserListDto userDto = new UserListDto();
             Major major = this.majorRepository.findMajorById(user.getMajor().getId());
             College college = this.collegeRepository.findCollegeById(major.getCollege().getId());

@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "assignment")
 public class Assignment {
-// 교수 과제 공지 테이블
+    // 교수 과제 공지 테이블
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "assignment_id", columnDefinition = "BIGINT")

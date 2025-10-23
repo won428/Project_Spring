@@ -46,4 +46,3 @@ public class SubmitAsgmt {
     private LocalDate updateAt; // 제출 수정일
 
 }
-
