@@ -55,7 +55,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 //                        .requestMatchers(permitAllowed).permitAll()
-                                .requestMatchers("/auth/**", "/Home").permitAll()
+//                                권한 추가 시에
+//                                 .requestMatchers("/접근할 url").hasRole("STUDENT","ADMIN")
+//                                 이런 식으로 이 아래에 추가하시면 됩니다.
+                                .requestMatchers("/auth/**", "/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwFilter, UsernamePasswordAuthenticationFilter.class);
