@@ -1,11 +1,14 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.Enum.CollegePaging;
 import com.secondproject.secondproject.dto.CollegeInsertDto;
 import com.secondproject.secondproject.dto.CollegeResponseDto;
+import com.secondproject.secondproject.dto.CollegeSearchDto;
 import com.secondproject.secondproject.entity.College;
 import com.secondproject.secondproject.service.CollegeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -34,6 +37,19 @@ public class CollegeController {
     @GetMapping("/list")
     public List<CollegeResponseDto> list(){
         return collegeService.getList();
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<Page<College>>collageLists(
+            @RequestParam(defaultValue = "") CollegePaging collegePaging,
+            @RequestParam(defaultValue = "") String searchKeyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size
+            ){
+        CollegeSearchDto collegeSearchDto = new CollegeSearchDto(collegePaging, searchKeyword);
+
+        Page<College> colleges = collegeService.listCollege(collegeSearchDto, page, size);
+        return ResponseEntity.ok(colleges);
     }
 
     @DeleteMapping("/delete/{college_id}")
