@@ -1,7 +1,7 @@
-package com.secondproject.secondproject.service;
+package com.secondproject.secondproject.Service;
 
 import com.secondproject.secondproject.Entity.User;
-import com.secondproject.secondproject.repository.UserRepository;
+import com.secondproject.secondproject.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

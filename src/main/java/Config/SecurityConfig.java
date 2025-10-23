@@ -1,8 +1,7 @@
 package Config;
 
 import Config.JWT.JwtAuthenticationFilter;
-import Config.JWT.JwtTokenProvider;
-import com.secondproject.secondproject.service.UserDetailService;
+import com.secondproject.secondproject.Service.UserDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

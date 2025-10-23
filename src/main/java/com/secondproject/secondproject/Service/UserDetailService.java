@@ -1,4 +1,4 @@
-package com.secondproject.secondproject.service;
+package com.secondproject.secondproject.Service;
 
 import com.secondproject.secondproject.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;

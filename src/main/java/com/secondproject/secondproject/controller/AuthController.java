@@ -3,7 +3,7 @@ package com.secondproject.secondproject.controller;
 import com.secondproject.secondproject.Entity.RefreshToken;
 import Config.JWT.JwtTokenProvider;
 import com.secondproject.secondproject.Repository.RefreshTokenRepo;
-import com.secondproject.secondproject.service.AuthService;
+import com.secondproject.secondproject.Service.AuthService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
