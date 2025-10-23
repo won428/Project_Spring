@@ -21,15 +21,15 @@ public class CollegeService {
     @Transactional // 단과대학 데이터 insert
     public CollegeResponseDto insert(CollegeInsertDto collegeInsertDto){
         College college = new College();
-        college.setC_type(collegeInsertDto.getType());
-        college.setC_office(collegeInsertDto.getOfficeNumber());
+        college.setType(collegeInsertDto.getType());
+        college.setOffice(collegeInsertDto.getOfficeNumber());
 
         College saved = collegeRepository.save(college);
 
         CollegeResponseDto collegeResponseDto = new CollegeResponseDto();
         collegeResponseDto.setId(saved.getId());
-        collegeResponseDto.setType(saved.getC_type());
-        collegeResponseDto.setOfficeNumber(saved.getC_office());
+        collegeResponseDto.setType(saved.getType());
+        collegeResponseDto.setOfficeNumber(saved.getOffice());
 
         return collegeResponseDto;
     }
@@ -42,13 +42,13 @@ public class CollegeService {
     }
 
     public List<CollegeResponseDto> getList(){
-        List<College> collegeEntityList  = collegeRepository.findAllOrderByCTypeAsc();
+        List<College> collegeEntityList  = collegeRepository.findAllByOrderByTypeAsc();
         List<CollegeResponseDto> collegesLists = new ArrayList<>();
         for (College c : collegeEntityList){
             CollegeResponseDto collegeResponse = new CollegeResponseDto();
             collegeResponse.setId(c.getId());
-            collegeResponse.setType(c.getC_type());
-            collegeResponse.setOfficeNumber(c.getC_office());
+            collegeResponse.setType(c.getType());
+            collegeResponse.setOfficeNumber(c.getOffice());
             collegesLists.add(collegeResponse);
         }
         return collegesLists;
@@ -65,13 +65,13 @@ public class CollegeService {
     public CollegeResponseDto update(Long id, CollegeInsertDto req) {
         College entity = collegeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 ID: " + id));
-        entity.setC_type(req.getType());
-        entity.setC_office(req.getOfficeNumber());
+        entity.setType(req.getType());
+        entity.setOffice(req.getOfficeNumber());
 
         CollegeResponseDto collegeResponseDto = new CollegeResponseDto();
         collegeResponseDto.setId(entity.getId());
-        collegeResponseDto.setType(entity.getC_type());
-        collegeResponseDto.setOfficeNumber(entity.getC_office());
+        collegeResponseDto.setType(entity.getType());
+        collegeResponseDto.setOfficeNumber(entity.getOffice());
 
         return collegeResponseDto;
     }
@@ -84,8 +84,8 @@ public class CollegeService {
     public CollegeResponseDto toDto(College college){
         CollegeResponseDto collegeResponseDto = new CollegeResponseDto();
         collegeResponseDto.setId(college.getId());
-        collegeResponseDto.setType(college.getC_type());
-        collegeResponseDto.setOfficeNumber(college.getC_office());
+        collegeResponseDto.setType(college.getType());
+        collegeResponseDto.setOfficeNumber(college.getOffice());
 
         return collegeResponseDto;
     }
