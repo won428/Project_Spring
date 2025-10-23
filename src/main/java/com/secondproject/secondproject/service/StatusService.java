@@ -33,8 +33,8 @@ public class StatusService {
         StudentRecord record = new StudentRecord();
         record.setTitle(dto.getTitle());
         record.setContent(dto.getContent());
-        record.setApplied_date(dto.getAppliedDate());
-        record.setProcessed_date(dto.getProcessedDate());
+        record.setAppliedDate(dto.getAppliedDate());
+        record.setProcessedDate(dto.getProcessedDate());
         record.setStudentStatus(dto.getAcademicRequest());
         // 신청자 ID를 그대로 기록
         record.setUser(dto.getUser());
@@ -59,10 +59,10 @@ public class StatusService {
             String originalFileName = file.getOriginalFilename();
             Attachment attachment = new Attachment();
             attachment.setName(originalFileName); // 필드명이 'name' 으로 정의되어 있음
-            attachment.setStored_key(originalFileName); // 변환된 파일명 (추후 수정 필요)
-            attachment.setContent_type(file.getContentType());
-            attachment.setSize_bytes(file.getSize());
-            attachment.setUpload_at(LocalDate.now());
+            attachment.setStoredKey(originalFileName); // 변환된 파일명 (추후 수정 필요)
+            attachment.setContentType(file.getContentType());
+            attachment.setSizeBytes(file.getSize());
+            attachment.setUploadAt(LocalDate.now());
             AttachmentRepository.fSave(attachment); // fSave → save 로 수정
         } catch (Exception e) {
             throw new RuntimeException("첨부파일 저장 중 오류 발생: " + e.getMessage());
@@ -85,18 +85,18 @@ public class StatusService {
         dto.setContent(null);                              // content 필드가 없으므로 null 설정
         dto.setAppliedDate(record.getAdmissionDate());     // 입학일
         dto.setProcessedDate(null);                        // 처리일 엔티티에 없으면 null
-        dto.setAcademicRequest(record.getStudent_status()); // 학생 상태(enum)
+        dto.setAcademicRequest(record.getStudentStatus()); // 학생 상태(enum)
         dto.setAttachmentId(null);                         // 첨부파일ID는 별도 필드/관계 필요 시 처리
 
         // 필요하면 아래와 같이 추가 상세 필드도 DTO에 매핑 가능
         dto.setLeaveDate(record.getLeaveDate());
         dto.setReturnDate(record.getReturnDate());
-        dto.setGraduationDate(record.getGraduation_date());
-        dto.setRetentionDate(record.getRetention_date());
-        dto.setExpelledDate(record.getExpelled_date());
+        dto.setGraduationDate(record.getGraduationDate());
+        dto.setRetentionDate(record.getRetentionDate());
+        dto.setExpelledDate(record.getExpelledDate());
         dto.setTotalCredit(record.getTotalCredit());
         dto.setCurrentCredit(record.getCurrentCredit());
-        dto.setStudentImage(record.getStudent_image());
+        dto.setStudentImage(record.getStudentImage());
 
         return dto;
     }

@@ -23,11 +23,11 @@ public class Enrollment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecture_id", foreignKey = @ForeignKey(name = "fk_enrollment_lecture"))
-    private com.secondproject.secondproject.entity.Lecture lecture; // 수강중인 강의 코드
+    private Lecture lecture; // 수강중인 강의 코드
 
     @OneToOne
     @JoinColumn(name = "grade_id", nullable = false)
-    private com.secondproject.secondproject.entity.Grade grade; // 성적 정보 id
+    private Grade grade; // 성적 정보 id
 
     @Column(nullable = false)
     private String completionDiv; // 이수구분

@@ -18,7 +18,7 @@ public class Assignment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "assignment_id", columnDefinition = "BIGINT")
-    private long assignmentId; // 과제ID(PK)
+    private long id; // 과제ID(PK)
 
     @Column(name = "ass_title",nullable = false, length = 200)
     private String title; // 공지 제목
@@ -28,7 +28,7 @@ public class Assignment {
 
     @Column(name = "is_enabled", nullable = false)
     @ColumnDefault("1")
-    private boolean is_enabled = true;
+    private boolean isEnabled = true;
     // 제출창구(제출 마감시 비활성화(0), 제출 진행중일시 활성화(1))
 
     @Column(name = "open_at", nullable = false)
@@ -61,5 +61,5 @@ public class Assignment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecture_id", nullable = false, foreignKey = @ForeignKey(name = "fk_assignment_lecture"))
-    private com.secondproject.secondproject.entity.Lecture lecture; // Lecture(강의) 테이블 FK참조
+    private Lecture lecture; // Lecture(강의) 테이블 FK참조
 }

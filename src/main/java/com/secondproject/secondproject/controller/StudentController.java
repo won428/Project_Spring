@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.secondproject.secondproject.Enum.UserType.*;
+
 @RestController
 @RequestMapping("/student") //
 public class StudentController {
@@ -30,7 +32,7 @@ public class StudentController {
     public ResponseEntity<?> getStudentInfo(@PathVariable Long id) {
         User user = studentService.getStudentById(id);
 
-        if (user == null || user.getU_type() != UserType.STUDENT) {
+        if (user == null || user.getType() != STUDENT) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "학생 정보만 조회할 수 있습니다."));
         }
@@ -50,7 +52,7 @@ public class StudentController {
                     .body(Map.of("error", "학생 정보가 없습니다."));
         }
 
-        switch (user.getU_type()) {
+        switch (user.getType()) {
             case STUDENT:
                 return ResponseEntity.ok(Map.of("message", "학생 기능 수행"));
             case PROFESSOR:
@@ -69,13 +71,13 @@ public class StudentController {
     public ResponseEntity<?> issueCertificate(@PathVariable Long id, @PathVariable String type) {
         User user = studentService.getStudentById(id);
 
-        if (user == null || user.getU_type() != UserType.STUDENT) {
+        if (user == null || user.getType() != STUDENT) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "학생 전용 서비스입니다."));
         }
 
         StatusRecords sr = studentService.getStatusRecordById(user.getId());
-        boolean isGraduated = "졸업".equals(sr.getStudent_status());
+        boolean isGraduated = "졸업".equals(sr.getStudentStatus());
 
         if (!isGraduated) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -98,7 +100,7 @@ public class StudentController {
                                                     @RequestParam(required = false) Long studentId) {
         // 1. 교수 계정 확인
         User professor = studentService.getStudentById(professorId);
-        if (professor == null || professor.getU_type() != UserType.PROFESSOR) {
+        if (professor == null || professor.getType() != PROFESSOR) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "교수 전용 서비스입니다."));
         }
@@ -109,11 +111,11 @@ public class StudentController {
         // 필터링
         List<Map<String, Object>> result = new ArrayList<>();
         for (User s : students) {
-            if ((name == null || s.getU_name().contains(name)) &&
+            if ((name == null || s.getName().contains(name)) &&
                     (studentId == null || s.getId().equals(studentId))) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", s.getId());
-                map.put("name", s.getU_name());
+                map.put("name", s.getName());
                 result.add(map);
             }
         }

@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.service;
 
+import com.secondproject.secondproject.entity.Enrollment;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.Enum.UserType;
@@ -8,6 +9,7 @@ import com.secondproject.secondproject.repository.UserRepository;
 import com.secondproject.secondproject.repository.RecordStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.stream.Collectors;
 
 import java.util.List;
 import java.util.Map;
@@ -29,8 +31,8 @@ public class StudentService {
 
     // 학생 정보 조회
     public User getStudentById(Long id) {
-        Optional<User> userOpt = userRepository.getUserById(id);
-        if (userOpt.isEmpty() || userOpt.get().getU_type() != UserType.STUDENT) {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty() || userOpt.get().getType() != UserType.STUDENT) {
             return null; // 학생이 아니거나 유저 없음
         }
         return userOpt.get();
@@ -53,7 +55,7 @@ public class StudentService {
             return Map.of("error", "학적 정보가 없습니다.");
         }
 
-        boolean isGraduated = "졸업".equals(sr.getStudent_status());
+        boolean isGraduated = "졸업".equals(sr.getStudentStatus());
         if (!isGraduated) {
             return Map.of("error", "재학생/휴학생은 증명서 발급 메뉴에서 신청하세요.");
         }
@@ -68,7 +70,11 @@ public class StudentService {
     }
 
     // 교수별 학생 목록 조회
-    public List<User> getStudentsByLecture(Long lectureId) {
-        return enrollmentRepository.findStudentsByLectureIdAndUserType(lectureId, UserType.STUDENT);
+    public List<User> getStudentsByLecture(Long id) {
+        List<Enrollment> enrollments = enrollmentRepository.findByLectureIdAndType(id, UserType.STUDENT);
+        // Enrollment 리스트에서 User만 추출해서 리스트로 반환
+        return enrollments.stream()
+                .map(Enrollment::getUser)  // Enrollment에 getUser() 메서드가 있다고 가정
+                .collect(Collectors.toList());
     }
 }

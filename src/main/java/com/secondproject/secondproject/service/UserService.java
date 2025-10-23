@@ -50,7 +50,7 @@ public class UserService {
 
         Long studentId = Long.parseLong(stringStudentId);
 
-        saved.setUser_code(studentId);
+        saved.setUserCode(studentId);
     }
 
     public List<UserListDto> findUserList() {
@@ -63,19 +63,19 @@ public class UserService {
             Major major = this.majorRepository.findMajorById(user.getMajor().getId());
             College college = this.collegeRepository.findCollegeById(major.getCollege().getId());
 
-            String majorName = major.getM_name();
-            String collegeName = college.getC_type();
+            String majorName = major.getName();
+            String collegeName = college.getType();
 
-            userDto.setU_name(user.getU_name());
-            userDto.setBirthdate(user.getBirthdate());
+            userDto.setU_name(user.getName());
+            userDto.setBirthdate(user.getBirthDate());
             userDto.setGender(user.getGender());
-            userDto.setUser_code(user.getUser_code());
+            userDto.setUser_code(user.getUserCode());
             userDto.setPhone(user.getPhone());
             userDto.setEmail(user.getEmail());
             userDto.setPassword(user.getPassword());
             userDto.setMajor(majorName);
             userDto.setCollege(collegeName);
-            userDto.setU_type(user.getU_type());
+            userDto.setU_type(user.getType());
 
             userListDto.add(userDto);
         }

@@ -20,8 +20,8 @@ public class EnrollmentInfoDto {
 
     public EnrollmentInfoDto(User student, Lecture lecture) {
         this.studentId = student.getId(); // 학번
-        this.studentName = student.getU_name(); // 학생 이름
+        this.studentName = student.getName(); // 학생 이름
         this.lectureId = lecture.getId(); // 강의 코드
-        this.lectureName = lecture.getLec_name(); // 강의 이름
+        this.lectureName = lecture.getName(); // 강의 이름
     }
 }

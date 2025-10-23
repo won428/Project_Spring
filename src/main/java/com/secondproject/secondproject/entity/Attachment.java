@@ -12,10 +12,8 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "attachment")
 public class Attachment {
-    // 파일 저장 경로 테이블, 파일을 업로드하는 기능을 쓰는 경우 매핑 엔터티(테이블) 한개 만드시고
-    // 기능 - 매핑테이블 - 파일저장 경로 테이블로 매핑 하시면됩니다.
-    // 매핑하는 이유는 파일이 두개 이상 업로드 될 수있어서 이렇게 설계 했습니다.
-
+    // 로컬 파일들 전체 다 저장되는 엔터티 입니다.
+    // 진성님 한번씩 검토해서 수정할거 수정해주세요 !
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,18 +27,18 @@ public class Attachment {
     @Column(name = "original_name")
     private String name; // 원본 이름
 
-    @Column(nullable = false)
-    private String stored_key;  // 변환된 파일명(로컬주소)
+    @Column(name = "stored_key", nullable = false)
+    private String storedKey;  // 변환된 파일명(로컬주소)
 
-    @Column(nullable = false)
-    private String content_type; // 파일 타입
+    @Column(name = "content_type", nullable = false)
+    private String contentType; // 파일 타입
 
-    @Column(nullable = false)
-    private Long size_bytes; // 파일 용량
+    @Column(name = "size_bytes", nullable = false)
+    private Long sizeBytes; // 파일 용량
 
-    @Column(nullable = false)
+    @Column(name = "upload_at", nullable = false)
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate upload_at; // 업로드일
+    private LocalDate uploadAt; // 업로드일
 
     private String sha256; // 해시검증용 입니다.
 }

@@ -40,8 +40,8 @@ public class CollegeService {
         for (College c : collegeEntityList){
             ColResponseDto collegeResponse = new ColResponseDto();
             collegeResponse.setId(c.getId());
-            collegeResponse.setC_type(c.getC_type());
-            collegeResponse.setC_office(c.getC_office());
+            collegeResponse.setC_type(c.getType());
+            collegeResponse.setC_office(c.getOffice());
             collegesLists.add(collegeResponse);
         }
         return collegesLists;
@@ -58,8 +58,8 @@ public class CollegeService {
     public ColResponseDto update(Long id, CollegeCreateReq req) {
         College entity = collegeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 ID: " + id));
-        entity.setC_type(req.getC_type());
-        entity.setC_office(req.getC_office());
+        entity.setType(req.getC_type());
+        entity.setOffice(req.getC_office());
         return collegeMapper.toResponse(entity);
     }
 

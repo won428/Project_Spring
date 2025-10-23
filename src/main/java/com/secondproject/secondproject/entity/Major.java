@@ -18,10 +18,11 @@ public class Major {
     @Column(name = "major_id")
     private Long id; // 학과 코드
 
-    @Column(nullable = false)
-    private String m_name; // 학과 이름
+    @Column(name = "m_name", nullable = false)
+    private String name; // 학과 이름
 
-    private String m_office; // 학과 전화번호
+    @Column(name = "m_office")
+    private String office; // 학과 전화번호
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "college_id", foreignKey = @ForeignKey(name = "fk_major_college"))

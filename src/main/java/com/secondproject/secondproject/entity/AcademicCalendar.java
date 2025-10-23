@@ -15,19 +15,19 @@ public class AcademicCalendar {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "calendar_id")
-    private Long calendarId;
+    private Long id;
 
     @Column(name = "cal_start_date", nullable = false)
     private LocalDate calStartDate;
 
     @Column(name = "cal_end_date",nullable = false)
-    private  LocalDate calEndDate;
+    private  LocalDate eneDate;
 
     @Column(name = "cal_title",length = 50, nullable = false)
-    private String calTitle;
+    private String title;
 
     @Column(name = "cal_description",length = 255)
-    private String calDescription;
+    private String description;
 
 
 }
