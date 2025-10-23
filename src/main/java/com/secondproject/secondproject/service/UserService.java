@@ -84,16 +84,9 @@ public class UserService {
         return userListDto;
     }
 
-    public Optional<User> findUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public Optional<User> findByUsercode(Long userCode) {
+        Optional<User> user = this.userRepository.findByUserCode(userCode);
+
+        return user;
     }
-
-//    public User setPasswordByEmail(String email) {
-//        return userRepository.setPasswordByEmail(email);
-//    }
-
-    public Optional<User> getByEmail(String email) {
-        return userRepository.getByEmail(email);
-    }
-
 }
