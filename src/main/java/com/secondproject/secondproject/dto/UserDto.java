@@ -21,6 +21,7 @@ public class UserDto {
     private String phone; // 휴대전화
     private String gender;
     private String college;
+    private Long userCode;
     private Long major; // 소속학과ID (number, FK)
     private UserType u_type; // 구분: 학생, 교수, 관리자 (enum)
 
@@ -31,6 +32,18 @@ public class UserDto {
         this.email = email;
         this.phone = phone;
         this.gender = gender;
+        this.major = major;
+        this.u_type = u_type;
+    }
+
+    public UserDto(String u_name, String password, LocalDate birthdate, String email, String phone, String gender, String college, Long major, UserType u_type) {
+        this.u_name = u_name;
+        this.password = password;
+        this.birthdate = birthdate;
+        this.email = email;
+        this.phone = phone;
+        this.gender = gender;
+        this.college = college;
         this.major = major;
         this.u_type = u_type;
     }

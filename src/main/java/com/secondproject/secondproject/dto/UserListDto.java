@@ -31,6 +31,7 @@ public class UserListDto {
 
     private String college; // 소속 단과대학
 
+
     private UserType u_type; // 구분: 학생, 교수, 관리자 (enum)
 
     public UserListDto( Long user_code, String u_name, String password, LocalDate birthdate, String email, String phone, String gender, String major, String college, UserType u_type) {
@@ -46,6 +47,7 @@ public class UserListDto {
         this.college = college;
         this.u_type = u_type;
     }
+
 
     public UserListDto() {
     }
