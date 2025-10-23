@@ -1,13 +1,11 @@
 package com.secondproject.secondproject.service;
 
-import com.secondproject.secondproject.dto.CollegeCreateReq;
-import com.secondproject.secondproject.dto.ColResponseDto;
+import com.secondproject.secondproject.dto.CollegeInsertDto;
+import com.secondproject.secondproject.dto.CollegeResponseDto;
 import com.secondproject.secondproject.entity.College;
-import com.secondproject.secondproject.mapper.CollegeMapper;
 import com.secondproject.secondproject.repository.CollegeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,13 +16,22 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CollegeService {
 
-    private final CollegeMapper collegeMapper;
     private final CollegeRepository collegeRepository;
 
     @Transactional // 단과대학 데이터 insert
-    public ColResponseDto insert(CollegeCreateReq collegeCreateReq){
-        College insertCollege = collegeRepository.save(collegeMapper.InsertToEntity(collegeCreateReq));
-        return collegeMapper.toResponse(insertCollege);
+    public CollegeResponseDto insert(CollegeInsertDto collegeInsertDto){
+        College college = new College();
+        college.setType(collegeInsertDto.getType());
+        college.setOffice(collegeInsertDto.getOffice());
+
+        College saved = collegeRepository.save(college);
+
+        CollegeResponseDto collegeResponseDto = new CollegeResponseDto();
+        collegeResponseDto.setId(saved.getId());
+        collegeResponseDto.setType(saved.getType());
+        collegeResponseDto.setOffice(saved.getOffice());
+
+        return collegeResponseDto;
     }
 
     public boolean existsById(Long college_id) {return collegeRepository.existsById(college_id);
@@ -34,14 +41,14 @@ public class CollegeService {
         collegeRepository.deleteById(collegeId);
     }
 
-    public List<ColResponseDto> getList(){
+    public List<CollegeResponseDto> getList(){
         List<College> collegeEntityList  = collegeRepository.findAllByOrderByTypeAsc();
-        List<ColResponseDto> collegesLists = new ArrayList<>();
+        List<CollegeResponseDto> collegesLists = new ArrayList<>();
         for (College c : collegeEntityList){
-            ColResponseDto collegeResponse = new ColResponseDto();
+            CollegeResponseDto collegeResponse = new CollegeResponseDto();
             collegeResponse.setId(c.getId());
-            collegeResponse.setC_type(c.getType());
-            collegeResponse.setC_office(c.getOffice());
+            collegeResponse.setType(c.getType());
+            collegeResponse.setOffice(c.getOffice());
             collegesLists.add(collegeResponse);
         }
         return collegesLists;
@@ -55,15 +62,31 @@ public class CollegeService {
 
     // 입력한 정보로 업데이트하기
     @Transactional
-    public ColResponseDto update(Long id, CollegeCreateReq req) {
+    public CollegeResponseDto update(Long id, CollegeInsertDto req) {
         College entity = collegeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 ID: " + id));
-        entity.setType(req.getC_type());
-        entity.setOffice(req.getC_office());
-        return collegeMapper.toResponse(entity);
+        entity.setType(req.getType());
+        entity.setOffice(req.getOffice());
+
+        CollegeResponseDto collegeResponseDto = new CollegeResponseDto();
+        collegeResponseDto.setId(entity.getId());
+        collegeResponseDto.setType(entity.getType());
+        collegeResponseDto.setOffice(entity.getOffice());
+
+        return collegeResponseDto;
     }
 
-    public Optional<ColResponseDto> findById(Long id) {
-        return collegeRepository.findById(id).map(collegeMapper::toResponse);
+    //
+    public Optional<CollegeResponseDto> findById(Long id) {
+        return collegeRepository.findById(id).map(this::toDto);
+    }
+
+    public CollegeResponseDto toDto(College college){
+        CollegeResponseDto collegeResponseDto = new CollegeResponseDto();
+        collegeResponseDto.setId(college.getId());
+        collegeResponseDto.setType(college.getType());
+        collegeResponseDto.setOffice(college.getOffice());
+
+        return collegeResponseDto;
     }
 }
