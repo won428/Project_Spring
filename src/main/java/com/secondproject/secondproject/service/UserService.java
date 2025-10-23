@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -82,4 +83,17 @@ public class UserService {
 
         return userListDto;
     }
+
+    public Optional<User> findUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+//    public User setPasswordByEmail(String email) {
+//        return userRepository.setPasswordByEmail(email);
+//    }
+
+    public Optional<User> getByEmail(String email) {
+        return userRepository.getByEmail(email);
+    }
+
 }
