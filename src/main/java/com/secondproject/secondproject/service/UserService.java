@@ -66,7 +66,7 @@ public class UserService {
             String majorName = major.getName();
             String collegeName = college.getType();
 
-            userDto.setU_name(user.getUName());
+            userDto.setU_name(user.getName());
             userDto.setBirthdate(user.getBirthDate());
             userDto.setGender(user.getGender());
             userDto.setUser_code(user.getUserCode());
@@ -75,7 +75,7 @@ public class UserService {
             userDto.setPassword(user.getPassword());
             userDto.setMajor(majorName);
             userDto.setCollege(collegeName);
-            userDto.setU_type(user.getUType());
+            userDto.setU_type(user.getType());
 
             userListDto.add(userDto);
         }

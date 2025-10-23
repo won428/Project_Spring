@@ -25,14 +25,14 @@ public class UserController {
         User user = new User();
         Major major = this.majorService.findMajor(userinfo.getMajor());
 
-        user.setUName(userinfo.getU_name());
+        user.setName(userinfo.getU_name());
         user.setGender(userinfo.getGender());
         user.setEmail(userinfo.getEmail());
         user.setBirthDate(userinfo.getBirthdate());
         user.setPassword(userinfo.getPassword());
         user.setMajor(major);
         user.setPhone(userinfo.getPhone());
-        user.setUType(userinfo.getU_type());
+        user.setType(userinfo.getU_type());
 
         this.userService.insertUser(user);
 

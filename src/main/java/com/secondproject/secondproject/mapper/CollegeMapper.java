@@ -12,7 +12,7 @@ public class CollegeMapper {
     public College InsertToEntity(CollegeCreateReq req){
         College college = new College();
         college.setType(normalizeType(req.getC_type()));
-        college.setCOffice(normalizeOffice(req.getC_office()));
+        college.setOffice(normalizeOffice(req.getC_office()));
         return college;
     }
 
@@ -21,7 +21,7 @@ public class CollegeMapper {
 
     // 응답Dto ->  entity로 변환
     public ColResponseDto toResponse(College college){
-        return new ColResponseDto(college.getId(), college.getType(), college.getCOffice());
+        return new ColResponseDto(college.getId(), college.getType(), college.getOffice());
     }
 
 
