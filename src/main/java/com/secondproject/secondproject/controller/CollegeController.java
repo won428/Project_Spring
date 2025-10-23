@@ -14,10 +14,10 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/college")
+@RequiredArgsConstructor
 public class CollegeController {
-    private  final CollegeService collegeService;
+    private final CollegeService collegeService;
 
     @PostMapping("/insert") // 단과대학 등록
     public ResponseEntity<CollegeResponseDto> insert(@RequestBody @Valid CollegeInsertDto collegeInsertDto){

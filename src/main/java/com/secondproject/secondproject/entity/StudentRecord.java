@@ -22,35 +22,34 @@ public class StudentRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "record_id")
-    private Long record_id;                  // 유저ID(FK), number
+    private Long id;                  // 유저ID(FK), number
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_studentRecord_user")) // 신청자ID
     private User user;
 
     @Enumerated(EnumType.STRING)
-    private Status statusRecords;                // 상태/학적번호(FK), number
+    @Column(name ="Student_status" )
+    private Student_status studentStatus;                // 신청 목적
 
-    @Column(nullable = false)
+    @Column(name = "record_title", nullable = false)
     private String title;                 // 제목(varchar)
 
-    @Column(nullable = false)
+    @Column(name = "record_content", nullable = false)
     private String content;               // 내용(varchar)
 
-    @Column(nullable = false)
+    @Column(name = "applied_date", nullable = false)
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate applied_date;        // 신청일(date)
+    private LocalDate appliedDate;        // 신청일(date)
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate processed_date;      // 처리일(date), null 허용
+    @Column(name = "processed_date")
+    private LocalDate processedDate;      // 처리일(date), null 허용
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;         // 처리상태
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Student_status studentStatus;     // 변경신청목적(enum, varchar)
 
     // 연관관계 매핑이 필요하면 @ManyToOne, @JoinColumn(userId) 등 추가
 }
