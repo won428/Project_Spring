@@ -1,11 +1,11 @@
-package com.secondproject.secondproject.controller;
+package com.secondproject.secondproject.Controller;
 
 import com.secondproject.secondproject.Dto.UserDto;
 import com.secondproject.secondproject.Dto.UserListDto;
 import com.secondproject.secondproject.Entity.Major;
 import com.secondproject.secondproject.Entity.User;
 import com.secondproject.secondproject.Service.MajorService;
-import com.secondproject.secondproject.service.UserService;
+import com.secondproject.secondproject.Service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
