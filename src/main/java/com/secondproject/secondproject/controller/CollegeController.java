@@ -66,7 +66,7 @@ public class CollegeController {
     }
 
     // College 정보 업데이트 시 폼에 기존 정보 가져오는 메소드
-    @GetMapping("/{id}")
+    @GetMapping("/select/{id}")
     public ResponseEntity<CollegeResponseDto> findOne(@PathVariable Long id) {
         return collegeService.findById(id)
                 .map(ResponseEntity::ok)
@@ -74,7 +74,7 @@ public class CollegeController {
     }
 
     // 수정한 실제 정보로 UPDATE하는 메소드
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<CollegeResponseDto> update(@PathVariable Long id,
                                                      @RequestBody @Valid CollegeInsertDto req) {
         CollegeResponseDto updated = collegeService.update(id, req);
