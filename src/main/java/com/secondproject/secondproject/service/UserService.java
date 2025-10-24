@@ -98,4 +98,10 @@ public class UserService {
     public void setPassword(User user) {
         userRepository.save(user);
     }
+
+    public Optional<User> findByUsercode(Long userCode) {
+        Optional<User> user = this.userRepository.findByUserCode(userCode);
+
+        return user;
+    }
 }

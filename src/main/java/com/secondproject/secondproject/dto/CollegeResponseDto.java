@@ -5,9 +5,9 @@ import lombok.*;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ColResponseDto {
-    Long id;
-    String c_type;
-    String c_office;
+public class CollegeResponseDto {
+    private Long id;
+    private String type;
+    private String office;
 
 }
