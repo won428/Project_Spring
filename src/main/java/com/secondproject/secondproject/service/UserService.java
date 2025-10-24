@@ -10,6 +10,7 @@ import com.secondproject.secondproject.repository.MajorRepository;
 import com.secondproject.secondproject.repository.StatusRecordsRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ public class UserService {
     private final StatusRecordsRepository statusRecordsRepository;
     private final MajorRepository majorRepository;
     private final CollegeRepository collegeRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public void insertUser(User newUser) {
@@ -88,12 +90,12 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-//    public User setPasswordByEmail(String email) {
-//        return userRepository.setPasswordByEmail(email);
-//    }
 
     public Optional<User> getByEmail(String email) {
         return userRepository.getByEmail(email);
     }
 
+    public void setPassword(User user) {
+        userRepository.save(user);
+    }
 }

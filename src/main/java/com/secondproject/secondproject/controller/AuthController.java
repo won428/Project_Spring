@@ -14,6 +14,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -95,18 +96,33 @@ public class AuthController {
     }
 
 
-    @PostMapping("/setPw/:{email}")
-    public ResponseEntity<?> setPw(@PathVariable String email, @RequestBody PwSetRequest pwsetRequest) {
-        Optional<User> authUser = userService.getByEmail(email);
-        String newPassword = pwsetRequest.newPassword;
-        if (authUser.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        } else {
-            User user = authUser.get();
-            user.setPassword(newPassword);
-        }
+    @PostMapping("/SetPw")
+    public ResponseEntity<?> setPw(@RequestBody PwSetRequest pwsetRequest) {
+        System.out.println("Request : " + pwsetRequest);
+        String email = pwsetRequest.email;
 
-        return null;
+        Optional<User> authUser = userService.getByEmail(email);
+        String newPassword = (pwsetRequest.newPassword);
+        String Password = authUser.get().getPassword();
+        System.out.println(!passwordEncoder.matches(newPassword, Password));
+        try {
+            if (!passwordEncoder.matches(newPassword, Password)) {
+                String encodedPassword = passwordEncoder.encode(pwsetRequest.newPassword);
+                if (authUser.isEmpty()) {
+                    return ResponseEntity.notFound().build();
+                } else {
+                    User user = authUser.get();
+                    user.setPassword(encodedPassword);
+                    userService.setPassword(user);
+                    return ResponseEntity.ok(HttpStatus.ACCEPTED);
+                }
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("중복되는 Pw 입니다.");
+
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
 
     }
 
@@ -132,10 +148,12 @@ public class AuthController {
     @Data
     public static class FindRequest {
         private String email;
+
     }
 
     @Data
     public static class PwSetRequest {
+        private String email;
         private String newPassword;
     }
 
