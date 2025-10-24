@@ -23,11 +23,11 @@ public class StudentInfoDto {
     private Long id;          // 사용자 기본키
     private Long userCode;    // 학번
     private String name;      // 이름
-    private String password; // 비밀번호
-    private LocalDate birthDate; // 생일
     private String email;     // 이메일
-    private String phone;     // 휴대전화
+    private String password; // 비밀번호
     private String gender;    // 성별
+    private LocalDate birthDate; // 생일
+    private String phone;     // 휴대전화
     private Major major; // 소속 학과명
     private UserType type; // 구분자
 
@@ -35,6 +35,7 @@ public class StudentInfoDto {
     // 예) 전공명 majorName; 필요시 추가
 
     // 학적 정보 (StatusRecords 필드)
+    private Long statusId;
     private Student_status student_status;
     private LocalDate admissionDate;
     private LocalDate leaveDate;
@@ -42,6 +43,9 @@ public class StudentInfoDto {
     private LocalDate graduationDate;
     private LocalDate retentionDate;
     private LocalDate expelledDate;
+    private int totalCredit;
+    private double currentCredit;
+    private String studentImage;
 
     public StudentInfoDto(User user, StatusRecords statusRecord) {
     }

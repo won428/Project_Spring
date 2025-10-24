@@ -2,9 +2,8 @@ package com.secondproject.secondproject.controller;
 
 import com.secondproject.secondproject.Entity.RefreshToken;
 import com.secondproject.secondproject.config.JWT.JwtTokenProvider;
-import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.repository.RefreshTokenRepo;
-import com.secondproject.secondproject.service.UserService;
+import com.secondproject.secondproject.service.AuthService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +13,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +27,7 @@ public class AuthController {
     private final RefreshTokenRepo refreshTokenRepo;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserService userService;
+    private final AuthService authService;
 
 
     @PostMapping("/login")
@@ -83,55 +81,40 @@ public class AuthController {
         }
     }
 
-    //    Pw 찾기 기능 진행중 ...
-    @PostMapping("/FindPW")
-    public ResponseEntity<?> findPw(@RequestBody FindRequest findRequest) {
-        String userEmail = findRequest.email;
-        Optional<User> authUser = userService.findUserByEmail(userEmail);
-        if (authUser.isPresent()) {
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body("Email 검증 성공");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("검증 실패");
-        }
-    }
+//    Pw 찾기 기능 진행중 ...
+//    @PostMapping("/FindPW")
+//    public ResponseEntity<?> findPw(@RequestBody FindRequest findRequest) {
+//        String userEmail = findRequest.email;
+//        Optional<User> authUser = authService.findUserByEmail(userEmail);
+//        if (authUser.isPresent()) {
+//            return ResponseEntity.status(HttpStatus.ACCEPTED).body("Email 검증 성공");
+//        } else {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("검증 실패");
+//        }
+//    }
 
 
-    @PostMapping("/SetPw")
-    public ResponseEntity<?> setPw(@RequestBody PwSetRequest pwsetRequest) {
-        System.out.println("Request : " + pwsetRequest);
-        String email = pwsetRequest.email;
+//    @PostMapping("/setPw/:{email}")
+//    public ResponseEntity<?> setPw(@PathVariable String email, @RequestBody PwSetRequest pwsetRequest) {
+//        Optional<User> authUser = authService.getByEmail(email);
+//        String newPassword = pwsetRequest.newPassword;
+//        if(authUser.isEmpty()){
+//            return ResponseEntity.notFound().build();
+//        }else {
+//            User user = authUser.get();
+//            user.setPassword(newPassword);
+//        }
+//
+//
+//
+//    }
 
-        Optional<User> authUser = userService.getByEmail(email);
-        String newPassword = (pwsetRequest.newPassword);
-        String Password = authUser.get().getPassword();
-        System.out.println(!passwordEncoder.matches(newPassword, Password));
-        try {
-            if (!passwordEncoder.matches(newPassword, Password)) {
-                String encodedPassword = passwordEncoder.encode(pwsetRequest.newPassword);
-                if (authUser.isEmpty()) {
-                    return ResponseEntity.notFound().build();
-                } else {
-                    User user = authUser.get();
-                    user.setPassword(encodedPassword);
-                    userService.setPassword(user);
-                    return ResponseEntity.ok(HttpStatus.ACCEPTED);
-                }
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("중복되는 Pw 입니다.");
-
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
-
-    }
-
-    // react 에서 access token 만료로 구현
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody LoginRequest loginRequest) {
-        refreshTokenRepo.deleteByEmail(loginRequest.getEmail());
-        return ResponseEntity.ok("로그아웃 완료");
-    }
+// react 에서 access token 만료로 구현
+//    @PostMapping("/logout")
+//    public ResponseEntity<?> logout(@RequestBody LoginRequest loginRequest) {
+//        refreshTokenRepo.deleteByEmail(loginRequest.getEmail());
+//        return ResponseEntity.ok("로그아웃 완료");
+//    }
 
     @Data
     public static class LoginRequest {
@@ -148,12 +131,10 @@ public class AuthController {
     @Data
     public static class FindRequest {
         private String email;
-
     }
 
     @Data
     public static class PwSetRequest {
-        private String email;
         private String newPassword;
     }
 
