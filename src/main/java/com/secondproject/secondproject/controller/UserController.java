@@ -2,6 +2,7 @@ package com.secondproject.secondproject.controller;
 
 import com.secondproject.secondproject.dto.UserDto;
 import com.secondproject.secondproject.dto.UserListDto;
+import com.secondproject.secondproject.dto.UserUpdateDto;
 import com.secondproject.secondproject.entity.College;
 import com.secondproject.secondproject.entity.Major;
 import com.secondproject.secondproject.entity.User;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.swing.plaf.OptionPaneUI;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,20 +57,28 @@ public class UserController {
         return userList;
     }
 
-    @GetMapping("/selectUserCode/{id}")
-    public UserListDto findByUsercode(@PathVariable Long id){
+    @GetMapping("/professorList")
+    public List<UserListDto> professorList(@RequestParam("major_id") Long majorId){
+        List<UserListDto> userList = this.userService.findProfessorList(majorId);
 
-        UserListDto userDto = new UserListDto();
+        return userList;
+    }
+
+    @GetMapping("/selectUserCode/{id}")
+    public UserUpdateDto findByUsercode(@PathVariable Long id){
+
+        UserUpdateDto userDto = new UserUpdateDto();
         Optional<User> optUser = this.userService.findByUsercode(id);
         User user = optUser
                 .orElseThrow(()->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, id + "사용자 없음"));
         College college = this.collegeService.getCollegeId(user.getMajor().getCollege().getId());
 
+        userDto.setId(user.getId());
         userDto.setU_name(user.getName());
         userDto.setGender(user.getGender());
-        userDto.setMajor(user.getMajor().getName());
-        userDto.setCollege(college.getType());
+        userDto.setMajor(user.getMajor().getId());
+        userDto.setCollege(college.getId());
         userDto.setPhone(user.getPhone());
         userDto.setEmail(user.getEmail());
         userDto.setBirthdate(user.getBirthDate());
@@ -79,4 +89,18 @@ public class UserController {
 
         return userDto;
     }
+
+    @PatchMapping("/admin/update/{id}")
+    public ResponseEntity<?> userUpdateByAdmin(@PathVariable Long id, @RequestBody UserUpdateDto userReactDto){
+
+        User findUser = this.userService.findByUsercode(id)
+                .orElseThrow(()->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, id + "사용자 없음"));
+        Major major = this.majorService.findMajor(userReactDto.getMajor());
+
+        this.userService.save(id, userReactDto, findUser , major);
+
+        return ResponseEntity.ok(200);
+    }
+
 }
