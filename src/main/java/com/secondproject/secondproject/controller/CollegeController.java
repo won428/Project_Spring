@@ -34,12 +34,12 @@ public class CollegeController {
         return ResponseEntity.created(location).body(collegeResponseDto);
     }
 
-//    @GetMapping("/list")
-//    public List<CollegeResponseDto> list(){
-//        return collegeService.getList();
-//    }
-
     @GetMapping("/list")
+    public List<CollegeResponseDto> list(){
+        return collegeService.getList();
+    }
+
+    @GetMapping("/page/list")
     public ResponseEntity<Page<College>>collageLists(
             @RequestParam(name = "searchType", defaultValue = "ALL") CollegePaging collegePaging,
             @RequestParam(name = "searchKeyword", defaultValue = "") String searchKeyword,

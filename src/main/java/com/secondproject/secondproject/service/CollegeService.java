@@ -4,15 +4,20 @@ import com.secondproject.secondproject.Enum.CollegePaging;
 import com.secondproject.secondproject.dto.CollegeInsertDto;
 import com.secondproject.secondproject.dto.CollegeResponseDto;
 import com.secondproject.secondproject.dto.CollegeSearchDto;
+import com.secondproject.secondproject.dto.MajorResponseDto;
 import com.secondproject.secondproject.entity.College;
 import com.secondproject.secondproject.repository.CollegeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,14 +35,18 @@ public class CollegeService {
         college.setType(collegeInsertDto.getType());
         college.setOffice(collegeInsertDto.getOffice());
 
-        College saved = collegeRepository.save(college);
+        try{
+            College saved = collegeRepository.save(college);
 
-        CollegeResponseDto collegeResponseDto = new CollegeResponseDto();
-        collegeResponseDto.setId(saved.getId());
-        collegeResponseDto.setType(saved.getType());
-        collegeResponseDto.setOffice(saved.getOffice());
+            CollegeResponseDto collegeResponseDto = new CollegeResponseDto();
+            collegeResponseDto.setId(saved.getId());
+            collegeResponseDto.setType(saved.getType());
+            collegeResponseDto.setOffice(saved.getOffice());
 
-        return collegeResponseDto;
+            return collegeResponseDto;
+        } catch (DataIntegrityViolationException e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"유효하지 않은 요청 : "+e);
+        }
     }
 
     public boolean existsById(Long college_id) {return collegeRepository.existsById(college_id);

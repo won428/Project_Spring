@@ -1,20 +1,32 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.dto.MajorInCollegeDto;
+import com.secondproject.secondproject.dto.MajorInsertDto;
+import com.secondproject.secondproject.dto.MajorResponseDto;
+import com.secondproject.secondproject.entity.College;
 import com.secondproject.secondproject.entity.Major;
+import com.secondproject.secondproject.repository.CollegeRepository;
 import com.secondproject.secondproject.repository.MajorRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.config.ConfigDataLocationNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class MajorService {
 
     private final MajorRepository majorRepository;
+    private final CollegeRepository collegeRepository;
 
     // 단과대학에 속한 학과 리스트 조회
     public List<MajorInCollegeDto> getMajorListByCollege(Long collegeId) {
@@ -37,5 +49,35 @@ public class MajorService {
     public Major findMajor(Long major) {
         return majorRepository.findById(major)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 학과: " + major));
+    }
+
+    // 학과 등록하기
+    public MajorResponseDto insertMajor(@Valid MajorInsertDto majorInsertDto) {
+
+        // 해당 단과대학 존재여부 확인
+        College college = collegeRepository.findById(majorInsertDto.getCollegeId())
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (majorRepository.existsByNameAndCollegeId(majorInsertDto.getName(),majorInsertDto.getCollegeId())){
+            throw new ResponseStatusException(HttpStatus.CONFLICT);
+        }
+        Major major = new Major();
+        major.setId(majorInsertDto.getCollegeId());
+        major.setName(majorInsertDto.getName());
+        major.setOffice(majorInsertDto.getOffice());
+        major.setCollege(college);
+
+        try{
+            Major saved = majorRepository.save(major);
+
+            MajorResponseDto responseDto = new MajorResponseDto();
+            responseDto.setId(saved.getId());
+            responseDto.setName(saved.getName());
+            responseDto.setOffice(saved.getOffice());
+            responseDto.setCollege(saved.getCollege());
+
+            return responseDto;
+        }catch (DataIntegrityViolationException e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"유효하지 않은 데이터 : "+e);
+        }
     }
 }
