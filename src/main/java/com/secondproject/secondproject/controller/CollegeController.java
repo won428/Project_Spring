@@ -1,11 +1,14 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.Enum.CollegePaging;
 import com.secondproject.secondproject.dto.CollegeInsertDto;
 import com.secondproject.secondproject.dto.CollegeResponseDto;
+import com.secondproject.secondproject.dto.CollegeSearchDto;
 import com.secondproject.secondproject.entity.College;
 import com.secondproject.secondproject.service.CollegeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -31,9 +34,23 @@ public class CollegeController {
         return ResponseEntity.created(location).body(collegeResponseDto);
     }
 
+//    @GetMapping("/list")
+//    public List<CollegeResponseDto> list(){
+//        return collegeService.getList();
+//    }
+
     @GetMapping("/list")
-    public List<CollegeResponseDto> list(){
-        return collegeService.getList();
+    public ResponseEntity<Page<College>>collageLists(
+            @RequestParam(name = "searchType", defaultValue = "ALL") CollegePaging collegePaging,
+            @RequestParam(name = "searchKeyword", defaultValue = "") String searchKeyword,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "8") int pageSize
+            ){
+        CollegeSearchDto collegeSearchDto = new CollegeSearchDto(collegePaging, searchKeyword,pageNumber,pageSize);
+
+        Page<College> colleges = collegeService.search(collegeSearchDto);
+
+        return ResponseEntity.ok(colleges);
     }
 
     @DeleteMapping("/delete/{college_id}")
@@ -49,7 +66,7 @@ public class CollegeController {
     }
 
     // College 정보 업데이트 시 폼에 기존 정보 가져오는 메소드
-    @GetMapping("/{id}")
+    @GetMapping("/select/{id}")
     public ResponseEntity<CollegeResponseDto> findOne(@PathVariable Long id) {
         return collegeService.findById(id)
                 .map(ResponseEntity::ok)
@@ -57,7 +74,7 @@ public class CollegeController {
     }
 
     // 수정한 실제 정보로 UPDATE하는 메소드
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<CollegeResponseDto> update(@PathVariable Long id,
                                                      @RequestBody @Valid CollegeInsertDto req) {
         CollegeResponseDto updated = collegeService.update(id, req);
