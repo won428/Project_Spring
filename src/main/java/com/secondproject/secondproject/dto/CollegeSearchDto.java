@@ -14,5 +14,5 @@ public class CollegeSearchDto {
     private CollegePaging collegePaging;
     private String searchKeyword;
     private Integer page = 0;         // 선택
-    private Integer size = 20;
+    private Integer size = 10;
 }

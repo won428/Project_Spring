@@ -34,21 +34,22 @@ public class CollegeController {
         return ResponseEntity.created(location).body(collegeResponseDto);
     }
 
-    @GetMapping("/list")
-    public List<CollegeResponseDto> list(){
-        return collegeService.getList();
-    }
+//    @GetMapping("/list")
+//    public List<CollegeResponseDto> list(){
+//        return collegeService.getList();
+//    }
 
     @GetMapping("/list")
     public ResponseEntity<Page<College>>collageLists(
-            @RequestParam(defaultValue = "") CollegePaging collegePaging,
-            @RequestParam(defaultValue = "") String searchKeyword,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "8") int size
+            @RequestParam(name = "searchType", defaultValue = "ALL") CollegePaging collegePaging,
+            @RequestParam(name = "searchKeyword", defaultValue = "") String searchKeyword,
+            @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "8") int pageSize
             ){
-        CollegeSearchDto collegeSearchDto = new CollegeSearchDto(collegePaging, searchKeyword);
+        CollegeSearchDto collegeSearchDto = new CollegeSearchDto(collegePaging, searchKeyword,pageNumber,pageSize);
 
-        Page<College> colleges = collegeService.listCollege(collegeSearchDto, page, size);
+        Page<College> colleges = collegeService.search(collegeSearchDto);
+
         return ResponseEntity.ok(colleges);
     }
 
