@@ -11,7 +11,7 @@ import java.time.LocalDate;
 public class UserListDto {
 
 
-
+    private Long id;
 
     private Long user_code; // 유저 번호
 
@@ -48,6 +48,19 @@ public class UserListDto {
         this.u_type = u_type;
     }
 
+    public UserListDto(Long id, Long user_code, String u_name, String password, LocalDate birthdate, String email, String phone, String gender, String major, String college, UserType u_type) {
+        this.id = id;
+        this.user_code = user_code;
+        this.u_name = u_name;
+        this.password = password;
+        this.birthdate = birthdate;
+        this.email = email;
+        this.phone = phone;
+        this.gender = gender;
+        this.major = major;
+        this.college = college;
+        this.u_type = u_type;
+    }
 
     public UserListDto() {
     }

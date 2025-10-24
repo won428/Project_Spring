@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.swing.plaf.OptionPaneUI;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,6 +57,13 @@ public class UserController {
         return userList;
     }
 
+    @GetMapping("/professorList")
+    public List<UserListDto> professorList(@RequestParam("major_id") Long majorId){
+        List<UserListDto> userList = this.userService.findProfessorList(majorId);
+
+        return userList;
+    }
+
     @GetMapping("/selectUserCode/{id}")
     public UserUpdateDto findByUsercode(@PathVariable Long id){
 
@@ -66,6 +74,7 @@ public class UserController {
                 new ResponseStatusException(HttpStatus.NOT_FOUND, id + "사용자 없음"));
         College college = this.collegeService.getCollegeId(user.getMajor().getCollege().getId());
 
+        userDto.setId(user.getId());
         userDto.setU_name(user.getName());
         userDto.setGender(user.getGender());
         userDto.setMajor(user.getMajor().getId());
@@ -80,4 +89,18 @@ public class UserController {
 
         return userDto;
     }
+
+    @PatchMapping("/admin/update/{id}")
+    public ResponseEntity<?> userUpdateByAdmin(@PathVariable Long id, @RequestBody UserUpdateDto userReactDto){
+
+        User findUser = this.userService.findByUsercode(id)
+                .orElseThrow(()->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, id + "사용자 없음"));
+        Major major = this.majorService.findMajor(userReactDto.getMajor());
+
+        this.userService.save(id, userReactDto, findUser , major);
+
+        return ResponseEntity.ok(200);
+    }
+
 }

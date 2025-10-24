@@ -9,6 +9,8 @@ import java.time.LocalDate;
 
 @Getter @Setter @ToString
 public class UserUpdateDto {
+    private Long id;
+
     private Long user_code; // 유저 번호
 
     private String u_name; // 이름
