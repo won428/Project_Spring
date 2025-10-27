@@ -1,11 +1,17 @@
 package com.secondproject.secondproject.repository;
 
+import com.secondproject.secondproject.dto.MajorListDto;
+import com.secondproject.secondproject.dto.MajorSearchDto;
 import com.secondproject.secondproject.entity.Major;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -20,4 +26,17 @@ public interface MajorRepository extends JpaRepository<Major,Long> {
             regexp = "^[\\p{L}\\p{N}·&()\\-\\/ ]+$",
             message = "학과명에는 한글·영문·숫자와 공백, · - & ( ) /만 사용할 수 있습니다."
     ) String name, @NotNull Long collegeId);
+
+    @Query("""
+            select new com.secondproject.secondproject.dto.MajorListDto(
+            m.id, m.name,m.office,c.id,c.type
+            )
+            from Major m
+            join m.college c
+            where (:#{majorSearchDto.majorId} is null or m.id = :#{majorSearchDto.majorId})
+            and (:#{majorSearchDto.majorName} is null or m.name like concat('%',:#{majorSearchDto.majorName,'%')})
+            and (:#{majorSearchDto.collegeId} is null or c.id = :#{majorSearchDto.collegeId})
+            and (:#{majorSearchDto.collegeName} is null or c.type like concat('%',:#{majorSearchDto.collegeName},'%'))
+            """)
+    Page <MajorListDto> findAllWithCollege(@Param("majorSearchDto") MajorSearchDto majorSearchDto, Pageable pageable);
 }

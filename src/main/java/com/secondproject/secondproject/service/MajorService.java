@@ -1,8 +1,6 @@
 package com.secondproject.secondproject.service;
 
-import com.secondproject.secondproject.dto.MajorInCollegeDto;
-import com.secondproject.secondproject.dto.MajorInsertDto;
-import com.secondproject.secondproject.dto.MajorResponseDto;
+import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.College;
 import com.secondproject.secondproject.entity.Major;
 import com.secondproject.secondproject.repository.CollegeRepository;
@@ -13,7 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.config.ConfigDataLocationNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -63,7 +64,6 @@ public class MajorService {
 
         // 학과 등록
         Major major = new Major();
-        major.setId(majorInsertDto.getCollegeId());
         major.setName(majorInsertDto.getName());
         major.setOffice(majorInsertDto.getOffice());
         major.setCollege(college);
@@ -82,5 +82,18 @@ public class MajorService {
         }catch (DataIntegrityViolationException e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"유효하지 않은 데이터 : "+e);
         }
+    }
+
+
+    public Page<MajorListDto> findAllMajors(MajorSearchDto majorSearchDto, Pageable pageable) {
+        return majorRepository.findAllWithCollege(majorSearchDto,pageable);
+    }
+
+    public void deleteMajor(Long id) {
+        majorRepository.deleteById(id);
+    }
+
+    public boolean existsById(Long id) {
+        return majorRepository.existsById(id);
     }
 }
