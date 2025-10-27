@@ -48,5 +48,33 @@ public class StudentInfoDto {
     private String studentImage;
 
     public StudentInfoDto(User user, StatusRecords statusRecord) {
+
+            // User 기반 필드 세팅
+            this.id = user.getId();
+            this.userCode = user.getUserCode();
+            this.name = user.getName();
+            this.email = user.getEmail();
+            this.password = user.getPassword();
+            this.gender = user.getGender();
+            this.birthDate = user.getBirthDate();
+            this.phone = user.getPhone();
+            this.major = user.getMajor();
+            this.type = user.getType();
+
+            // StatusRecords 기반 필드 세팅 (null 안전)
+            if (statusRecord != null) {
+                this.statusId = statusRecord.getId();
+                this.student_status = statusRecord.getStudentStatus(); // Enum
+                this.admissionDate = statusRecord.getAdmissionDate();
+                this.leaveDate = statusRecord.getLeaveDate();
+                this.returnDate = statusRecord.getReturnDate();
+                this.graduationDate = statusRecord.getGraduationDate();
+                this.retentionDate = statusRecord.getRetentionDate();
+                this.expelledDate = statusRecord.getExpelledDate();
+                this.totalCredit = statusRecord.getTotalCredit();
+                this.currentCredit = statusRecord.getCurrentCredit();
+                this.studentImage = statusRecord.getStudentImage();
+            }
+        }
     }
-}
+
