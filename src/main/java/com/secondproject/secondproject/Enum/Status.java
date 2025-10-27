@@ -7,7 +7,7 @@ public enum Status {
     PENDING,   // 처리중(검토 대기)
     APPROVED,  // 승인
     REJECTED,  // 거부
-    IN_PROGRESS, // 수강중
+    INPROGRESS, // 수강중
     COMPLETED // 종강
 
 }

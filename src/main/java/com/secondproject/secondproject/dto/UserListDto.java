@@ -11,7 +11,7 @@ import java.time.LocalDate;
 public class UserListDto {
 
 
-
+    private Long id;
 
     private Long user_code; // 유저 번호
 
@@ -31,10 +31,25 @@ public class UserListDto {
 
     private String college; // 소속 단과대학
 
+
     private UserType u_type; // 구분: 학생, 교수, 관리자 (enum)
 
     public UserListDto( Long user_code, String u_name, String password, LocalDate birthdate, String email, String phone, String gender, String major, String college, UserType u_type) {
 
+        this.user_code = user_code;
+        this.u_name = u_name;
+        this.password = password;
+        this.birthdate = birthdate;
+        this.email = email;
+        this.phone = phone;
+        this.gender = gender;
+        this.major = major;
+        this.college = college;
+        this.u_type = u_type;
+    }
+
+    public UserListDto(Long id, Long user_code, String u_name, String password, LocalDate birthdate, String email, String phone, String gender, String major, String college, UserType u_type) {
+        this.id = id;
         this.user_code = user_code;
         this.u_name = u_name;
         this.password = password;

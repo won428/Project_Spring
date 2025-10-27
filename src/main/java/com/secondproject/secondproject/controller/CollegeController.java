@@ -53,6 +53,8 @@ public class CollegeController {
         return ResponseEntity.ok(colleges);
     }
 
+
+
     @DeleteMapping("/delete/{college_id}")
     public ResponseEntity<String> deleteCollege(@PathVariable("college_id") Long college_id) {
         if (!collegeService.existsById(college_id)) {

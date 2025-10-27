@@ -1,25 +1,8 @@
-이의제기(appeal)
-이의제기코드(PK)	appeal_id	number	PK
-보낸사람	sending_id	number	FK
-받는사람	receiver_id	number	FK
-수강ID(FK)	enroll_Id	number	FK
-제목	title	varchar	not null
-본문	content	varchar	not null
-이의제기일	appeal_date	date	not null
-처리상태	a_status	ENUM	not null
-구분	appealType	ENUM	not null
-
-@Enumerated(EnumType.STRING)
-
-@JsonFormat(pattern = "yyyy-MM-dd")
-@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-
-@Id
-@GeneratedValue(strategy = GenerationType.AUTO)
-@Column(name = "user_id")
-
-columnDefinition
-
- @Column(name = "score", precision = 4, scale = 2, nullable = false) // => DECIMAL(4,2)
- @Digits(integer = 2, fraction = 2)  // Bean Validation (00.00 ~ 99.99)
- private BigDecimal score;
+this.name = name;
+        this.userName = userName;
+        this.credit = credit;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.majorName = majorName;
+        this.totalStudent = totalStudent;
+        this.status = status;
