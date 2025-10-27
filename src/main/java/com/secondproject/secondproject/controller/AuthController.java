@@ -45,10 +45,11 @@ public class AuthController {
             );
             com.secondproject.secondproject.entity.User user = (com.secondproject.secondproject.entity.User) authentication.getPrincipal();
 
+            Long id = user.getId();
             String role = user.getType().name();
             System.out.println("역할  :" + role);
-            String access = jwtTokenProvider.createAccessToken(email, role);
-            String refresh = jwtTokenProvider.createRefreshToken(email);
+            String access = jwtTokenProvider.createAccessToken(id,email, role);
+            String refresh = jwtTokenProvider.createRefreshToken(id,email);
 
             refreshTokenRepo.findByEmail(email)
                     .ifPresentOrElse(
@@ -76,7 +77,12 @@ public class AuthController {
                     && saved.get().getToken().equals(refreshRequest.getRefreshToken())
                     && jwtTokenProvider.validateToken(refreshRequest.getRefreshToken())
             ) {
-                String newAccess = jwtTokenProvider.createAccessToken(email, "");
+                User user = userService.getByEmail(email)
+                        .orElseThrow(() -> new BadCredentialsException("사용자 없음")); // ★ 추가
+                Long userId = user.getId();                                           // ★ 추가
+                String role  = user.getType().name();                                 // ★ 추가
+
+                String newAccess = jwtTokenProvider.createAccessToken(userId, email, role);
                 return ResponseEntity.ok(new TokenResponse(newAccess, refreshRequest.getRefreshToken()));
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token 만료 / 불 일치");

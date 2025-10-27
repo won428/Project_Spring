@@ -140,7 +140,7 @@ public class UserService {
     }
 
 
-    public void save(Long id, UserUpdateDto userReactDto, User findUser, Major major) {
+    public void update(Long id, UserUpdateDto userReactDto, User findUser, Major major) {
 
         User user = findUser;
         String password = passwordEncoder.encode(userReactDto.getPassword());

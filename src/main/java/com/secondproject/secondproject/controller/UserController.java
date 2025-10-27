@@ -105,7 +105,7 @@ public class UserController {
                         new ResponseStatusException(HttpStatus.NOT_FOUND, id + "사용자 없음"));
         Major major = this.majorService.findMajor(userReactDto.getMajor());
 
-        this.userService.save(id, userReactDto, findUser , major);
+        this.userService.update(id, userReactDto, findUser , major);
 
         return ResponseEntity.ok(200);
     }
