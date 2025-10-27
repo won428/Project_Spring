@@ -60,6 +60,8 @@ public class MajorService {
         if (majorRepository.existsByNameAndCollegeId(majorInsertDto.getName(),majorInsertDto.getCollegeId())){
             throw new ResponseStatusException(HttpStatus.CONFLICT);
         }
+
+        // 학과 등록
         Major major = new Major();
         major.setId(majorInsertDto.getCollegeId());
         major.setName(majorInsertDto.getName());
@@ -69,6 +71,7 @@ public class MajorService {
         try{
             Major saved = majorRepository.save(major);
 
+            // 응답Dto로 변환
             MajorResponseDto responseDto = new MajorResponseDto();
             responseDto.setId(saved.getId());
             responseDto.setName(saved.getName());
