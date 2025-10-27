@@ -22,7 +22,7 @@ public class Notice {
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_notice_user"))
     private User user; // 작성자 ID
 
-    @Column(name = "notice_title",nullable = false, length = 200)
+    @Column(name = "notice_title", nullable = false, length = 200)
     private String title; // 공지사항 제목
 
     @Lob
@@ -38,14 +38,16 @@ public class Notice {
     private LocalDateTime updatedAt; // 수정일
 
 
-    @PrePersist // @PrePersist: 엔티티가 처음 INSERT되기 직전에 자동 실행
+    @PrePersist
+        // @PrePersist: 엔티티가 처음 INSERT 되기 직전에 자동 실행
     void onCreate() {
         LocalDateTime now = LocalDateTime.now();
         if (createdAt == null) createdAt = now; // 최초 생성 시간
         updatedAt = now;                              // 최초 업데이트 시간도 now
     }
 
-    @PreUpdate // @PreUpdate: 엔티티가 UPDATE되기 직전에 자동 실행
+    @PreUpdate
+        // @PreUpdate: 엔티티가 UPDATE되기 직전에 자동 실행
     void onUpdate() {
         updatedAt = LocalDateTime.now();             // 수정 시마다 갱신
     }
