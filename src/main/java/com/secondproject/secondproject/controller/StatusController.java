@@ -1,11 +1,8 @@
 package com.secondproject.secondproject.controller;
 
-import com.secondproject.secondproject.entity.StudentRecord;
 import com.secondproject.secondproject.dto.StatusChangeRequestDto;
-import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.service.StatusService;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,43 +10,44 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/student_record")
+@RequestMapping("/api/student")
+@RequiredArgsConstructor
 public class StatusController {
 
-    @Autowired
-    private StatusService statusService;
+    private final StatusService statusService;
 
-    // 학적 변경 신청 API - 학생만 가능하도록 제약조건 유지
-    @PostMapping("/change")
-    public ResponseEntity<String> applyStatusChange(@RequestPart("dto") StatusChangeRequestDto dto,
-                                                    @RequestPart(value = "file", required = false) MultipartFile file,
-                                                    @RequestParam("userType") UserType userType) {
-        if (userType != UserType.STUDENT) {
-            return ResponseEntity.status(403).body("학적 변경 신청은 학생만 가능합니다.");
-        }
-        if (file != null && !file.isEmpty()) {
-            statusService.storeAttachmentFile(file);
-        }
-        statusService.changeStatusWithEvidence(dto);
-        return ResponseEntity.ok("학적 변경 신청이 완료되었습니다.");
+    // 생성: React ChangeStatusPage (POST /api/student/record)
+    @PostMapping("/record")
+    public ResponseEntity<StatusChangeRequestDto> applyStatusChange(@RequestBody StatusChangeRequestDto dto) {
+        StatusChangeRequestDto created = statusService.createChangeRequest(dto);
+        return ResponseEntity.ok(created);
     }
 
-    // 특정 학생의 학적 변경 신청 상태 목록 조회 API
-    @GetMapping("/change_requests/{applier}")
-    public ResponseEntity<List<StudentRecord>> getStudentChangeRequestsStatus(@PathVariable Long applier) {
-        List<StudentRecord> records = statusService.getStudentChangeRequestsStatus(applier);
-        return ResponseEntity.ok(records);
+    // 목록: React ChangeStatusList (GET /api/student/records/{userId})
+    @GetMapping("/records/{userId}")
+    public ResponseEntity<List<StatusChangeRequestDto>> getStudentChangeRequests(@PathVariable Long userId) {
+        List<StatusChangeRequestDto> list = statusService.getStudentChangeRequests(userId);
+        return ResponseEntity.ok(list);
     }
 
-    // *** 신규 추가: 개별 학적 변경 신청 상세내역 조회 API ***
-    @GetMapping("/change_request/{recordId}")
+    // 상세: React ChangeStatusDetail (GET /api/student/record/{recordId})
+    @GetMapping("/record/{recordId}")
     public ResponseEntity<StatusChangeRequestDto> getChangeRequestDetail(@PathVariable Long recordId) {
-        StatusChangeRequestDto detailDto = statusService.getChangeRequestDetail(recordId);
-
-        if (detailDto == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(detailDto);
+        StatusChangeRequestDto detail = statusService.getChangeRequestDetail(recordId);
+        if (detail == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(detail);
     }
+
+    // 동시 업로드: 파일 + DTO 한 번에 전송 (POST /api/student/attachments)
+//    @PostMapping(value = "/attachments", consumes = {"multipart/form-data"})
+//    public ResponseEntity<StatusChangeRequestDto> applyStatusChangeWithFile(
+//            @RequestPart("dto") StatusChangeRequestDto dto,
+//            @RequestPart(value = "file", required = false) MultipartFile file
+//    ) {
+//        Long attachmentId = (file != null && !file.isEmpty())
+//                ? statusService.storeAttachmentFile(file) : null;
+//        if (attachmentId != null) dto.setAttachmentId(attachmentId);
+//        StatusChangeRequestDto created = statusService.createChangeRequest(dto);
+//        return ResponseEntity.ok(created);
+//    }
 }

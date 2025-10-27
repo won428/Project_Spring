@@ -1,125 +1,144 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.entity.Attachment;
-import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.entity.StudentRecord;
 import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.dto.StatusChangeRequestDto;
+import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.repository.AttachmentRepository;
 import com.secondproject.secondproject.repository.StatusChangeRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.secondproject.secondproject.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
+@RequiredArgsConstructor
 public class StatusService {
 
-    @Autowired
-    private StatusChangeRepository statusChangeRepository;
+    private final UserRepository userRepository;
+    private final StatusChangeRepository statusChangeRepository;
+//    private final AttachmentRepository attachmentRepository;
 
-    @Autowired
-    private AttachmentRepository attachmentRepository;
+    // 파일 저장: 파일을 저장하고 첨부 PK를 반환
+//    @Transactional
+//    public Long storeAttachmentFile(MultipartFile file) {
+//        if (file == null || file.isEmpty()) return null;
+//
+//        try {
+//            // 예시: 로컬 디스크 저장
+//            String uuid = java.util.UUID.randomUUID().toString();
+//            String ext = Optional.ofNullable(file.getOriginalFilename())
+//                    .filter(n -> n.contains("."))
+//                    .map(n -> n.substring(n.lastIndexOf('.') + 1))
+//                    .orElse("");
+//            String storedKey = uuid + (ext.isEmpty() ? "" : "." + ext);
+//
+//            java.nio.file.Path uploadDir = java.nio.file.Paths.get("uploads");
+//            java.nio.file.Files.createDirectories(uploadDir);
+//            java.nio.file.Path target = uploadDir.resolve(storedKey);
+//            java.nio.file.Files.copy(file.getInputStream(), target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+//
+//            Attachment att = new Attachment();
+//            // 엔티티 실제 필드명에 맞게 변경 필요
+//            att.setName(file.getOriginalFilename());
+//            att.setContentType(file.getContentType());
+//            att.setSizeBytes(file.getSize());
+//            att.setStoredKey(storedKey); // NOT NULL 컬럼 채우기
+//
+//            Attachment saved = attachmentRepository.save(att);
+//            return saved.getId();
+//        } catch (Exception ex) {
+//            throw new RuntimeException("Attachment store failed", ex);
+//        }
+//    }
 
-    // 학적 변경 신청 저장 (처리 상태 지정 없이 기본 저장)
-    public void changeStatusWithEvidence(StatusChangeRequestDto dto) {
-        // 학생 여부 검증은 컨트롤러 등 상위 계층에서 처리한다고 가정
 
+    // 1) 생성
+    @Transactional
+    public StatusChangeRequestDto createChangeRequest(StatusChangeRequestDto dto) {
+        // 사용자 조회
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + dto.getUserId()));
+
+        // 엔티티 조립
         StudentRecord record = new StudentRecord();
+        record.setUser(user);
+        record.setStudentStatus(dto.getStudentStatus());
         record.setTitle(dto.getTitle());
         record.setContent(dto.getContent());
-        record.setAppliedDate(dto.getAppliedDate());
-        record.setProcessedDate(dto.getProcessedDate());
-        record.setStudentStatus(dto.getAcademicRequest());
-        // 신청자 ID를 그대로 기록
-        record.setUser(dto.getUser());
 
-        // 학적 변경 신청 기본 저장
-        StatusChangeRepository.save(record);
+        // 서버 보정
+        record.setAppliedDate(LocalDate.now());
+        record.setProcessedDate(null);
+        record.setStatus(Status.PENDING);
+
+        // 첨부 연결(선택)
+//        if (dto.getAttachmentId() != null) {
+//            Attachment att = attachmentRepository.findById(dto.getAttachmentId())
+//                    .orElseThrow(() -> new IllegalArgumentException("Attachment not found: " + dto.getAttachmentId()));
+//            // 연관관계가 있다면 주입(예: record.setAttachment(att))
+//        }
+
+        // 저장
+        StudentRecord saved = statusChangeRepository.save(record);
+
+        // 응답 DTO
+        StatusChangeRequestDto res = new StatusChangeRequestDto();
+        res.setRecordId(saved.getId());
+        res.setUserId(user.getId());
+        res.setStudentStatus(saved.getStudentStatus());
+        res.setTitle(saved.getTitle());
+        res.setContent(saved.getContent());
+        res.setAppliedDate(saved.getAppliedDate());
+        res.setProcessedDate(saved.getProcessedDate());
+        res.setStatus(saved.getStatus());
+        res.setAttachmentId(dto.getAttachmentId());
+        return res;
     }
 
-    // 특정 학생의 학적변경신청 상태(PENDING, APPROVED, REJECTED) 목록 조회
-    public List<StudentRecord> getStudentChangeRequestsStatus(Long userId) {
-        // userId가 학생인지 미리 확인해도 좋음
-
-        // 상태 세 가지만 필터링해 조회 (임의 메서드명, 구현된 리포지토리 메서드 필요)
-        List<Status> validStatuses = List.of(Status.PENDING, Status.APPROVED, Status.REJECTED);
-
-        return statusChangeRepository.findByUserIdAndStatusIn(userId, validStatuses);
+    // 2) 목록
+    @Transactional(readOnly = true)
+    public List<StatusChangeRequestDto> getStudentChangeRequests(Long userId) {
+        List<StudentRecord> list = statusChangeRepository.findByUserIdOrderByIdDesc(userId);
+        return list.stream().map(sr -> {
+            StatusChangeRequestDto d = new StatusChangeRequestDto();
+            d.setRecordId(sr.getId());
+            d.setUserId(sr.getUser() != null ? sr.getUser().getId() : null);
+            d.setStudentStatus(sr.getStudentStatus());
+            d.setTitle(sr.getTitle());
+            d.setContent(sr.getContent());
+            d.setAppliedDate(sr.getAppliedDate());
+            d.setProcessedDate(sr.getProcessedDate());
+            d.setStatus(sr.getStatus());
+            // 필요 시 첨부 id 매핑: d.setAttachmentId(sr.getAttachment() != null ? sr.getAttachment().getId() : null);
+            return d;
+        }).collect(java.util.stream.Collectors.toList());
     }
 
-    // 간단 첨부파일 저장 (파일명만 저장)
-    public void storeAttachmentFile(MultipartFile file) {
-        try {
-            String originalFileName = file.getOriginalFilename();
-            Attachment attachment = new Attachment();
-            attachment.setName(originalFileName); // 필드명이 'name' 으로 정의되어 있음
-            attachment.setStoredKey(originalFileName); // 변환된 파일명 (추후 수정 필요)
-            attachment.setContentType(file.getContentType());
-            attachment.setSizeBytes(file.getSize());
-            attachment.setUploadAt(LocalDate.now());
-            AttachmentRepository.fSave(attachment); // fSave → save 로 수정
-        } catch (Exception e) {
-            throw new RuntimeException("첨부파일 저장 중 오류 발생: " + e.getMessage());
-        }
-    }
-
-    // PK로 단일 학적변경신청 상세내역 조회
+    // 3) 상세
+    @Transactional(readOnly = true)
     public StatusChangeRequestDto getChangeRequestDetail(Long recordId) {
-        Optional<StatusRecords> optionalRecord = statusChangeRepository.findById(recordId);
-        if (optionalRecord.isEmpty()) {
-            return null; // 또는 적절한 예외 처리
-        }
-        StatusRecords record = optionalRecord.get();
+        Optional<StudentRecord> opt = statusChangeRepository.findById(recordId);
+        if (opt.isEmpty()) return null;
+        StudentRecord sr = opt.get();
 
-        StatusChangeRequestDto dto = new StatusChangeRequestDto();
-        dto.setRecordId(record.getId());                  // PK (status_id)
-        dto.setUser(record.getUser());            // 신청자 ID
-        dto.setStatusId(record.getId());                   // 참조용 상태 ID (recordId 재사용)
-        dto.setTitle(null);                                // title 필드가 없으므로 null 설정
-        dto.setContent(null);                              // content 필드가 없으므로 null 설정
-        dto.setAppliedDate(record.getAdmissionDate());     // 입학일
-        dto.setProcessedDate(null);                        // 처리일 엔티티에 없으면 null
-        dto.setAcademicRequest(record.getStudentStatus()); // 학생 상태(enum)
-        dto.setAttachmentId(null);                         // 첨부파일ID는 별도 필드/관계 필요 시 처리
-
-        // 필요하면 아래와 같이 추가 상세 필드도 DTO에 매핑 가능
-        dto.setLeaveDate(record.getLeaveDate());
-        dto.setReturnDate(record.getReturnDate());
-        dto.setGraduationDate(record.getGraduationDate());
-        dto.setRetentionDate(record.getRetentionDate());
-        dto.setExpelledDate(record.getExpelledDate());
-        dto.setTotalCredit(record.getTotalCredit());
-        dto.setCurrentCredit(record.getCurrentCredit());
-        dto.setStudentImage(record.getStudentImage());
-
-        return dto;
+        StatusChangeRequestDto d = new StatusChangeRequestDto();
+        d.setRecordId(sr.getId());
+        d.setUserId(sr.getUser() != null ? sr.getUser().getId() : null);
+        d.setStudentStatus(sr.getStudentStatus());
+        d.setTitle(sr.getTitle());
+        d.setContent(sr.getContent());
+        d.setAppliedDate(sr.getAppliedDate());
+        d.setProcessedDate(sr.getProcessedDate());
+        d.setStatus(sr.getStatus());
+        // 필요 시 첨부 id 매핑: d.setAttachmentId(sr.getAttachment() != null ? sr.getAttachment().getId() : null);
+        return d;
     }
-
-    // 추가 구현 가능한 메소드 목록
-
-    // PK로 단일 학적변경신청 조회
-//    public StudentRecord getRecordById(Long recordId) {
-//        return studentRecordRepository.findByRecordId(recordId);
-//    }
-//
-//    // 사용자별 학적변경 이력 목록 조회
-//    public List<StudentRecord> getRecordsByUserId(Long userId) {
-//        return studentRecordRepository.findByUserId(userId);
-//    }
-//
-//    // 제목 검색용
-//    public List<StudentRecord> findRecordsByTitle(String keyword) {
-//        return studentRecordRepository.findByTitleContaining(keyword);
-//    }
-//
-//    // 신청일 기간별 조회
-//    public List<StudentRecord> getRecordsByAppliedDateBetween(LocalDate start, LocalDate end) {
-//        return studentRecordRepository.findByAppliedDateBetween(start, end);
-//    }
 }
