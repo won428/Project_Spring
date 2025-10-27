@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class BoardListDto {
     Long id;
-    User user;
+    String username;
     String title;
     String content;
     LocalDateTime createdAt;
@@ -27,9 +27,10 @@ public class BoardListDto {
         dto.setContent(notice.getContent());
 
         // User 엔티티에서 필요한 작성자 이름만 꺼내서 DTO에 담습니다.
-        // 이렇게 하면 무한 재귀 문제도 해결되고, 필요한 데이터만 노출할 수 있습니다.
         if (notice.getUser() != null) {
-            dto.setUser(notice.getUser());
+            dto.setUsername(notice.getUser().getName());
+            System.out.println(notice.getUser().getName());
+
         }
 
         dto.setCreatedAt(notice.getCreatedAt());

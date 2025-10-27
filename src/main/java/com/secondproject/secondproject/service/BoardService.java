@@ -58,7 +58,6 @@ public class BoardService {
             noticeListDto.add(BoardListDto.fromEntity(notice));
         }
 
-
         return noticeListDto;
     }
 }
