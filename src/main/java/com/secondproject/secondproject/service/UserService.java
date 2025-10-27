@@ -108,6 +108,7 @@ public class UserService {
             userDto.setUser_code(user.getUserCode());
             userDto.setPhone(user.getPhone());
             userDto.setEmail(user.getEmail());
+            userDto.setPassword(user.getPassword());
             userDto.setMajor(majorName);
             userDto.setCollege(collegeName);
             userDto.setU_type(user.getType());
@@ -117,6 +118,19 @@ public class UserService {
         }
 
         return userListDto;
+    }
+
+    public Optional<User> findUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+
+    public Optional<User> getByEmail(String email) {
+        return userRepository.getByEmail(email);
+    }
+
+    public void setPassword(User user) {
+        userRepository.save(user);
     }
 
     public Optional<User> findByUsercode(Long userCode) {

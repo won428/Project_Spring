@@ -1,12 +1,23 @@
 package com.secondproject.secondproject.service;
 
+import com.secondproject.secondproject.Enum.CollegePaging;
 import com.secondproject.secondproject.dto.CollegeInsertDto;
 import com.secondproject.secondproject.dto.CollegeResponseDto;
+import com.secondproject.secondproject.dto.CollegeSearchDto;
+import com.secondproject.secondproject.dto.MajorResponseDto;
 import com.secondproject.secondproject.entity.College;
 import com.secondproject.secondproject.repository.CollegeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,14 +35,18 @@ public class CollegeService {
         college.setType(collegeInsertDto.getType());
         college.setOffice(collegeInsertDto.getOffice());
 
-        College saved = collegeRepository.save(college);
+        try{
+            College saved = collegeRepository.save(college);
 
-        CollegeResponseDto collegeResponseDto = new CollegeResponseDto();
-        collegeResponseDto.setId(saved.getId());
-        collegeResponseDto.setType(saved.getType());
-        collegeResponseDto.setOffice(saved.getOffice());
+            CollegeResponseDto collegeResponseDto = new CollegeResponseDto();
+            collegeResponseDto.setId(saved.getId());
+            collegeResponseDto.setType(saved.getType());
+            collegeResponseDto.setOffice(saved.getOffice());
 
-        return collegeResponseDto;
+            return collegeResponseDto;
+        } catch (DataIntegrityViolationException e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"유효하지 않은 요청 : "+e);
+        }
     }
 
     public boolean existsById(Long college_id) {return collegeRepository.existsById(college_id);
@@ -76,11 +91,12 @@ public class CollegeService {
         return collegeResponseDto;
     }
 
-    //
+    // College 엔터티 id로 조회해서 응답Dto로 받기
     public Optional<CollegeResponseDto> findById(Long id) {
         return collegeRepository.findById(id).map(this::toDto);
     }
 
+    // 엔터티를 응답Dto로 반환
     public CollegeResponseDto toDto(College college){
         CollegeResponseDto collegeResponseDto = new CollegeResponseDto();
         collegeResponseDto.setId(college.getId());
@@ -89,4 +105,28 @@ public class CollegeService {
 
         return collegeResponseDto;
     }
+
+    public Page<College> listCollage(Pageable pageable){
+        return this.collegeRepository.findAll(pageable);
+    }
+
+    public Page<College> search(CollegeSearchDto collegeSearchDto) {
+        Pageable pageable = PageRequest.of(collegeSearchDto.getPage(),collegeSearchDto.getSize());
+        String keyword = Optional.ofNullable(collegeSearchDto.getSearchKeyword()).orElse("");
+        CollegePaging mode = Optional.ofNullable(collegeSearchDto.getCollegePaging()).orElse(CollegePaging.ALL);
+
+        if (mode == null || mode == CollegePaging.ALL) {
+            return collegeRepository.findByTypeContainingIgnoreCaseOrOfficeContaining(keyword, keyword, pageable);
+        } else if (mode == CollegePaging.TYPE) {
+            return collegeRepository.findByTypeContainingIgnoreCase(keyword, pageable);
+        } else if (mode == CollegePaging.OFFICE) {
+            return collegeRepository.findByTypeContainingIgnoreCase(keyword, pageable);
+        } else {
+            // 예상치 못한 값 처리
+            return collegeRepository.findByTypeContainingIgnoreCaseOrOfficeContaining(keyword, keyword, pageable);
+            // 또는 throw new IllegalStateException("Unexpected mode: " + mode);
+        }
+    }
+
+
 }
