@@ -35,9 +35,12 @@ public class BoardController {
     public ResponseEntity<List<BoardListDto>> NotionList(@RequestParam String email) {
         try {
             List<BoardListDto> noticeList = boardService.getNoticeById(email);
+
             return ResponseEntity.ok(noticeList);
         } catch (Exception e) {
+            e.printStackTrace(); // 에러의 전체 내용을 콘솔(err)에 출력
             return ResponseEntity.badRequest().build();
+
         }
 
 
