@@ -34,8 +34,23 @@ public class MajorController {
         return majorList;
     }
 
+    // 선택한 특정 학과 가져오기(업데이트용)
+    @GetMapping("/selectOne/{id}")
+    public ResponseEntity<MajorListDto> selectMajorId(@PathVariable("id") Long id){
+        return  majorService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
-    // 페이징 시 여기에 Pageable 넣기
+    // 수정한 정보로 업데이트하기
+    @PutMapping("/update/{id}")
+    public ResponseEntity<MajorResponseDto> updateMajor(@PathVariable Long id,
+                                                        @RequestBody @Valid MajorInsertDto majorInsertDto){
+        MajorResponseDto majorResponseDto = majorService.updateMajor(id,majorInsertDto);
+        return ResponseEntity.ok(majorResponseDto);
+    }
+
+    // 학과목록 조회 + 검색기능 + 페이징
     @GetMapping("/findAllMajor")
     public Page<MajorListDto> findAllMajors(Pageable pageable,
                                             @RequestParam(defaultValue = "ALL") MajorPaging searchType,
@@ -57,6 +72,7 @@ public class MajorController {
         return ResponseEntity.created(location).body(null);
     }
 
+    // 학과 삭제
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> delete(@PathVariable("id") Long id){
         if(!majorService.existsById(id)){

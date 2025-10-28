@@ -54,6 +54,7 @@ public class MajorService {
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 학과: " + major));
     }
 
+
     // 학과 등록하기
     public MajorResponseDto insertMajor(@Valid MajorInsertDto majorInsertDto) {
 
@@ -75,12 +76,8 @@ public class MajorService {
 
             // 응답Dto로 변환
             MajorResponseDto responseDto = new MajorResponseDto();
-            responseDto.setId(saved.getId());
-            responseDto.setName(saved.getName());
-            responseDto.setOffice(saved.getOffice());
-            responseDto.setCollege(saved.getCollege());
 
-            return responseDto;
+            return new MajorResponseDto(saved.getId(), saved.getName(),saved.getOffice(),saved.getCollege().getId());
         }catch (DataIntegrityViolationException e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"유효하지 않은 데이터 : "+e);
         }
@@ -92,6 +89,7 @@ public class MajorService {
         catch (NumberFormatException e) { return null; }
     }
 
+    // 학과 검색조건 설정 및 검색
     @Transactional(readOnly = true)
     public Page<MajorListDto> findAllMajors(Pageable pageable, MajorPaging searchType, String searchKeyword) {
         String keyWord = searchKeyword == null ? "":searchKeyword.trim();
@@ -117,5 +115,37 @@ public class MajorService {
 
     public boolean existsById(Long id) {
         return majorRepository.existsById(id);
+    }
+
+
+    public Optional<MajorListDto> findById(Long id) {
+        return majorRepository.findByMajorId(id);
+    }
+
+//    public MajorListDto toDto(Major major) {
+//        MajorListDto majorListDto = new MajorListDto();
+//
+//        majorListDto.setId(major.getId());
+//        majorListDto.setName(major.getName());
+//        majorListDto.setOffice(major.getOffice());
+//        majorListDto.setCollegeId(major.getCollege().getId());
+//        majorListDto.setCollegeName(major.getCollege().getType());
+//
+//        return majorListDto;
+//    }
+
+    public MajorResponseDto updateMajor(Long id, @Valid MajorInsertDto majorInsertDto) {
+        Major major = majorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지않는 ID : "+id));
+        College college = collegeRepository.findById(majorInsertDto.getCollegeId())
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        major.setName(majorInsertDto.getName());
+        major.setOffice(majorInsertDto.getOffice());
+        major.setCollege(college);
+
+        Major saved = majorRepository.save(major);
+
+        return new MajorResponseDto(saved.getId(), saved.getName(), saved.getOffice(), saved.getCollege().getId());
     }
 }
