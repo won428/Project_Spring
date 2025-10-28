@@ -33,6 +33,7 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
     private final LectureService lectureService;
 
+    // 유저 등록(컨트롤러 부분 나중에 서비스로 이식할겁니다.)
     @PostMapping("/signup")
     public ResponseEntity<?> insertUser(@RequestBody UserDto userinfo){
         User user = new User();
@@ -69,7 +70,7 @@ public class UserController {
         return userList;
     }
 
-    // 유저코드로 유저 찾기
+    // 유저코드로 유저 찾기(컨트롤러 부분 나중에 서비스로 이식할겁니다.)
     @GetMapping("/selectUserCode/{id}")
     public UserUpdateDto findByUsercode(@PathVariable Long id){
 
@@ -96,7 +97,7 @@ public class UserController {
         return userDto;
     }
 
-    // 관리자용 유저 정보수정
+    // 관리자용 유저 정보수정(컨트롤러 부분 나중에 서비스로 이식할겁니다.)
     @PatchMapping("/admin/update/{id}")
     public ResponseEntity<?> userUpdateByAdmin(@PathVariable Long id, @RequestBody UserUpdateDto userReactDto){
 
@@ -105,10 +106,11 @@ public class UserController {
                         new ResponseStatusException(HttpStatus.NOT_FOUND, id + "사용자 없음"));
         Major major = this.majorService.findMajor(userReactDto.getMajor());
 
-        this.userService.save(id, userReactDto, findUser , major);
+        this.userService.update(id, userReactDto, findUser , major);
 
         return ResponseEntity.ok(200);
     }
+
 
 
 

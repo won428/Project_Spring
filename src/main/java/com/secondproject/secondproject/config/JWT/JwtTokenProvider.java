@@ -25,10 +25,11 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String createAccessToken(String email, String role) {
+    public String createAccessToken(Long id, String email, String role) {
         Date now = new Date();
         return Jwts.builder()
                 .setSubject(email)
+                .claim("uid", String.valueOf(id))
                 .claim("role", role)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + accessExp))
@@ -36,10 +37,11 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String createRefreshToken(String email) {
+    public String createRefreshToken(Long id, String email) {
         Date now = new Date();
         return Jwts.builder()
                 .setSubject(email)
+                .claim("uid", String.valueOf(id))
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + refreshExp))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -68,6 +70,7 @@ public class JwtTokenProvider {
                 .getBody()
                 .getSubject();
     }
+
 
 
 //    public String getUsername(String token) {

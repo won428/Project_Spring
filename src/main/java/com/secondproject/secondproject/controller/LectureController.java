@@ -1,13 +1,20 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.dto.LectureDto;
+import com.secondproject.secondproject.dto.UserDto;
+import com.secondproject.secondproject.dto.UserListDto;
 import com.secondproject.secondproject.service.LectureService;
 import com.secondproject.secondproject.service.MajorService;
+import com.secondproject.secondproject.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/lecture")
@@ -15,6 +22,7 @@ import java.util.List;
 public class LectureController {
     private final MajorService majorService;
     private final LectureService lectureService;
+    private final UserService userService;
 
     // 관리자용 강의 등록
     @PostMapping("/admin/lectureRegister")
@@ -31,6 +39,71 @@ public class LectureController {
         List<LectureDto> lectureDtoList = this.lectureService.findAll();
 
         return lectureDtoList;
+    }
+
+
+    @PutMapping("/request")
+    public ResponseEntity<?> lectureRequest(@RequestParam Long id, @RequestParam("status") Status status){
+
+        if(id == null || id < 0 || status == null){
+            return ResponseEntity.badRequest().body(Map.of("message","존재하지 않는 강의이거나 존재하지 않는 상태 표시입니다."));
+        }
+
+        this.lectureService.updateStatus(id,status);
+
+        return ResponseEntity.ok(200);
+    }
+
+    @PostMapping("/apply")
+    public ResponseEntity<?> applyLecture(@RequestBody List<Long> idList, @RequestParam Long id){
+
+
+        try {
+            this.lectureService.applyLecture(idList, id);
+            return ResponseEntity.ok(Map.of("success",true));
+        }catch (ResponseStatusException ex){
+            try {
+
+                int status = ex.getStatusCode().value();
+                String error = HttpStatus.valueOf(status).name();
+
+                Map<String, Object> body = Map.of(
+                        "status", status,
+                        "error", error,
+                        "message", ex.getReason(),
+                        "timestamp", java.time.OffsetDateTime.now().toString()
+                );
+
+                return ResponseEntity.status(ex.getStatusCode()).body(body);
+            }catch (Exception otherEx){
+                return ResponseEntity.status(500).body("알수없는 오류");
+            }
+        }
+    }
+
+    // 학생 수강신청 목록
+    @GetMapping("/mylist")
+    public List<LectureDto> myLectureList(@RequestParam Long userId){
+
+        List<LectureDto> myLecture = this.lectureService.myLectureList(userId);
+
+        return  myLecture;
+    }
+
+    // 교수 개설된 강의 상세정보
+    @GetMapping("/detail/{id}")
+    public LectureDto lectureDetailForPro(@PathVariable Long id){
+        LectureDto lectureDto = lectureService.findByID(id);
+
+        return lectureDto;
+    }
+
+    // 강의 상세정보 학생 목록
+    @GetMapping("/detail/studentList/{id}")
+    public List<UserDto> detailStudentList(@PathVariable Long id){
+        List<UserDto> userDtos = this.userService.findUserLectureDetail(id);
+
+        return userDtos;
     }
 
 }

@@ -36,6 +36,9 @@ public class LectureDto {
     private String majorName; // 학과 이름
 
     private int totalStudent; // 정원이 몇명인지 표기합니다. 정원을 초과하여 유저(학생이) 강의를 수강 할 수 없습니다.
+
+    private Long nowStudent;
+
     //강의 상태 : 대기중, 개설, 폐강등 ENUM에 필요한 상수 추가해주세요.
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -62,5 +65,12 @@ public class LectureDto {
         this.majorName = majorName;
         this.totalStudent = totalStudent;
         this.status = status;
+    }
+
+    public LectureDto(String name, String userName, int totalStudent, String majorName) {
+        this.name = name;
+        this.userName = userName;
+        this.totalStudent = totalStudent;
+        this.majorName = majorName;
     }
 }
