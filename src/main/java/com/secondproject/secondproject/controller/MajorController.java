@@ -1,6 +1,7 @@
 package com.secondproject.secondproject.controller;
 
 
+import com.secondproject.secondproject.Enum.MajorPaging;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.Major;
 import com.secondproject.secondproject.service.CollegeService;
@@ -36,8 +37,10 @@ public class MajorController {
 
     // 페이징 시 여기에 Pageable 넣기
     @GetMapping("/findAllMajor")
-    public Page<MajorListDto> findAllMajors(@ModelAttribute MajorSearchDto majorSearchDto, Pageable pageable){
-        return majorService.findAllMajors(majorSearchDto, pageable);
+    public Page<MajorListDto> findAllMajors(Pageable pageable,
+                                            @RequestParam(defaultValue = "ALL") MajorPaging searchType,
+                                            @RequestParam(defaultValue = "")String searchKeyword){
+        return majorService.findAllMajors(pageable, searchType, searchKeyword);
     }
 
     // 학과 등록

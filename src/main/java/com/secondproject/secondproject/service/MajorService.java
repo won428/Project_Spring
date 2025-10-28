@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.service;
 
+import com.secondproject.secondproject.Enum.MajorPaging;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.College;
 import com.secondproject.secondproject.entity.Major;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -84,9 +86,29 @@ public class MajorService {
         }
     }
 
+    // 숫자만 입력가능하게 하는 필터함수
+    private Long parseLongOrNull(String s) {
+        try { return s.isBlank()? null : Long.parseLong(s); }
+        catch (NumberFormatException e) { return null; }
+    }
 
-    public Page<MajorListDto> findAllMajors(MajorSearchDto majorSearchDto, Pageable pageable) {
-        return majorRepository.findAllWithCollege(majorSearchDto,pageable);
+    @Transactional(readOnly = true)
+    public Page<MajorListDto> findAllMajors(Pageable pageable, MajorPaging searchType, String searchKeyword) {
+        String keyWord = searchKeyword == null ? "":searchKeyword.trim();
+
+        switch (searchType) {
+            case MAJORID -> {
+                Long id = parseLongOrNull(keyWord);
+                return majorRepository.searchById(pageable,id);
+            } // 학과 ID 검색
+            case MAJORNAME -> { return majorRepository.searchByName(pageable,searchKeyword);} // 학과명 검색
+            case COLLEGENAME -> {return majorRepository.seachByCollegeName(pageable,searchKeyword);} //단과대학명 검색
+            case ALL -> {return majorRepository.searchAll(pageable,searchKeyword);} // 전체검색
+            default -> {return majorRepository.searchAll(pageable,searchKeyword);} // 기본값 전체검색
+
+        }
+
+
     }
 
     public void deleteMajor(Long id) {

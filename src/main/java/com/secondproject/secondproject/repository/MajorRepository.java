@@ -27,16 +27,38 @@ public interface MajorRepository extends JpaRepository<Major,Long> {
             message = "학과명에는 한글·영문·숫자와 공백, · - & ( ) /만 사용할 수 있습니다."
     ) String name, @NotNull Long collegeId);
 
+    // 학과 ID로 검색
     @Query("""
-            select new com.secondproject.secondproject.dto.MajorListDto(
-            m.id, m.name,m.office,c.id,c.type
-            )
-            from Major m
-            join m.college c
-            where (:#{majorSearchDto.majorId} is null or m.id = :#{majorSearchDto.majorId})
-            and (:#{majorSearchDto.majorName} is null or m.name like concat('%',:#{majorSearchDto.majorName,'%')})
-            and (:#{majorSearchDto.collegeId} is null or c.id = :#{majorSearchDto.collegeId})
-            and (:#{majorSearchDto.collegeName} is null or c.type like concat('%',:#{majorSearchDto.collegeName},'%'))
+            select new com.secondproject.secondproject.dto.MajorListDto(m.id,m.name,m.office,c.id,c.type)
+            from Major m join m.college c
+            where (:id is null or m.id = :id)
             """)
-    Page <MajorListDto> findAllWithCollege(@Param("majorSearchDto") MajorSearchDto majorSearchDto, Pageable pageable);
+    Page<MajorListDto> searchById(Pageable pageable, @Param("id") Long id);
+
+    // 학과명으로 검색
+    @Query("""
+            select new com.secondproject.secondproject.dto.MajorListDto(m.id,m.name,m.office,c.id,c.type)
+            from Major m join m.college c
+            where (:kw = '' or lower(m.name) like concat('%',lower(:kw),'%'))
+            """)
+    Page<MajorListDto> searchByName(Pageable pageable, @Param("kw") String searchKeyword);
+
+    // 단과대학명으로 검색
+    @Query("""
+            select new com.secondproject.secondproject.dto.MajorListDto(m.id,m.name,m.office,c.id,c.type)
+            from Major m join m.college c
+            where (:kw = '' or lower(c.type) like concat('%',lower(:kw),'%'))
+            """)
+    Page<MajorListDto> seachByCollegeName(Pageable pageable, @Param("kw") String searchKeyword);
+
+    // 전체검색
+    @Query("""
+            select new com.secondproject.secondproject.dto.MajorListDto(m.id,m.name,m.office,c.id,c.type)
+            from Major m join m.college c
+            where (:kw = '')
+            or lower(m.name) like concat('%',lower(:kw),'%')
+            or lower(c.type) like concat('%',lower(:kw),'%')
+            or (cast(m.id as string) like concat('%',:kw,'%'))
+            """)
+    Page<MajorListDto> searchAll(Pageable pageable, @Param("kw") String searchKeyword);
 }
