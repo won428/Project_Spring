@@ -10,6 +10,6 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
     static void fSave(Attachment attachment) {
 
     }
-    
-    List<Attachment> findByAttachmentId(Long attachmentId);
+
+
 }

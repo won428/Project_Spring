@@ -18,6 +18,7 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -74,8 +75,8 @@ public class AttachmentService {
     }
 
 
-    public List<Attachment> findById(Long attachmentId) {
-        return attachmentRepository.findByAttachmentId(attachmentId);
+    public Optional<Attachment> findById(Long attachmentId) {
+        return attachmentRepository.findById(attachmentId);
     }
 
 

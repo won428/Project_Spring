@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface NoticeAttachRepository extends JpaRepository<NoticeAttach, Long> {
-    NoticeAttach findByLecNoticeId(Long id);
+    List<NoticeAttach> findByLecNoticeId(Long id);
 }

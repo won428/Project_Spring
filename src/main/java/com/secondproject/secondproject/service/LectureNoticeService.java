@@ -83,12 +83,23 @@ public class LectureNoticeService {
     }
 
 
-    public List<LectureNoticeListWithFileDto> findById(Long id) {
+    public LectureNoticeListWithFileDto findById(Long id) {
 //        게시물 ID로 attachment 조회 / ListDto 조회 -> Dto에  담아서 Controller 전송
-        NoticeAttach noticeAttach = noticeAttachRepository.findByLecNoticeId(id);
-        List<Attachment> attachment = attachmentService.findById(noticeAttach.getAttachment().getId());
-        List<LectureNotice> lectureNotices = new ArrayList<>();
-        
+        //
+        List<NoticeAttach> noticeAttach = noticeAttachRepository.findByLecNoticeId(id);
+        //게시물 목록 호출
+        LectureNotice lectureNotice = lectureNoticeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("공지 없다"));
 
+
+        List<Attachment> NoticesFiles = new ArrayList<>();
+        LectureNoticeListWithFileDto dto = new LectureNoticeListWithFileDto();
+        dto.add(LectureNoticeListWithFileDto.fromEntity(lectureNotice));
+        for (NoticeAttach attachId : noticeAttach) {
+            Attachment attachment = attachmentService.findById(attachId.getAttachment().getId()).orElseThrow(() -> new EntityNotFoundException("ㅅㅄㅄㅂ"));
+            NoticesFiles.add(attachment);
+        }
+        dto.setFiles(NoticesFiles);
+        return dto;
     }
 }

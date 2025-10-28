@@ -1,6 +1,8 @@
 package com.secondproject.secondproject.dto;
 
+import com.secondproject.secondproject.entity.Attachment;
 import com.secondproject.secondproject.entity.LectureNotice;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,7 +13,7 @@ import java.util.List;
 
 @Getter
 @Setter
-@NoArgsConstructor
+@AllArgsConstructor
 public class LectureNoticeListWithFileDto {
     Long id;
     String username;
@@ -19,7 +21,7 @@ public class LectureNoticeListWithFileDto {
     String content;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
-    List<MultipartFile> files;
+    List<Attachment> files;
 
 
     public static LectureNoticeListWithFileDto fromEntity(LectureNotice notice) {
