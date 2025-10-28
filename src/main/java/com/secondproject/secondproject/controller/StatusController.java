@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.dto.StatusChangeListDto;
 import com.secondproject.secondproject.dto.StatusChangeRequestDto;
 import com.secondproject.secondproject.service.StatusService;
 import lombok.RequiredArgsConstructor;
@@ -50,4 +51,11 @@ public class StatusController {
 //        StatusChangeRequestDto created = statusService.createChangeRequest(dto);
 //        return ResponseEntity.ok(created);
 //    }
+
+    @GetMapping("/record/my")
+    public List<StatusChangeListDto> changeList(@RequestParam Long id){
+        List<StatusChangeListDto> list = this.statusService.findMyList(id);
+
+        return list;
+    }
 }

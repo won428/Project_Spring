@@ -14,6 +14,8 @@ public interface StatusChangeRepository extends JpaRepository<StudentRecord, Lon
     // 최신순 목록(스프링 자동 구현)
     List<StudentRecord> findByUserIdOrderByIdDesc(Long userId);
 
+    List<StudentRecord> findAllByUser_Id(Long id);
+
     // default save(...)는 제거. JpaRepository.save 사용.
 }
 

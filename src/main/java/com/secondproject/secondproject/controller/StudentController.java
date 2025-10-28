@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.dto.StatusChangeListDto;
 import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.entity.StatusRecords;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.secondproject.secondproject.Enum.UserType.STUDENT;
@@ -88,4 +90,6 @@ public class StudentController {
 
         return ResponseEntity.ok(responseBody);
     }
+
+
 }
