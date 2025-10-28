@@ -53,10 +53,10 @@ public class LectureNoticeController {
     public ResponseEntity<?> SpecPage(@RequestParam Long id, @RequestParam String email) {
         try {
 //           게시물 id 로 불러오고
-            List<LectureNoticeListWithFileDto> attachments = lectureNoticeService.findById(id);
+            LectureNoticeListWithFileDto attachments = lectureNoticeService.findById(id);
 
 
-            return null;
+            return ResponseEntity.ok(attachments);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }

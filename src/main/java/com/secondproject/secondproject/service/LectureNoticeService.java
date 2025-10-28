@@ -91,15 +91,20 @@ public class LectureNoticeService {
         LectureNotice lectureNotice = lectureNoticeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("공지 없다"));
 
+        List<Attachment> attachments = noticeAttach.stream()
+                .map(NoticeAttach::getAttachment)
+                .toList();
+        return LectureNoticeListWithFileDto.fromEntity(lectureNotice, attachments);
 
-        List<Attachment> NoticesFiles = new ArrayList<>();
-        LectureNoticeListWithFileDto dto = new LectureNoticeListWithFileDto();
-        dto.add(LectureNoticeListWithFileDto.fromEntity(lectureNotice));
-        for (NoticeAttach attachId : noticeAttach) {
-            Attachment attachment = attachmentService.findById(attachId.getAttachment().getId()).orElseThrow(() -> new EntityNotFoundException("ㅅㅄㅄㅂ"));
-            NoticesFiles.add(attachment);
-        }
-        dto.setFiles(NoticesFiles);
-        return dto;
+
+//        List<Attachment> NoticesFiles = new ArrayList<>();
+//        LectureNoticeListWithFileDto dto = new LectureNoticeListWithFileDto();
+//        dto.add(LectureNoticeListWithFileDto.fromEntity(lectureNotice));
+//        for (NoticeAttach attachId : noticeAttach) {
+//            Attachment attachment = attachmentService.findById(attachId.getAttachment().getId()).orElseThrow(() -> new EntityNotFoundException("ㅅㅄㅄㅂ"));
+//            NoticesFiles.add(attachment);
+//        }
+//        dto.setFiles(NoticesFiles);
+//        return dto;
     }
 }

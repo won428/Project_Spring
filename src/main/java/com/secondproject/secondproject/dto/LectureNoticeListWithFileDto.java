@@ -9,11 +9,12 @@ import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
-@AllArgsConstructor
+@NoArgsConstructor
 public class LectureNoticeListWithFileDto {
     Long id;
     String username;
@@ -24,23 +25,24 @@ public class LectureNoticeListWithFileDto {
     List<Attachment> files;
 
 
-    public static LectureNoticeListWithFileDto fromEntity(LectureNotice notice) {
+    public static LectureNoticeListWithFileDto fromEntity(
+            LectureNotice lectureNotice,
+            List<Attachment> attachments
+    ) {
         LectureNoticeListWithFileDto dto = new LectureNoticeListWithFileDto();
-        dto.setId(notice.getId());
-        dto.setTitle(notice.getLnTitle());
-        dto.setContent(notice.getLnContent());
-
-        if (notice.getUser() != null) {
-            dto.setUsername(notice.getUser().getName());
-            System.out.println(notice.getUser().getName());
-
+        dto.setId(lectureNotice.getId());
+        dto.setUsername(lectureNotice.getUser().getName());
+        dto.setTitle(lectureNotice.getLnTitle());
+        dto.setContent(lectureNotice.getLnContent());
+        dto.setCreatedAt(lectureNotice.getLnCreateAt());
+        dto.setUpdatedAt(lectureNotice.getLnUpdateAt());
+        List<Attachment> ListAttach = new ArrayList<>();
+        if (!attachments.isEmpty()) {
+            for (Attachment attachment : attachments) {
+                ListAttach.add(attachment);
+            }
+            dto.setFiles(ListAttach);
         }
-
-
-        dto.setCreatedAt(notice.getLnCreateAt());
-        dto.setUpdatedAt(notice.getLnUpdateAt());
         return dto;
     }
-
-
 }
