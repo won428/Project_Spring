@@ -17,9 +17,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findByLectureIdAndType(@Param("lecture_id") Long id, @Param("u_Type") UserType type);
 
 
-    Long countByLecture_Id(Long lecId);
 
-
-    boolean existsByUser_IdAndLecture_Id(Long userId, Long lecId);
 }
 
