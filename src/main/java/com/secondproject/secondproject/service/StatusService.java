@@ -1,19 +1,15 @@
 package com.secondproject.secondproject.service;
 
-import com.secondproject.secondproject.entity.Attachment;
 import com.secondproject.secondproject.entity.StudentRecord;
 import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.dto.StatusChangeRequestDto;
 import com.secondproject.secondproject.entity.User;
-import com.secondproject.secondproject.repository.AttachmentRepository;
 import com.secondproject.secondproject.repository.StatusChangeRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -73,6 +69,9 @@ public class StatusService {
         record.setStudentStatus(dto.getStudentStatus());
         record.setTitle(dto.getTitle());
         record.setContent(dto.getContent());
+        record.setAppliedDate(dto.getAppliedDate());
+        record.setStatus(dto.getStatus());
+
 
         // 서버 보정
         record.setAppliedDate(LocalDate.now());
@@ -141,4 +140,12 @@ public class StatusService {
         // 필요 시 첨부 id 매핑: d.setAttachmentId(sr.getAttachment() != null ? sr.getAttachment().getId() : null);
         return d;
     }
+
+//    @Transactional
+//    public StatusChangeRequestDto createChangeRequestByEmail(String email, StatusChangeRequestDto dto) {
+//        User user = userRepository.findByEmail(email)
+//                .orElseThrow(() -> new IllegalArgumentException("User not found by email: " + email));
+//        dto.setUserId(user.getId());
+//        return createChangeRequest(dto); // 기존 메서드 재사용
+//    }
 }

@@ -24,7 +24,6 @@ public class UserDto {
     private String college;
     private Long major; // 소속학과ID (number, FK)
     private UserType u_type; // 구분: 학생, 교수, 관리자 (enum)
-    private String majorName;
 
     public UserDto(String u_name, String password, LocalDate birthdate, String email, String phone, String gender, Long major, UserType u_type) {
         this.u_name = u_name;

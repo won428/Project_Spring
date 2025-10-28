@@ -1,6 +1,5 @@
 package com.secondproject.secondproject.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.secondproject.secondproject.entity.Major;
 import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.entity.User;

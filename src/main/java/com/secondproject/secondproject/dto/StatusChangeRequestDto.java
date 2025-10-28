@@ -15,6 +15,7 @@ public class StatusChangeRequestDto {
     // StudentRecord 전체 매핑(요청/응답 공용)
     private Long recordId;                // StudentRecord.id (응답 시 세팅, 생성 요청 시 null 권장)
 
+
     private Long userId;                  // StudentRecord.user.id (요청 시 필수)
     private Student_status studentStatus; // StudentRecord.studentStatus
 
@@ -57,5 +58,17 @@ public class StatusChangeRequestDto {
             this.sha256 = attachment.getSha256();
 
         }
+    }
+
+    public StatusChangeRequestDto(Long recordId, Long userId, Student_status studentStatus, String title, String content, LocalDate appliedDate, LocalDate processedDate, Status status, Long attachmentId) {
+        this.recordId = recordId;
+        this.userId = userId;
+        this.studentStatus = studentStatus;
+        this.title = title;
+        this.content = content;
+        this.appliedDate = appliedDate;
+        this.processedDate = processedDate;
+        this.status = status;
+        this.attachmentId = attachmentId;
     }
 }

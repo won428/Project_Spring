@@ -1,9 +1,9 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.dto.StudentInfoDto;
-import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.service.StudentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;

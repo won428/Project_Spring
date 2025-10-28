@@ -5,7 +5,6 @@ import com.secondproject.secondproject.service.StatusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -17,6 +16,7 @@ public class StatusController {
     private final StatusService statusService;
 
     // 생성: React ChangeStatusPage (POST /api/student/record)
+    // 프론트가 body.userId를 포함해 전송하는 방식을 사용
     @PostMapping("/record")
     public ResponseEntity<StatusChangeRequestDto> applyStatusChange(@RequestBody StatusChangeRequestDto dto) {
         StatusChangeRequestDto created = statusService.createChangeRequest(dto);
@@ -38,7 +38,7 @@ public class StatusController {
         return ResponseEntity.ok(detail);
     }
 
-    // 동시 업로드: 파일 + DTO 한 번에 전송 (POST /api/student/attachments)
+    // 동시 업로드: 파일 + DTO 한 번에 전송 (필요 시 주석 해제하여 사용)
 //    @PostMapping(value = "/attachments", consumes = {"multipart/form-data"})
 //    public ResponseEntity<StatusChangeRequestDto> applyStatusChangeWithFile(
 //            @RequestPart("dto") StatusChangeRequestDto dto,

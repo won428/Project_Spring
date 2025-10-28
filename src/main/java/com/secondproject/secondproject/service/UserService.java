@@ -1,17 +1,21 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.UserType;
-import com.secondproject.secondproject.dto.UserDto;
 import com.secondproject.secondproject.dto.UserListDto;
 import com.secondproject.secondproject.dto.UserUpdateDto;
-import com.secondproject.secondproject.entity.*;
-import com.secondproject.secondproject.repository.*;
+import com.secondproject.secondproject.entity.College;
+import com.secondproject.secondproject.entity.Major;
+import com.secondproject.secondproject.entity.StatusRecords;
+import com.secondproject.secondproject.entity.StatusRecords;
+import com.secondproject.secondproject.entity.User;
+import com.secondproject.secondproject.repository.CollegeRepository;
+import com.secondproject.secondproject.repository.MajorRepository;
+import com.secondproject.secondproject.repository.StatusRecordsRepository;
+import com.secondproject.secondproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 
 import java.time.LocalDate;
@@ -28,8 +32,6 @@ public class UserService {
     private final MajorRepository majorRepository;
     private final CollegeRepository collegeRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EnrollmentRepository enrollmentRepository;
-    private final CourseRegRepository courseRegRepository;
 
     @Transactional
     public void insertUser(User newUser) {
@@ -57,7 +59,6 @@ public class UserService {
         saved.setUserCode(studentId);
     }
 
-    // 전체 유저 조회
     public List<UserListDto> findUserList() {
         List<User> userList = this.userRepository.findAll();
         List<UserListDto> userListDto = new ArrayList<>();
@@ -140,7 +141,7 @@ public class UserService {
     }
 
 
-    public void update(Long id, UserUpdateDto userReactDto, User findUser, Major major) {
+    public void save(Long id, UserUpdateDto userReactDto, User findUser, Major major) {
 
         User user = findUser;
         String password = passwordEncoder.encode(userReactDto.getPassword());
@@ -158,26 +159,5 @@ public class UserService {
         if (userReactDto.getU_type() != null) user.setType(userReactDto.getU_type());
 
         this.userRepository.save(user);
-    }
-
-    public List<UserDto> findUserLectureDetail(Long lectureId) {
-        List<CourseRegistration> courseRegistrations = this.courseRegRepository.findByLecture_Id(lectureId);
-        List<UserDto> userDtoList = new ArrayList<>();
-
-        for (CourseRegistration courseRegistration: courseRegistrations){
-            User user = this.userRepository.findById(courseRegistration.getUser().getId())
-                    .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 유저"));
-            UserDto userDto = new UserDto();
-
-            userDto.setUserCode(user.getUserCode());
-            userDto.setU_name(user.getName());
-            userDto.setMajorName(user.getMajor().getName());
-            userDto.setEmail(user.getEmail());
-            userDto.setPhone(user.getPhone());
-
-            userDtoList.add(userDto);
-        }
-
-        return userDtoList;
     }
 }

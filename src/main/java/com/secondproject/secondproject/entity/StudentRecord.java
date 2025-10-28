@@ -33,6 +33,7 @@ public class StudentRecord {
     private Student_status studentStatus;                // 신청 목적
 
     @Column(name = "record_title", nullable = false)
+
     private String title;                 // 제목(varchar)
 
     @Column(name = "record_content", nullable = false)

@@ -7,8 +7,6 @@ import com.secondproject.secondproject.repository.UserRepository;
 import com.secondproject.secondproject.repository.RecordStatusRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class StudentService {
     private final UserRepository userRepository;
