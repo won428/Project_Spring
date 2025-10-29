@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.dto.LectureDto;
 import com.secondproject.secondproject.dto.UserDto;
 import com.secondproject.secondproject.dto.UserListDto;
 import com.secondproject.secondproject.dto.UserUpdateDto;
@@ -7,6 +8,7 @@ import com.secondproject.secondproject.entity.College;
 import com.secondproject.secondproject.entity.Major;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.service.CollegeService;
+import com.secondproject.secondproject.service.LectureService;
 import com.secondproject.secondproject.service.MajorService;
 import com.secondproject.secondproject.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +31,9 @@ public class UserController {
     private final MajorService majorService;
     private final CollegeService collegeService;
     private final PasswordEncoder passwordEncoder;
+    private final LectureService lectureService;
 
+    // 유저 등록(컨트롤러 부분 나중에 서비스로 이식할겁니다.)
     @PostMapping("/signup")
     public ResponseEntity<?> insertUser(@RequestBody UserDto userinfo){
         User user = new User();
@@ -50,6 +54,7 @@ public class UserController {
         return ResponseEntity.ok(200);
     }
 
+    // 관리자용 유저 목록 조회
     @GetMapping("/list")
     public List<UserListDto> userList(){
         List<UserListDto> userList = this.userService.findUserList();
@@ -57,6 +62,7 @@ public class UserController {
         return userList;
     }
 
+    // 학과별 교수 목록
     @GetMapping("/professorList")
     public List<UserListDto> professorList(@RequestParam("major_id") Long majorId){
         List<UserListDto> userList = this.userService.findProfessorList(majorId);
@@ -64,6 +70,7 @@ public class UserController {
         return userList;
     }
 
+    // 유저코드로 유저 찾기(컨트롤러 부분 나중에 서비스로 이식할겁니다.)
     @GetMapping("/selectUserCode/{id}")
     public UserUpdateDto findByUsercode(@PathVariable Long id){
 
@@ -90,6 +97,7 @@ public class UserController {
         return userDto;
     }
 
+    // 관리자용 유저 정보수정(컨트롤러 부분 나중에 서비스로 이식할겁니다.)
     @PatchMapping("/admin/update/{id}")
     public ResponseEntity<?> userUpdateByAdmin(@PathVariable Long id, @RequestBody UserUpdateDto userReactDto){
 
@@ -98,9 +106,13 @@ public class UserController {
                         new ResponseStatusException(HttpStatus.NOT_FOUND, id + "사용자 없음"));
         Major major = this.majorService.findMajor(userReactDto.getMajor());
 
-        this.userService.save(id, userReactDto, findUser , major);
+        this.userService.update(id, userReactDto, findUser , major);
 
         return ResponseEntity.ok(200);
     }
+
+
+
+
 
 }
