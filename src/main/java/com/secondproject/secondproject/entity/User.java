@@ -1,6 +1,7 @@
 package com.secondproject.secondproject.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.secondproject.secondproject.Enum.Gender;
 import com.secondproject.secondproject.Enum.UserType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -49,7 +50,7 @@ public class User implements UserDetails {
     private String phone; // 휴대전화
 
     @Column(nullable = false)
-    private String gender; // 성별 (enum, 문자열 컬럼)
+    private Gender gender; // 성별 (enum, 문자열 컬럼)
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="major_id", foreignKey = @ForeignKey(name = "fk_user_major"))

@@ -1,6 +1,7 @@
 package com.secondproject.secondproject.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.secondproject.secondproject.Enum.Gender;
 import com.secondproject.secondproject.Enum.UserType;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,13 +20,13 @@ public class UserDto {
     private LocalDate birthdate; // 생년월일 (date 타입)
     private String email; // 이메일
     private String phone; // 휴대전화
-    private String gender;
+    private Gender gender;
     private String college;
     private Long userCode;
     private Long major; // 소속학과ID (number, FK)
     private UserType u_type; // 구분: 학생, 교수, 관리자 (enum)
 
-    public UserDto(String u_name, String password, LocalDate birthdate, String email, String phone, String gender, Long major, UserType u_type) {
+    public UserDto(String u_name, String password, LocalDate birthdate, String email, String phone, Gender gender, Long major, UserType u_type) {
         this.u_name = u_name;
         this.password = password;
         this.birthdate = birthdate;
@@ -36,7 +37,7 @@ public class UserDto {
         this.u_type = u_type;
     }
 
-    public UserDto(String u_name, String password, LocalDate birthdate, String email, String phone, String gender, String college, Long major, UserType u_type) {
+    public UserDto(String u_name, String password, LocalDate birthdate, String email, String phone, Gender gender, String college, Long major, UserType u_type) {
         this.u_name = u_name;
         this.password = password;
         this.birthdate = birthdate;
