@@ -55,4 +55,19 @@ public class UserLoginTest extends AbstractTestNGSpringContextTests {
         std1.setType(UserType.STUDENT);                    // Enum: 학생
         userRepository.save(std1);
     }
+
+    @Test
+    public void insertUser_김명수() {
+        // given
+        User std2 = new User();
+        std2.setEmail("myungsoo.kim@example.com");                  // UNIQUE, length 100
+        std2.setPassword(passwordEncoder.encode("Myungsoo123!"));   // 인코딩된 비밀번호
+        std2.setName("김명수");                                       // u_name NOT NULL
+        std2.setGender("MALE");                                     // 문자열 컬럼(예: 'MALE' / 'FEMALE')
+        std2.setPhone("01066667777");                               // UNIQUE, length 20
+        std2.setType(UserType.STUDENT);                             // Enum: 학생
+
+        // when
+        userRepository.save(std2);
+    }
 }

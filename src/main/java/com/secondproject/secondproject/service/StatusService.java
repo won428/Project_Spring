@@ -104,24 +104,24 @@ public class StatusService {
         return res;
     }
 
-    // 2) 목록
-    @Transactional(readOnly = true)
-    public List<StatusChangeRequestDto> getStudentChangeRequests(Long userId) {
-        List<StudentRecord> list = statusChangeRepository.findByUserIdOrderByIdDesc(userId);
-        return list.stream().map(sr -> {
-            StatusChangeRequestDto d = new StatusChangeRequestDto();
-            d.setRecordId(sr.getId());
-            d.setUserId(sr.getUser() != null ? sr.getUser().getId() : null);
-            d.setStudentStatus(sr.getStudentStatus());
-            d.setTitle(sr.getTitle());
-            d.setContent(sr.getContent());
-            d.setAppliedDate(sr.getAppliedDate());
-            d.setProcessedDate(sr.getProcessedDate());
-            d.setStatus(sr.getStatus());
-            // 필요 시 첨부 id 매핑: d.setAttachmentId(sr.getAttachment() != null ? sr.getAttachment().getId() : null);
-            return d;
-        }).collect(java.util.stream.Collectors.toList());
-    }
+//     2) 목록
+//    @Transactional(readOnly = true)
+//    public List<StatusChangeRequestDto> getStudentChangeRequests(Long userId) {
+//        List<StudentRecord> list = statusChangeRepository.findByUserIdOrderByIdDesc(userId);
+//        return list.stream().map(sr -> {
+//            StatusChangeRequestDto d = new StatusChangeRequestDto();
+//            d.setRecordId(sr.getId());
+//            d.setUserId(sr.getUser() != null ? sr.getUser().getId() : null);
+//            d.setStudentStatus(sr.getStudentStatus());
+//            d.setTitle(sr.getTitle());
+//            d.setContent(sr.getContent());
+//            d.setAppliedDate(sr.getAppliedDate());
+//            d.setProcessedDate(sr.getProcessedDate());
+//            d.setStatus(sr.getStatus());
+//            // 필요 시 첨부 id 매핑: d.setAttachmentId(sr.getAttachment() != null ? sr.getAttachment().getId() : null);
+//            return d;
+//        }).collect(java.util.stream.Collectors.toList());
+//    }
 
     // 3) 상세
     @Transactional(readOnly = true)
@@ -143,6 +143,7 @@ public class StatusService {
         return d;
     }
 
+    // 목록 조회 조장님이 작성해줌
     public List<StatusChangeListDto> findMyList(Long id) {
         List<StudentRecord> studentRecords = this.statusChangeRepository.findAllByUser_Id(id);
         List<StatusChangeListDto> statusChangeListDtos = new ArrayList<>();
@@ -162,6 +163,9 @@ public class StatusService {
 
         return statusChangeListDtos;
     }
+
+
+
 
 //    @Transactional
 //    public StatusChangeRequestDto createChangeRequestByEmail(String email, StatusChangeRequestDto dto) {

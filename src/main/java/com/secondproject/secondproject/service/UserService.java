@@ -1,21 +1,18 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.UserType;
+import com.secondproject.secondproject.dto.UserDto;
 import com.secondproject.secondproject.dto.UserListDto;
 import com.secondproject.secondproject.dto.UserUpdateDto;
-import com.secondproject.secondproject.entity.College;
-import com.secondproject.secondproject.entity.Major;
+import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.entity.StatusRecords;
-import com.secondproject.secondproject.entity.StatusRecords;
-import com.secondproject.secondproject.entity.User;
-import com.secondproject.secondproject.repository.CollegeRepository;
-import com.secondproject.secondproject.repository.MajorRepository;
-import com.secondproject.secondproject.repository.StatusRecordsRepository;
-import com.secondproject.secondproject.repository.UserRepository;
+import com.secondproject.secondproject.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.time.LocalDate;
@@ -31,6 +28,7 @@ public class UserService {
     private final StatusRecordsRepository statusRecordsRepository;
     private final MajorRepository majorRepository;
     private final CollegeRepository collegeRepository;
+    private final CourseRegRepository courseRegRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -159,5 +157,26 @@ public class UserService {
         if (userReactDto.getU_type() != null) user.setType(userReactDto.getU_type());
 
         this.userRepository.save(user);
+    }
+
+    public List<UserDto> findUserLectureDetail(Long lectureId) {
+        List<CourseRegistration> courseRegistrations = this.courseRegRepository.findByLecture_Id(lectureId);
+        List<UserDto> userDtoList = new ArrayList<>();
+
+        for (CourseRegistration courseRegistration: courseRegistrations){
+            User user = this.userRepository.findById(courseRegistration.getUser().getId())
+                    .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 유저"));
+            UserDto userDto = new UserDto();
+
+            userDto.setUserCode(user.getUserCode());
+            userDto.setU_name(user.getName());
+            userDto.setMajorName(user.getMajor().getName());
+            userDto.setEmail(user.getEmail());
+            userDto.setPhone(user.getPhone());
+
+            userDtoList.add(userDto);
+        }
+
+        return userDtoList;
     }
 }

@@ -32,5 +32,7 @@ public class StudentService {
     public StatusRecords getStatusRecordByUserId(Long userId) {
         return recordStatusRepository.findByUserId(userId).orElse(null);
     }
+
+
 }
 
