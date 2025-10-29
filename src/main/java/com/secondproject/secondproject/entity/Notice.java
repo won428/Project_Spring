@@ -1,7 +1,9 @@
 package com.secondproject.secondproject.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.secondproject.secondproject.Enum.FileType;
 import jakarta.persistence.*;
+import lombok.Cleanup;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -37,6 +39,8 @@ public class Notice {
     @Column(name = "notice_update_at", nullable = false)
     private LocalDateTime updatedAt; // 수정일
 
+    @Column(name = "file_type")
+    private FileType filetype;
 
     @PrePersist
         // @PrePersist: 엔티티가 처음 INSERT 되기 직전에 자동 실행

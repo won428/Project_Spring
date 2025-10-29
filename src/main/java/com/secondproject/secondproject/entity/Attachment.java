@@ -1,20 +1,24 @@
 package com.secondproject.secondproject.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.secondproject.secondproject.Enum.FileType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-@Getter @Setter @ToString
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "attachment")
 public class Attachment {
     // 로컬 파일들 전체 다 저장되는 엔터티 입니다.
-    // 진성님 한번씩 검토해서 수정할거 수정해주세요 !
-
+    // 파일 다운로드를 할때 (parentType,parentId)형태로
+    // private List<MultipartFile> files; @ModelAttribute 사용
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "attachment_id")
@@ -41,4 +45,14 @@ public class Attachment {
     private LocalDate uploadAt; // 업로드일
 
     private String sha256; // 해시검증용 입니다.
+
+
+    @PrePersist
+        // @PrePersist: 엔티티가 처음 INSERT 되기 직전에 자동 실행
+    void onCreate() {
+        LocalDate now = LocalDate.now();
+        if (uploadAt == null) uploadAt = now; // 최초 생성 시간
+        uploadAt = now;                              // 최초 업데이트 시간도 now
+    }
+
 }
