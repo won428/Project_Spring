@@ -3,10 +3,17 @@ package com.secondproject.secondproject.service;
 import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.dto.UserDto;
 import com.secondproject.secondproject.dto.UserListDto;
+import com.secondproject.secondproject.dto.UserListSearchDto;
 import com.secondproject.secondproject.dto.UserUpdateDto;
 import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.math3.stat.descriptive.summary.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,8 +39,40 @@ public class UserService {
     private final CourseRegRepository courseRegRepository;
 
     @Transactional
-    public void insertUser(User newUser) {
-        User saved = this.userRepository.save(newUser);
+    public void insertUser(UserDto userinfo) {
+
+        if(userinfo.getEmail() == null || userinfo.getEmail().isBlank()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"이메일은 필수 입력 사항입니다..");
+        }else if(userinfo.getBirthdate() == null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"생년월일은 필수 입력 사항입니다..");
+        }else if(userinfo.getPhone() == null || userinfo.getPhone().isBlank()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"휴대폰 번호는 필수 입력 사항입니다.");
+        }else if(userinfo.getMajor() == null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"학과는 필수 입력 사항입니다.");
+        }
+
+        User user = new User();
+        Major major = this.majorRepository.findById(userinfo.getMajor())
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        String encodePassWord  = passwordEncoder.encode(userinfo.getPhone());
+
+        if(this.userRepository.existsByPhone(userinfo.getPhone())){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 휴대폰 번호입니다.");
+        }
+        if(this.userRepository.existsByEmail(userinfo.getEmail())){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"이미 존재하는 이메일 입니다.");
+        }
+
+        user.setName(userinfo.getName());
+        user.setGender(userinfo.getGender());
+        user.setEmail(userinfo.getEmail());
+        user.setBirthDate(userinfo.getBirthdate());
+        user.setPassword(encodePassWord);
+        user.setMajor(major);
+        user.setPhone(userinfo.getPhone());
+        user.setType(userinfo.getType());
+
+        User saved = this.userRepository.save(user);
         StatusRecords userStatus = new StatusRecords();
 
         userStatus.setUser(saved);
@@ -44,10 +83,10 @@ public class UserService {
         LocalDate b = savedRecords.getAdmissionDate();     // 1997-04-28
         Long id = saved.getId();
         int year = b.getYear();                // 입학년도
-        Long major = saved.getMajor().getId(); // 학과 코드
+        Long majorCode = saved.getMajor().getId(); // 학과 코드
 
         String stringYear = Integer.toString(year); // 입학년도 문자열로 변환
-        String stringMajor = Long.toString(major); // 학과 코드 문자열로 변환
+        String stringMajor = Long.toString(majorCode); // 학과 코드 문자열로 변환
         String stringId = Long.toString(id); // id 문자열로 변환
 
         String stringStudentId = stringYear + stringId + stringMajor;
@@ -170,7 +209,7 @@ public class UserService {
             UserDto userDto = new UserDto();
 
             userDto.setUserCode(user.getUserCode());
-            userDto.setU_name(user.getName());
+            userDto.setName(user.getName());
             userDto.setMajorName(user.getMajor().getName());
             userDto.setEmail(user.getEmail());
             userDto.setPhone(user.getPhone());
@@ -179,5 +218,59 @@ public class UserService {
         }
 
         return userDtoList;
+    }
+
+    public Page<UserListDto> ListPageUser(UserListSearchDto userListSearchDto, int pageNumber, int pageSize) {
+
+        Specification<User> spec = (root, query, cb) -> cb.conjunction();
+
+
+        if(userListSearchDto.getSearchMajor() != null){
+            spec = spec.and(PublicSpecification.hasMajor(userListSearchDto.getSearchMajor()));
+        }
+
+        if(userListSearchDto.getSearchUserType() != null){
+            spec = spec.and(PublicSpecification.hasUserType(userListSearchDto.getSearchUserType()));
+        }
+
+        if(userListSearchDto.getSearchGender() != null || !userListSearchDto.getSearchGender().isBlank()){
+            spec = spec.and(PublicSpecification.hasGender(userListSearchDto.getSearchGender()));
+        }
+
+        String searchMode = userListSearchDto.getSearchMode();
+        String searchKeyword = userListSearchDto.getSearchKeyword();
+
+        if(searchMode != null && searchKeyword != null){
+            if(searchMode.equals("name")){
+                spec = spec.and(PublicSpecification.hasName(searchKeyword));
+            }else if(searchMode.equals("email")){
+                spec = spec.and(PublicSpecification.hasEmail(searchKeyword));
+            }else if(searchMode.equals("phone")){
+                spec = spec.and(PublicSpecification.hasPhone(searchKeyword));
+            }
+        }
+
+
+        Sort sort = Sort.by(Sort.Order.desc("id"));
+        Pageable pageable = PageRequest.of(pageNumber,pageSize,sort);
+
+        Page<User> userList = this.userRepository.findAll(spec, pageable);
+        Page<UserListDto> userListDtos = userList.map(user -> {
+            UserListDto userdto = new UserListDto();
+            userdto.setId(user.getId());
+            userdto.setUser_code(user.getUserCode());
+            userdto.setU_name(user.getName());
+            userdto.setBirthdate(user.getBirthDate());
+            userdto.setGender(user.getGender());
+            userdto.setEmail(user.getEmail());
+            userdto.setPhone(user.getPhone());
+            userdto.setMajor(user.getMajor() != null ? user.getMajor().getName() : null);
+            userdto.setU_type(user.getType());
+            userdto.setCollege(user.getMajor().getCollege().getType());
+
+            return userdto;
+        });
+
+        return userListDtos;
     }
 }
