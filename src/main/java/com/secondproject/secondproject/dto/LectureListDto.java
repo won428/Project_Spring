@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
-public class LectureDto {
+public class LectureListDto {
     private Long id; // 강의코드
 
     private String name; // 강의명
@@ -26,7 +26,7 @@ public class LectureDto {
 
     private int totalStudent;
 
-    public LectureDto(Long id, String name, User user, int credit, LocalDate startDate, LocalDate endDate, int totalStudent) {
+    public LectureListDto(Long id, String name, User user, int credit, LocalDate startDate, LocalDate endDate, int totalStudent) {
         this.id = id;
         this.name = name;
         this.user = user;
@@ -36,15 +36,15 @@ public class LectureDto {
         this.totalStudent = totalStudent;
     }
 
-    public static LectureDto fromEntity(Lecture lecture) {
-        LectureDto lectureDto = new LectureDto();
-        lectureDto.setId(lecture.getId());
-        lectureDto.setName(lecture.getName());
-        lectureDto.setCredit(lecture.getCredit());
-        lectureDto.setUser(lecture.getUser());
-        lectureDto.setStartDate(lecture.getStartDate());
-        lectureDto.setTotalStudent(lecture.getTotalStudent());
-        return lectureDto;
+    public static LectureListDto fromEntity(Lecture lecture) {
+        LectureListDto lectureListDto = new LectureListDto();
+        lectureListDto.setId(lecture.getId());
+        lectureListDto.setName(lecture.getName());
+        lectureListDto.setCredit(lecture.getCredit());
+        lectureListDto.setUser(lecture.getUser());
+        lectureListDto.setStartDate(lecture.getStartDate());
+        lectureListDto.setTotalStudent(lecture.getTotalStudent());
+        return lectureListDto;
     }
 
 }
