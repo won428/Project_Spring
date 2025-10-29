@@ -54,10 +54,10 @@ public class LectureNoticeController {
 
     ) {
         try {
-//            List<LectureNoticeListDto> noticeList = lectureNoticeService.getNoticeByEmail(email);
+            //   List<LectureNoticeListDto> noticeList = lectureNoticeService.getNoticeByEmail(email);
             Page<LectureNoticeListDto> res = lectureNoticeService.getPagedNotices(email, page, size);
             return ResponseEntity.ok(res);
-            
+
         } catch (Exception e) {
             e.printStackTrace(); // 에러의 전체 내용을 콘솔(err)에 출력
             return ResponseEntity.badRequest().build();

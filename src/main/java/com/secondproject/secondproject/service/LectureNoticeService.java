@@ -55,16 +55,22 @@ public class LectureNoticeService {
         // 3. 생성된 Notice를 저장합니다.
         LectureNotice saved = lectureNoticeRepository.save(LN);
 
-        if (!files.isEmpty() && files != null) {
+        // files null이면 빈 배열로 반환
+        List<MultipartFile> safeFiles = (files == null)
+                ? java.util.Collections.emptyList()
+                : files.stream().filter(f -> f != null && !f.isEmpty()).toList();
 
-            for (MultipartFile file : files) {
-                Attachment attachment = attachmentService.save(file, user);
-                NoticeAttach noticeAttach = new NoticeAttach();
-                noticeAttach.setAttachment(attachment);
-                noticeAttach.setLectureNotice(saved);
-                noticeAttachRepository.save(noticeAttach);
-            }
+        if (safeFiles.isEmpty()) {
+            return;
         }
+        for (MultipartFile file : files) {
+            Attachment attachment = attachmentService.save(file, user);
+            NoticeAttach noticeAttach = new NoticeAttach();
+            noticeAttach.setAttachment(attachment);
+            noticeAttach.setLectureNotice(saved);
+            noticeAttachRepository.save(noticeAttach);
+        }
+
     }
 
 
@@ -112,7 +118,7 @@ public class LectureNoticeService {
     public Page<LectureNoticeListDto> getPagedNotices(String email, int page, int size) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("해당 이메일의 사용자를 찾을 수 없습니다."));
-        Pageable pageable = PageRequest.of(page, size, Sort.by((Sort.Direction.DESC), "createdAt"));
+        Pageable pageable = PageRequest.of(page, size, Sort.by((Sort.Direction.DESC), "lnCreateAt"));
         Page<LectureNotice> result = lectureNoticeRepository.findByUser(user, pageable);
         return result.map(LectureNoticeListDto::fromEntity);
     }
