@@ -46,7 +46,7 @@ public class UserLoginTest extends AbstractTestNGSpringContextTests {
 
     @Test
     public void insertUser_김영희() {
-        User std1 = new User();
+        User std1 = new User(); // userid: 3
         std1.setEmail("younghee.kim@example.com");        // UNIQUE, length 100
         std1.setPassword(passwordEncoder.encode("Younghee123!")); // 인코딩된 비밀번호
         std1.setName("김영희");                              // u_name NOT NULL
@@ -59,7 +59,7 @@ public class UserLoginTest extends AbstractTestNGSpringContextTests {
     @Test
     public void insertUser_김명수() {
         // given
-        User std2 = new User();
+        User std2 = new User(); // userid: 4
         std2.setEmail("myungsoo.kim@example.com");                  // UNIQUE, length 100
         std2.setPassword(passwordEncoder.encode("Myungsoo123!"));   // 인코딩된 비밀번호
         std2.setName("김명수");                                       // u_name NOT NULL

@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping; // 삭제 요청용
+import org.springframework.web.bind.annotation.PathVariable; // 경로 변수 활용
+import org.springframework.http.ResponseEntity; // 응답처리
 
 import java.util.List;
 import java.util.Map;
@@ -62,18 +65,14 @@ public class StatusController {
         return ResponseEntity.ok(detail);
     }
 
-    // 동시 업로드: 파일 + DTO 한 번에 전송 (필요 시 주석 해제하여 사용)
-//    @PostMapping(value = "/attachments", consumes = {"multipart/form-data"})
-//    public ResponseEntity<StatusChangeRequestDto> applyStatusChangeWithFile(
-//            @RequestPart("dto") StatusChangeRequestDto dto,
-//            @RequestPart(value = "file", required = false) MultipartFile file
-//    ) {
-//        Long attachmentId = (file != null && !file.isEmpty())
-//                ? statusService.storeAttachmentFile(file) : null;
-//        if (attachmentId != null) dto.setAttachmentId(attachmentId);
-//        StatusChangeRequestDto created = statusService.createChangeRequest(dto);
-//        return ResponseEntity.ok(created);
-//    }
-
-
+    // 삭제 핸들러 기능
+    @DeleteMapping("/record/{recordId}")
+    public ResponseEntity<?> deleteRecord(@PathVariable Long recordId) {
+        boolean deleted = statusService.deleteChangeRequest(recordId);
+        if (deleted) {
+            return ResponseEntity.ok().body("삭제 성공");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("존재하지 않는 요청입니다");
+        }
+    }
 }

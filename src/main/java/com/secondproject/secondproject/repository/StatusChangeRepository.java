@@ -2,14 +2,17 @@ package com.secondproject.secondproject.repository;
 
 import com.secondproject.secondproject.entity.StudentRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface StatusChangeRepository extends JpaRepository<StudentRecord, Long> {
+
+    Optional<StudentRecord> findById(Long id);
+
+    void deleteById(Long id);
 
     // 최신순 목록(스프링 자동 구현)
     List<StudentRecord> findByUserIdOrderByIdDesc(Long userId);

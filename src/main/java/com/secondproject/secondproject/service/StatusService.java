@@ -22,7 +22,8 @@ public class StatusService {
 
     private final UserRepository userRepository;
     private final StatusChangeRepository statusChangeRepository;
-//    private final AttachmentRepository attachmentRepository;
+
+    //    private final AttachmentRepository attachmentRepository;
 
     // 파일 저장: 파일을 저장하고 첨부 PK를 반환
 //    @Transactional
@@ -164,8 +165,15 @@ public class StatusService {
         return statusChangeListDtos;
     }
 
-
-
+    // 학적변경신청 리스트 삭제기능
+    public boolean deleteChangeRequest(Long id) {
+        Optional<StudentRecord> record = statusChangeRepository.findById(id);
+        if (record.isPresent()) {
+            statusChangeRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
 
 //    @Transactional
 //    public StatusChangeRequestDto createChangeRequestByEmail(String email, StatusChangeRequestDto dto) {
