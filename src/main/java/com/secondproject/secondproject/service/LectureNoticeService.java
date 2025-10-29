@@ -14,6 +14,10 @@ import com.secondproject.secondproject.repository.NoticeAttachRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -103,14 +107,13 @@ public class LectureNoticeService {
         return NoticeResponseDto.fromEntity(lectureNotice, attachments);
 
 
-//        List<Attachment> NoticesFiles = new ArrayList<>();
-//        LectureNoticeListWithFileDto dto = new LectureNoticeListWithFileDto();
-//        dto.add(LectureNoticeListWithFileDto.fromEntity(lectureNotice));
-//        for (NoticeAttach attachId : noticeAttach) {
-//            Attachment attachment = attachmentService.findById(attachId.getAttachment().getId()).orElseThrow(() -> new EntityNotFoundException("ㅅㅄㅄㅂ"));
-//            NoticesFiles.add(attachment);
-//        }
-//        dto.setFiles(NoticesFiles);
-//        return dto;
+    }
+
+    public Page<LectureNoticeListDto> getPagedNotices(String email, int page, int size) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("해당 이메일의 사용자를 찾을 수 없습니다."));
+        Pageable pageable = PageRequest.of(page, size, Sort.by((Sort.Direction.DESC), "createdAt"));
+        Page<LectureNotice> result = lectureNoticeRepository.findByUser(user, pageable);
+        return result.map(LectureNoticeListDto::fromEntity);
     }
 }

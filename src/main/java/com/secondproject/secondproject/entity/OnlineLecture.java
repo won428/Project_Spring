@@ -8,7 +8,9 @@ import lombok.ToString;
 
 import java.time.LocalDate;
 
-@Getter @Setter @ToString
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "onlineLecture")
 public class OnlineLecture {

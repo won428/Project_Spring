@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -46,12 +47,17 @@ public class LectureNoticeController {
     }
 
     @GetMapping("/List")
-    public ResponseEntity<List<LectureNoticeListDto>> NotionList(@RequestParam String email) {
+    public ResponseEntity<?> NotionList(
+            @RequestParam String email,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
 
+    ) {
         try {
-            List<LectureNoticeListDto> noticeList = lectureNoticeService.getNoticeByEmail(email);
-
-            return ResponseEntity.ok(noticeList);
+//            List<LectureNoticeListDto> noticeList = lectureNoticeService.getNoticeByEmail(email);
+            Page<LectureNoticeListDto> res = lectureNoticeService.getPagedNotices(email, page, size);
+            return ResponseEntity.ok(res);
+            
         } catch (Exception e) {
             e.printStackTrace(); // 에러의 전체 내용을 콘솔(err)에 출력
             return ResponseEntity.badRequest().build();
