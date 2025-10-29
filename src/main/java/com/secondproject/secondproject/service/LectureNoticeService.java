@@ -1,8 +1,9 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.dto.LectureNoticeListDto;
-import com.secondproject.secondproject.dto.LectureNoticeListWithFileDto;
+import com.secondproject.secondproject.dto.AttachmentDto;
 import com.secondproject.secondproject.dto.LectureNoticeUploadDto;
+import com.secondproject.secondproject.dto.NoticeResponseDto;
 import com.secondproject.secondproject.entity.Attachment;
 import com.secondproject.secondproject.entity.LectureNotice;
 import com.secondproject.secondproject.entity.Mapping.NoticeAttach;
@@ -83,10 +84,13 @@ public class LectureNoticeService {
     }
 
 
-    public LectureNoticeListWithFileDto findById(Long id) {
+    public NoticeResponseDto findById(Long id) {
 //        게시물 ID로 attachment 조회 / ListDto 조회 -> Dto에  담아서 Controller 전송
         //
-        List<NoticeAttach> noticeAttach = noticeAttachRepository.findByLecNoticeId(id);
+
+        List<NoticeAttach> noticeAttach = noticeAttachRepository.findByLectureNotice_Id(id);
+
+
         //게시물 목록 호출
         LectureNotice lectureNotice = lectureNoticeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("공지 없다"));
@@ -94,7 +98,9 @@ public class LectureNoticeService {
         List<Attachment> attachments = noticeAttach.stream()
                 .map(NoticeAttach::getAttachment)
                 .toList();
-        return LectureNoticeListWithFileDto.fromEntity(lectureNotice, attachments);
+
+
+        return NoticeResponseDto.fromEntity(lectureNotice, attachments);
 
 
 //        List<Attachment> NoticesFiles = new ArrayList<>();

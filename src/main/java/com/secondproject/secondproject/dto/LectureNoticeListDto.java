@@ -32,7 +32,6 @@ public class LectureNoticeListDto {
 
         }
 
-
         dto.setCreatedAt(notice.getLnCreateAt());
         dto.setUpdatedAt(notice.getLnUpdateAt());
         return dto;

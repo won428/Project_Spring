@@ -2,11 +2,9 @@ package com.secondproject.secondproject.dto;
 
 import com.secondproject.secondproject.entity.Attachment;
 import com.secondproject.secondproject.entity.LectureNotice;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,34 +13,48 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class LectureNoticeListWithFileDto {
+public class NoticeResponseDto {
     Long id;
     String username;
+    Long userid;
     String title;
     String content;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
-    List<Attachment> files;
+    List<AttachmentDto> attachmentDto;
 
-
-    public static LectureNoticeListWithFileDto fromEntity(
+    public static NoticeResponseDto fromEntity(
             LectureNotice lectureNotice,
             List<Attachment> attachments
     ) {
-        LectureNoticeListWithFileDto dto = new LectureNoticeListWithFileDto();
+        NoticeResponseDto dto = new NoticeResponseDto();
         dto.setId(lectureNotice.getId());
+        dto.setUserid(lectureNotice.getUser().getId());
         dto.setUsername(lectureNotice.getUser().getName());
         dto.setTitle(lectureNotice.getLnTitle());
         dto.setContent(lectureNotice.getLnContent());
         dto.setCreatedAt(lectureNotice.getLnCreateAt());
         dto.setUpdatedAt(lectureNotice.getLnUpdateAt());
-        List<Attachment> ListAttach = new ArrayList<>();
-        if (!attachments.isEmpty()) {
+
+        List<AttachmentDto> ListAttach = new ArrayList<>();
+        if (!attachments.isEmpty() || attachments != null) {
             for (Attachment attachment : attachments) {
-                ListAttach.add(attachment);
+                AttachmentDto Ado = new AttachmentDto();
+                Ado.setId(attachment.getId());
+                Ado.setName(attachment.getName());
+                Ado.setId(attachment.getUser().getId());
+                Ado.setContentType(attachment.getContentType());
+                Ado.setSha256(attachment.getSha256());
+                Ado.setSizeBytes(attachment.getSizeBytes());
+                Ado.setStoredKey(attachment.getStoredKey());
+                Ado.setUploadAt(attachment.getUploadAt());
+
+                ListAttach.add(Ado);
             }
-            dto.setFiles(ListAttach);
+
+            dto.setAttachmentDto(ListAttach);
         }
         return dto;
     }
+
 }
