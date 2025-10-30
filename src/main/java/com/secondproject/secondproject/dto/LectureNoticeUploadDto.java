@@ -7,11 +7,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class BoardUpNoticeDto {
+public class LectureNoticeUploadDto {
 
-    String email;
-    String title;
-    String content;
-
+    private String email;
+    private String title;
+    private String content;
 
 }

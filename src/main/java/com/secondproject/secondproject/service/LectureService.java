@@ -4,12 +4,16 @@ import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.dto.LectureDto;
 import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.repository.*;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,14 +29,15 @@ public class LectureService {
     private final EnrollmentRepository enrollmentRepository;
     private final GradeRepository gradeRepository;
 
+
     public void insertByAdmin(LectureDto lectureDto) {
         Lecture lecture = new Lecture();
         Optional<User> optUser = this.userRepository.findById(lectureDto.getUser());
-        User user = optUser.orElseThrow(()->
-                new ResponseStatusException(HttpStatus.NOT_FOUND,  "사용자 없음"));
+        User user = optUser.orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자 없음"));
         Optional<Major> optMajor = this.majorRepository.findById(lectureDto.getMajor());
-        Major major = optMajor.orElseThrow(()->
-                new ResponseStatusException(HttpStatus.NOT_FOUND,  "학과 없음"));
+        Major major = optMajor.orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "학과 없음"));
 
         lecture.setName(lectureDto.getName());
         lecture.setUser(user);
@@ -50,7 +55,7 @@ public class LectureService {
     public List<LectureDto> findAll() {
         List<Lecture> lectureList = this.lectureRepository.findAll();
         List<LectureDto> lectureDtoList = new ArrayList<>();
-        for (Lecture lecture : lectureList){
+        for (Lecture lecture : lectureList) {
             Long nowStudent = this.courseRegRepository.countByLecture_Id(lecture.getId());
 
             LectureDto lectureDto = new LectureDto();
@@ -74,9 +79,9 @@ public class LectureService {
     }
 
     public void updateStatus(Long id, Status status) {
-        Optional<Lecture> lectureOpt= this.lectureRepository.findById(id);
+        Optional<Lecture> lectureOpt = this.lectureRepository.findById(id);
         Lecture lecture = lectureOpt
-                .orElseThrow(()->
+                .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, id + " 해당 강의가 존재하지 않습니다."));
         lecture.setStatus(status);
         this.lectureRepository.save(lecture);
@@ -84,22 +89,22 @@ public class LectureService {
 
     public void applyLecture(List<Long> idList, Long userId) {
 
-        if(idList == null || idList.isEmpty()){
+        if (idList == null || idList.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "강의는 최소 1개 이상 선택해야합니다..");
-        }else if(userId == null){
+        } else if (userId == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자 없음");
         }
 
         User user = this.userRepository.findById(userId)
-                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 사용자"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 사용자"));
 
-        for(Long lecId : idList){
+        for (Long lecId : idList) {
             Lecture lecture = this.lectureRepository.findById(lecId)
-                    .orElseThrow(()->  new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않습니다."));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않습니다."));
             Long nowStudent = this.courseRegRepository.countByLecture_Id(lecId);
             int totalStudent = lecture.getTotalStudent();
 
-            if(nowStudent >= totalStudent){
+            if (nowStudent >= totalStudent) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, lecture.getName() + " 강의는 정원 초과입니다.");
 
             }
@@ -126,9 +131,9 @@ public class LectureService {
         List<CourseRegistration> courseRegistrations = this.courseRegRepository.findByUser_Id(userId);
         List<LectureDto> myLectureList = new ArrayList<>();
 
-        for (CourseRegistration courseReg : courseRegistrations){
+        for (CourseRegistration courseReg : courseRegistrations) {
             Lecture lecture = this.lectureRepository.findById(courseReg.getLecture().getId())
-                    .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 강의"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 강의"));
             LectureDto lectureDto = new LectureDto();
 
             lectureDto.setName(lecture.getName());
@@ -150,7 +155,7 @@ public class LectureService {
 
     public LectureDto findByID(Long id) {
         Lecture lecture = this.lectureRepository.findById(id)
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"존재하지 않는 강의입니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
         LectureDto lectureDto = new LectureDto();
         Long nowStudent = this.courseRegRepository.countByLecture_Id(id);
 
@@ -162,4 +167,26 @@ public class LectureService {
 
         return lectureDto;
     }
+
+
+    public List<LectureDto> findByUser(User user) {
+
+        List<Lecture> lectures = lectureRepository.findByUser(user);
+        List<LectureDto> lectureListDto = new ArrayList<>();
+        for (Lecture lecture : lectures) {
+            lectureListDto.add(LectureDto.fromEntity(lecture));
+        }
+        return lectureListDto;
+
+    }
+
+
+    public LectureDto LectureSpec(Long id) {
+
+        Lecture lecture = lectureRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("강의가 존재하지 않습니다."));
+        return LectureDto.fromEntity(lecture);
+    }
+
+
 }

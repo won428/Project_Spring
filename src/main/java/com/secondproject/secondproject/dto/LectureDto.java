@@ -2,6 +2,7 @@ package com.secondproject.secondproject.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.secondproject.secondproject.Enum.Status;
+import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.Major;
 import com.secondproject.secondproject.entity.User;
 import jakarta.persistence.*;
@@ -73,4 +74,18 @@ public class LectureDto {
         this.totalStudent = totalStudent;
         this.majorName = majorName;
     }
+
+
+    public static LectureDto fromEntity(Lecture lecture) {
+        LectureDto lectureListDto = new LectureDto();
+        lectureListDto.setId(lecture.getId());
+        lectureListDto.setName(lecture.getName());
+        lectureListDto.setCredit(lecture.getCredit());
+        lectureListDto.setUser(lecture.getUser().getId());
+        lectureListDto.setUserName(lecture.getUser().getName());
+        lectureListDto.setStartDate(lecture.getStartDate());
+        lectureListDto.setTotalStudent(lecture.getTotalStudent());
+        return lectureListDto;
+    }
+
 }
