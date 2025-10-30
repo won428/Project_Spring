@@ -250,21 +250,6 @@ public class UserService {
     }
     // 아래는 전부 검증용, 파싱용 메소드
 
-    // 헤더 검증: 기대하는 헤더명과 동일한지(대소문자 무시)
-    private void assertHeader(Row header, FormulaEvaluator ev, String... expected) {
-        if (header == null) {
-            throw new IllegalArgumentException("엑셀 첫 행(헤더)이 없습니다.");
-        }
-        for (int i = 0; i < expected.length; i++) {
-            String got = getString(header.getCell(i), ev);
-            String want = expected[i];
-            if (got == null || !want.equalsIgnoreCase(got)) {
-                throw new IllegalArgumentException("헤더 불일치: col " + (i + 1) +
-                        " expected='" + want + "' but was='" + got + "'");
-            }
-        }
-    }
-
     // 표시 문자열(보이는 값) 가져오기 - 선행0를 포함해 사용하고 싶을 때
     private String getShownText(Cell c, FormulaEvaluator ev) {
         if (c == null) return null;
@@ -303,14 +288,6 @@ public class UserService {
 
         return new BigDecimal(s).longValueExact();
     }
-
-    // 날짜 안전 파싱: 날짜서식 → 직렬값 → 문자열 패턴
-    private static final DateTimeFormatter[] DATE_PATTERNS = new DateTimeFormatter[]{
-            DateTimeFormatter.ISO_LOCAL_DATE,          // 2025-10-29
-            DateTimeFormatter.ofPattern("yyyy.M.d"),
-            DateTimeFormatter.ofPattern("yyyy/M/d"),
-            DateTimeFormatter.ofPattern("yyyyMMdd")
-    };
 
     // 전화번호 정규화(숫자만) + 선행 0 보장
     private String normalizePhoneAndEnsureLeadingZero(String s) {
