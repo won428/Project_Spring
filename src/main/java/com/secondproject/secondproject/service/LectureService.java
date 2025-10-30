@@ -254,7 +254,7 @@ public class LectureService {
                     User user = this.userRepository.findById(courseReg.getUser().getId())
                             .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."));
 
-                    lecture.setStatus(Status.INPROGRESS);
+                    lecture.setStatus(status);
 
                     Grade grade = new Grade();
                     grade.setLecture(lecture);
