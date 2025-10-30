@@ -182,7 +182,6 @@ public class LectureService {
 
 
     public LectureDto LectureSpec(Long id) {
-
         Lecture lecture = lectureRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("강의가 존재하지 않습니다."));
         return LectureDto.fromEntity(lecture);
