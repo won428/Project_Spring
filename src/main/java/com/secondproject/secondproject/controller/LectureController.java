@@ -94,13 +94,21 @@ public class LectureController {
         }
     }
 
-    // 학생 수강신청 목록
+    // 학생 수강신청한 목록
     @GetMapping("/mylist")
     public List<LectureDto> myLectureList(@RequestParam Long userId) {
 
         List<LectureDto> myLecture = this.lectureService.myLectureList(userId);
 
         return myLecture;
+    }
+
+    // 학생 수강신청 가능 목록
+    @GetMapping("/apply/list")
+    public List<LectureDto> applyLectureList(@RequestParam Long id){
+        List <LectureDto> lectureList = this.lectureService.applyLecturList(id);
+
+        return lectureList;
     }
 
     // 교수 개설된 강의 상세정보
@@ -146,6 +154,32 @@ public class LectureController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("서버 오류 발생");
+        }
+    }
+
+    // 관리자가 승인이 완료되고 정원이 모두 채워진 강의를 개강으로 전환합니다.
+    @PatchMapping("/inprogress")
+    public ResponseEntity<?> lectureInprogress(@RequestBody List<Long> idList, @RequestParam Status status){
+        try {
+            this.lectureService.lectureInprogress(idList, status);
+            return ResponseEntity.ok(200);
+        }catch (ResponseStatusException ex) {
+            try {
+
+                int errStatus = ex.getStatusCode().value();
+                String error = HttpStatus.valueOf(errStatus).name();
+
+                Map<String, Object> body = Map.of(
+                        "status", status,
+                        "error", error,
+                        "message", ex.getReason(),
+                        "timestamp", java.time.OffsetDateTime.now().toString()
+                );
+
+                return ResponseEntity.status(ex.getStatusCode()).body(body);
+            } catch (Exception otherEx) {
+                return ResponseEntity.status(500).body("알수없는 오류");
+            }
         }
     }
 

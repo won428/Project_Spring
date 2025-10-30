@@ -13,4 +13,6 @@ public interface CourseRegRepository extends JpaRepository<CourseRegistration, L
     Long countByLecture_Id(Long lecId);
 
     List<CourseRegistration> findByLecture_Id(Long lectureId);
+
+    List<CourseRegistration> findAllByLecture_Id(Long lectureId);
 }

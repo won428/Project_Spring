@@ -6,10 +6,6 @@ import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -48,6 +44,8 @@ public class LectureService {
         lecture.setMajor(major);
         lecture.setTotalStudent(lectureDto.getTotalStudent());
         lecture.setStatus(lectureDto.getStatus());
+        lecture.setLevel(lectureDto.getLevel());
+        lecture.setCompletionDiv(lectureDto.getCompletionDiv());
 
         this.lectureRepository.save(lecture);
     }
@@ -70,6 +68,8 @@ public class LectureService {
             lectureDto.setStatus(lecture.getStatus());
             lectureDto.setTotalStudent(lecture.getTotalStudent());
             lectureDto.setNowStudent(nowStudent);
+            lectureDto.setCompletionDiv(lecture.getCompletionDiv());
+            lectureDto.setLevel(lecture.getLevel());
 
             lectureDtoList.add(lectureDto);
 
@@ -95,6 +95,8 @@ public class LectureService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자 없음");
         }
 
+
+
         User user = this.userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 사용자"));
 
@@ -109,12 +111,20 @@ public class LectureService {
 
             }
 
-            boolean alreadyApplied = courseRegRepository.existsByUser_IdAndLecture_Id(userId, lecId);
-            if (alreadyApplied) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, lecture.getName() + " 강의는 이미 신청한 강의입니다.");
-            }
 
-            Enrollment enrollment = new Enrollment();
+            boolean alreadyApplied = courseRegRepository.existsByUser_IdAndLecture_Id(userId, lecId);
+                if (alreadyApplied) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, lecture.getName() + " 강의는 이미 신청한 강의입니다.");
+                }
+
+
+
+
+//            boolean alreadyEnrollment = enrollmentRepository.existsByUser_IdAndLecture_Id(userId, lecture.getId());
+//            if(alreadyEnrollment){
+//                throw new ResponseStatusException(HttpStatus.CONFLICT, lecture.getName() + " 강의는 이미 수강한 강의입니다.");
+//            }
+
             CourseRegistration courseRegistration = new CourseRegistration();
 
             // 수강 신청 테이블 생성
@@ -144,6 +154,8 @@ public class LectureService {
             lectureDto.setTotalStudent(lecture.getTotalStudent());
             lectureDto.setCredit(lecture.getCredit());
             lectureDto.setStatus(lecture.getStatus());
+            lectureDto.setLevel(lecture.getLevel());
+            lectureDto.setCompletionDiv(lecture.getCompletionDiv());
 
             myLectureList.add(lectureDto);
 
@@ -189,4 +201,78 @@ public class LectureService {
     }
 
 
+    public List<LectureDto> applyLecturList(Long id) {
+        List<Lecture> lectureList = this.lectureRepository.findAllNotRegisteredByUser(id);
+        List<LectureDto> lectureDtoList = new ArrayList<>();
+
+        for(Lecture lecture : lectureList){
+            LectureDto lectureDto = new LectureDto();
+
+            lectureDto.setName(lecture.getName());
+            lectureDto.setStatus(lecture.getStatus());
+            lectureDto.setCredit(lecture.getCredit());
+            lectureDto.setUser(lecture.getUser().getId());
+            lectureDto.setTotalStudent(lecture.getTotalStudent());
+            lectureDto.setLevel(lecture.getLevel());
+            lectureDto.setId(lecture.getId());
+            lectureDto.setEndDate(lecture.getEndDate());
+            lectureDto.setDescription(lecture.getDescription());
+            lectureDto.setStartDate(lecture.getStartDate());
+            lectureDto.setCompletionDiv(lecture.getCompletionDiv());
+            lectureDto.setMajorName(lecture.getMajor().getName());
+            lectureDto.setUserName(lecture.getUser().getName());
+            lectureDto.setMajor(lecture.getMajor().getId());
+
+            lectureDtoList.add(lectureDto);
+        }
+
+        return lectureDtoList;
+    }
+
+    public void lectureInprogress(List<Long> idList, Status status) {
+
+        if (idList == null || idList.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "강의는 최소 1개 이상 선택해야합니다.");
+        }
+
+        for(Long lectureId : idList){
+            Lecture lecture = this.lectureRepository.findById(lectureId)
+                    .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
+
+            List<CourseRegistration> courseRegistrationList = this.courseRegRepository.findAllByLecture_Id(lectureId);
+
+
+            int total = lecture.getTotalStudent();
+            int minRequired = (int) Math.ceil(total * 0.3);
+
+
+            if(minRequired > courseRegistrationList.size()){
+                throw new ResponseStatusException(HttpStatus.CONFLICT,"신청 인원이 부족합니다");
+            }
+
+                for (CourseRegistration courseReg : courseRegistrationList){
+                    User user = this.userRepository.findById(courseReg.getUser().getId())
+                            .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."));
+
+                    lecture.setStatus(Status.INPROGRESS);
+
+                    Grade grade = new Grade();
+                    grade.setLecture(lecture);
+                    grade.setUser(user);
+
+                    Grade newGrade = this.gradeRepository.save(grade);
+
+                    Enrollment enrollment = new Enrollment();
+                    enrollment.setUser(user);
+                    enrollment.setGrade(newGrade);
+                    enrollment.setLecture(lecture);
+                    enrollment.setStatus(Status.INPROGRESS);
+
+                    this.enrollmentRepository.save(enrollment);
+
+
+                }
+
+        }
+    }
 }

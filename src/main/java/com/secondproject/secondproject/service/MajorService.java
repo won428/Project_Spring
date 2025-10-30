@@ -148,4 +148,22 @@ public class MajorService {
 
         return new MajorResponseDto(saved.getId(), saved.getName(), saved.getOffice(), saved.getCollege().getId());
     }
+
+    // 전체 학과 조회
+    public List<MajorListDto> majorList() {
+        List<Major> majorList = this.majorRepository.findAll();
+        List<MajorListDto> majorListDtos = new ArrayList<>();
+        for(Major major : majorList){
+            MajorListDto majorListDto = new MajorListDto();
+
+            majorListDto.setId(major.getId());
+            majorListDto.setName(major.getName());
+            majorListDto.setOffice(major.getOffice());
+            majorListDto.setCollegeId(major.getCollege().getId());
+
+            majorListDtos.add(majorListDto);
+        }
+
+        return  majorListDtos;
+    }
 }

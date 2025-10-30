@@ -37,6 +37,15 @@ public class MajorController {
         return majorList;
     }
 
+    // 전체 학과조회
+    @GetMapping("/all/list")
+    public List<MajorListDto> majorList(){
+
+        List<MajorListDto> listDtos = this.majorService.majorList();
+
+        return listDtos;
+    }
+
     // 선택한 특정 학과 가져오기(업데이트용)
     @GetMapping("/selectOne/{id}")
     public ResponseEntity<MajorListDto> selectMajorId(@PathVariable("id") Long id){
