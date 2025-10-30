@@ -54,6 +54,7 @@ public class UserService {
 
     @Transactional
     public void insertUser(UserDto userinfo) {
+        System.out.println(userinfo);
 
         if(userinfo.getEmail() == null || userinfo.getEmail().isBlank()){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"이메일은 필수 입력 사항입니다..");

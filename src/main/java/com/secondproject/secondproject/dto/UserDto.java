@@ -36,7 +36,7 @@ public class UserDto {
     @Pattern(regexp = "^(01[0-9])[-]?[0-9]{3,4}[-]?[0-9]{4}$",
             message = "휴대전화 번호 형식이 올바르지 않습니다.")
     private String phone; // 휴대전화
-    private Gender gender;
+
 
     @NotNull(message = "성별을 선택해주세요.")
     @Enumerated(EnumType.STRING)
@@ -51,8 +51,8 @@ public class UserDto {
     private String majorName;
     private String college;
     private Long userCode;
-    private Long major; // 소속학과ID (number, FK)
-    private UserType u_type; // 구분: 학생, 교수, 관리자 (enum)
+
+
 
     public UserDto(String name, String password, LocalDate birthdate, String email, String phone, Gender gender, Long major, UserType type) {
         this.name = name;
