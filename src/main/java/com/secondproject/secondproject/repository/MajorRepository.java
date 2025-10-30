@@ -1,18 +1,34 @@
 package com.secondproject.secondproject.repository;
 
+import com.secondproject.secondproject.dto.MajorListDto;
+import com.secondproject.secondproject.dto.MajorSearchDto;
 import com.secondproject.secondproject.entity.Major;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.apache.poi.ss.formula.functions.T;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MajorRepository extends JpaRepository<Major,Long> {
     List<Major> findByCollege_Id(Long collegeId);
 
     Major findMajorById(Long id);
+
+    @Query("""
+            select new com.secondproject.secondproject.dto.MajorListDto
+            (m.id,m.name,m.office,c.id,c.type)
+            from Major m join m.college c
+            where m.id = :id
+            """)
+    Optional<MajorListDto> findByMajorId(Long id); // 수정용 기존 정보 불러오기
 
     // 동일한 학과가 이미 존재하는지 확인
     boolean existsByNameAndCollegeId(@NotBlank(message = "학과명은 필수입니다.") @Size(min = 2, max = 50, message = "학과명은 2~50자여야 합니다.") @Pattern(
@@ -20,4 +36,39 @@ public interface MajorRepository extends JpaRepository<Major,Long> {
             regexp = "^[\\p{L}\\p{N}·&()\\-\\/ ]+$",
             message = "학과명에는 한글·영문·숫자와 공백, · - & ( ) /만 사용할 수 있습니다."
     ) String name, @NotNull Long collegeId);
+
+    // 학과 ID로 검색
+    @Query("""
+            select new com.secondproject.secondproject.dto.MajorListDto(m.id,m.name,m.office,c.id,c.type)
+            from Major m join m.college c
+            where (:id is null or m.id = :id)
+            """)
+    Page<MajorListDto> searchById(Pageable pageable, @Param("id") Long id);
+
+    // 학과명으로 검색
+    @Query("""
+            select new com.secondproject.secondproject.dto.MajorListDto(m.id,m.name,m.office,c.id,c.type)
+            from Major m join m.college c
+            where (:kw = '' or lower(m.name) like concat('%',lower(:kw),'%'))
+            """)
+    Page<MajorListDto> searchByName(Pageable pageable, @Param("kw") String searchKeyword);
+
+    // 단과대학명으로 검색
+    @Query("""
+            select new com.secondproject.secondproject.dto.MajorListDto(m.id,m.name,m.office,c.id,c.type)
+            from Major m join m.college c
+            where (:kw = '' or lower(c.type) like concat('%',lower(:kw),'%'))
+            """)
+    Page<MajorListDto> seachByCollegeName(Pageable pageable, @Param("kw") String searchKeyword);
+
+    // 전체검색
+    @Query("""
+            select new com.secondproject.secondproject.dto.MajorListDto(m.id,m.name,m.office,c.id,c.type)
+            from Major m join m.college c
+            where (:kw = '')
+            or lower(m.name) like concat('%',lower(:kw),'%')
+            or lower(c.type) like concat('%',lower(:kw),'%')
+            or (cast(m.id as string) like concat('%',:kw,'%'))
+            """)
+    Page<MajorListDto> searchAll(Pageable pageable, @Param("kw") String searchKeyword);
 }

@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
 
@@ -53,6 +54,10 @@ public class StatusRecords {
     @JsonFormat(pattern = "yyyy-MM-dd")// 퇴학일, NULL 허용
     private LocalDate expelledDate;
     // 제적일
+
+    @Column(name = "level")
+    @ColumnDefault("1")
+    private int level = 1; // 학년
 
     @Column(name = "major_credit", nullable = false)
     private int  majorCredit = 0;

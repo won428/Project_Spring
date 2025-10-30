@@ -36,9 +36,9 @@ public class LectureNotice {
     @Column(name = "ln_updateAt")
     private LocalDateTime lnUpdateAt;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ol_id")
-    private List<OnlineLecture> onlineLecture = new ArrayList<>();
+    private OnlineLecture onlineLecture;
 
 
     @PrePersist

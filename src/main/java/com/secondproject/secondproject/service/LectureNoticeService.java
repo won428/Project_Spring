@@ -14,6 +14,10 @@ import com.secondproject.secondproject.repository.NoticeAttachRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,16 +55,22 @@ public class LectureNoticeService {
         // 3. 생성된 Notice를 저장합니다.
         LectureNotice saved = lectureNoticeRepository.save(LN);
 
-        if (!files.isEmpty() && files != null) {
+        // files null이면 빈 배열로 반환
+        List<MultipartFile> safeFiles = (files == null)
+                ? java.util.Collections.emptyList()
+                : files.stream().filter(f -> f != null && !f.isEmpty()).toList();
 
-            for (MultipartFile file : files) {
-                Attachment attachment = attachmentService.save(file, user);
-                NoticeAttach noticeAttach = new NoticeAttach();
-                noticeAttach.setAttachment(attachment);
-                noticeAttach.setLectureNotice(saved);
-                noticeAttachRepository.save(noticeAttach);
-            }
+        if (safeFiles.isEmpty()) {
+            return;
         }
+        for (MultipartFile file : files) {
+            Attachment attachment = attachmentService.save(file, user);
+            NoticeAttach noticeAttach = new NoticeAttach();
+            noticeAttach.setAttachment(attachment);
+            noticeAttach.setLectureNotice(saved);
+            noticeAttachRepository.save(noticeAttach);
+        }
+
     }
 
 
@@ -103,14 +113,13 @@ public class LectureNoticeService {
         return NoticeResponseDto.fromEntity(lectureNotice, attachments);
 
 
-//        List<Attachment> NoticesFiles = new ArrayList<>();
-//        LectureNoticeListWithFileDto dto = new LectureNoticeListWithFileDto();
-//        dto.add(LectureNoticeListWithFileDto.fromEntity(lectureNotice));
-//        for (NoticeAttach attachId : noticeAttach) {
-//            Attachment attachment = attachmentService.findById(attachId.getAttachment().getId()).orElseThrow(() -> new EntityNotFoundException("ㅅㅄㅄㅂ"));
-//            NoticesFiles.add(attachment);
-//        }
-//        dto.setFiles(NoticesFiles);
-//        return dto;
+    }
+
+    public Page<LectureNoticeListDto> getPagedNotices(String email, int page, int size) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("해당 이메일의 사용자를 찾을 수 없습니다."));
+        Pageable pageable = PageRequest.of(page, size, Sort.by((Sort.Direction.DESC), "lnCreateAt"));
+        Page<LectureNotice> result = lectureNoticeRepository.findByUser(user, pageable);
+        return result.map(LectureNoticeListDto::fromEntity);
     }
 }

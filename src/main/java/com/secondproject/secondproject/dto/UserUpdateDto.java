@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.dto;
 
+import com.secondproject.secondproject.Enum.Gender;
 import com.secondproject.secondproject.Enum.UserType;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,7 +24,7 @@ public class UserUpdateDto {
 
     private String phone; // 휴대전화
 
-    private String gender; // 성별 (enum, 문자열 컬럼)
+    private Gender gender; // 성별 (enum, 문자열 컬럼)
 
     private Long major; // 소속학과ID (number, FK)
 
@@ -31,7 +32,7 @@ public class UserUpdateDto {
 
     private UserType u_type; // 구분: 학생, 교수, 관리자 (enum)
 
-    public UserUpdateDto(Long user_code, String u_name, String password, LocalDate birthdate, String email, String phone, String gender, Long major, Long college, UserType u_type) {
+    public UserUpdateDto(Long user_code, String u_name, String password, LocalDate birthdate, String email, String phone, Gender gender, Long major, Long college, UserType u_type) {
         this.user_code = user_code;
         this.u_name = u_name;
         this.password = password;
