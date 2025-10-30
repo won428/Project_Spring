@@ -188,4 +188,27 @@ public class LectureService {
     }
 
 
+    public List<LectureDto> findByStudent(User user) {
+        List<Enrollment> enrollments = enrollmentRepository.findByUser(user);
+
+        List<Long> lectureId = enrollments.stream()
+                .map(Enrollment::getLecture)
+                .map(Lecture::getId)
+                .toList();
+
+
+        List<Lecture> lectures = lectureRepository.findAllById(lectureId);
+
+
+//        for(Long lec : lectureId){
+//            Lecture lectures = lectureRepository.findAllById(lec)
+//                    .orElseThrow(()->new EntityNotFoundException("sdsd"));
+//            lectureDtoList.add(lectures);
+//        }
+
+        return lectures.stream()
+                .map(LectureDto::fromEntity)
+                .toList();
+
+    }
 }

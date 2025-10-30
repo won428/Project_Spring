@@ -149,5 +149,20 @@ public class LectureController {
         }
     }
 
+    @GetMapping("/stlist")
+    public ResponseEntity<?> StudentLecList(@RequestParam String email) {
+        try {
+            User user = userService.findUserByEmail(email)
+                    .orElseThrow(() -> (new UsernameNotFoundException("존재하지 않는 사용자 입니다.")));
 
+            List<LectureDto> lectureListDto = lectureService.findByStudent(user);
+            return ResponseEntity.ok(lectureListDto);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("오류 발생");
+        }
+
+
+    }
 }

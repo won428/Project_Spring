@@ -43,6 +43,7 @@ public class AssignmentService {
         Lecture lecture = lectureRepository.findById(assignmentDto.getLectureId())
                 .orElseThrow(() -> new EntityNotFoundException("강의명이 일치하지 않습니다."));
 
+
         Assignment assignInsert = new Assignment();
         assignInsert.setUser(user);
         assignInsert.setTitle(assignmentDto.getTitle());
@@ -68,11 +69,10 @@ public class AssignmentService {
     }
 
 
-    public Page<AssignmentDto> getPagedNotices(String email, int page, int size) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("해당 이메일의 사용자를 찾을 수 없습니다."));
+    public Page<AssignmentDto> getPagedNotices(Long id, int page, int size) {
+
         Pageable pageable = PageRequest.of(page, size, Sort.by((Sort.Direction.DESC), "createAt"));
-        Page<Assignment> result = assignmentRepository.findByUser(user, pageable);
+        Page<Assignment> result = assignmentRepository.findById(id, pageable);
         return result.map(AssignmentDto::fromEntity);
     }
 

@@ -30,12 +30,12 @@ public class AssignmentController {
 
     @GetMapping("/List")
     public ResponseEntity<?> AssignmentList(
-            @RequestParam String email,
+            @RequestParam Long id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         try {
-            Page<AssignmentDto> res = assignmentService.getPagedNotices(email, page, size);
+            Page<AssignmentDto> res = assignmentService.getPagedNotices(id, page, size);
             return ResponseEntity.ok(res);
 
         } catch (Exception e) {
