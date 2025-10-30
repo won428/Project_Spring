@@ -38,7 +38,7 @@ public class UserLoginTest extends AbstractTestNGSpringContextTests {
         prof.setEmail("chulsoo.prof@univ.com");        // 고유 이메일
         prof.setPassword(passwordEncoder.encode("Prof123!")); // 로그인용 원문 비번 예: Prof123!
         prof.setName("김철수");                           // 이름
-        prof.setGender("MALE");                         // 성별 (스키마/엔티티에 맞는 값)
+        prof.setGender(Gender.valueOf("MALE"));                         // 성별 (스키마/엔티티에 맞는 값)
         prof.setPhone("01012345678");                  // 연락처
         prof.setType(UserType.PROFESSOR);
         userRepository.save(prof);// 교수 권한
@@ -50,7 +50,7 @@ public class UserLoginTest extends AbstractTestNGSpringContextTests {
         std1.setEmail("younghee.kim@example.com");        // UNIQUE, length 100
         std1.setPassword(passwordEncoder.encode("Younghee123!")); // 인코딩된 비밀번호
         std1.setName("김영희");                              // u_name NOT NULL
-        std1.setGender("FEMALE");                          // 문자열 컬럼
+        std1.setGender(Gender.valueOf("FEMALE"));                          // 문자열 컬럼
         std1.setPhone("01077778888");                      // UNIQUE, length 20
         std1.setType(UserType.STUDENT);                    // Enum: 학생
         userRepository.save(std1);
@@ -63,7 +63,7 @@ public class UserLoginTest extends AbstractTestNGSpringContextTests {
         std2.setEmail("myungsoo.kim@example.com");                  // UNIQUE, length 100
         std2.setPassword(passwordEncoder.encode("Myungsoo123!"));   // 인코딩된 비밀번호
         std2.setName("김명수");                                       // u_name NOT NULL
-        std2.setGender("MALE");                                     // 문자열 컬럼(예: 'MALE' / 'FEMALE')
+        std2.setGender(Gender.valueOf("MALE"));                                     // 문자열 컬럼(예: 'MALE' / 'FEMALE')
         std2.setPhone("01066667777");                               // UNIQUE, length 20
         std2.setType(UserType.STUDENT);                             // Enum: 학생
 
