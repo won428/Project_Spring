@@ -13,11 +13,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.swing.plaf.OptionPaneUI;
@@ -146,7 +148,14 @@ public class UserController {
         return ResponseEntity.ok(200);
     }
 
+    // 학생 일괄 등록(페이지로 넘기기, DB 저장 X)
+    //consumes = MediaType.MULTIPART_FORM_DATA_VALUE <- 파일 업로드 형식 요청만 받겠다는 뜻 / Json 요청은 거부
+    @PostMapping(value = "/parse", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public List<UserStBatchDto> studentListInsert(@RequestPart("file")MultipartFile file){
+        return userService.parse(file);
+    }
 
+    // 학생 일괄 저장(DB에 저장)
 
 
 
