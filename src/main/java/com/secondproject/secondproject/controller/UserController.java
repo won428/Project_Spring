@@ -162,6 +162,8 @@ public class UserController {
         statusMap.put("graduationDate", dto.getGraduationDate());
         statusMap.put("retentionDate", dto.getRetentionDate());
         statusMap.put("expelledDate", dto.getExpelledDate());
+        statusMap.put("majorCredit", dto.getMajorCredit());
+        statusMap.put("generalCredit", dto.getGeneralCredit());
         statusMap.put("totalCredit", dto.getTotalCredit());
         statusMap.put("currentCredit", dto.getCurrentCredit());
         statusMap.put("studentImage", dto.getStudentImage());

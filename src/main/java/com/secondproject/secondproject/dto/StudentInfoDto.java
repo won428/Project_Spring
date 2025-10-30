@@ -42,6 +42,8 @@ public class StudentInfoDto {
     private LocalDate graduationDate;
     private LocalDate retentionDate;
     private LocalDate expelledDate;
+    private int majorCredit;
+    private int generalCredit;
     private int totalCredit;
     private double currentCredit;
     private String studentImage;
@@ -70,6 +72,8 @@ public class StudentInfoDto {
                 this.graduationDate = statusRecord.getGraduationDate();
                 this.retentionDate = statusRecord.getRetentionDate();
                 this.expelledDate = statusRecord.getExpelledDate();
+                this.majorCredit = statusRecord.getMajorCredit();
+                this.generalCredit = statusRecord.getGeneralCredit();
                 this.totalCredit = statusRecord.getTotalCredit();
                 this.currentCredit = statusRecord.getCurrentCredit();
                 this.studentImage = statusRecord.getStudentImage();

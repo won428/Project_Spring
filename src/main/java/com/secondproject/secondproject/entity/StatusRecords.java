@@ -54,6 +54,12 @@ public class StatusRecords {
     private LocalDate expelledDate;
     // 제적일
 
+    @Column(name = "major_credit", nullable = false)
+    private int  majorCredit = 0;
+
+    @Column(name = "general_credit", nullable = false)
+    private int  generalCredit = 0;
+
     @Column(name = "total_credit", nullable = false)
     private int  totalCredit = 0;               // 총 학점 (number)
 
