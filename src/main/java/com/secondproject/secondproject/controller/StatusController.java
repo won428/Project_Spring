@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PutMapping; // 삭제 요청용
 import org.springframework.web.bind.annotation.DeleteMapping; // 삭제 요청용
 import org.springframework.web.bind.annotation.PathVariable; // 경로 변수 활용
 import org.springframework.http.ResponseEntity; // 응답처리
@@ -74,5 +75,18 @@ public class StatusController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("존재하지 않는 요청입니다");
         }
+    }
+
+    // 수정 핸들러: React에서 수정 폼 제출 시 PUT /api/student/record/{recordId} 호출
+    @PutMapping("/record/{recordId}")
+    public ResponseEntity<StatusChangeRequestDto> updateChangeRequest(
+            @PathVariable Long recordId,
+            @RequestBody StatusChangeRequestDto dto) {
+
+        // 1) 기존 요청 존재 여부 체크 및 수정 서비스 호출
+        StatusChangeRequestDto updated = statusService.updateChangeRequest(recordId, dto);
+
+        // 3) 성공 시 수정된 데이터 반환
+        return ResponseEntity.ok(updated);
     }
 }
