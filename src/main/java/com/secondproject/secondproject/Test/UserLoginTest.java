@@ -22,13 +22,12 @@ public class UserLoginTest extends AbstractTestNGSpringContextTests {
     @Test
     public void insertUserList() {
         User user01 = new User();
-        user01.setEmail("Admin123@Admin");
-        user01.setPassword(passwordEncoder.encode("Admin123"));
+        user01.setEmail("test@test.com");
+        user01.setPassword(passwordEncoder.encode("Test123"));
         user01.setGender(Gender.MALE);
-        user01.setName("Kim");
-        user01.setPhone("01022223333");
+        user01.setName("Choi");
+        user01.setPhone("01033334444");
         user01.setType(UserType.ADMIN);
-        user01.setPhone("01012341234");
         userRepository.save(user01);
     }
 

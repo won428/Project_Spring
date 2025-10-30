@@ -211,7 +211,15 @@ public class UserService {
 
                     dto.setName(name);
                     dto.setBirthDate(birth);
-                    dto.setGender(genderRaw);
+
+                    try {
+                        Gender gender = mapGender(genderRaw);
+                        dto.setGender(gender);
+                    } catch (Exception e) {
+                        errors.add("gender : "+e.getMessage());
+                        dto.setGender(null);
+                    }
+
                     dto.setEmail(email);
                     dto.setPhoneNumber(phone);
                     dto.setMajorId(majorId);

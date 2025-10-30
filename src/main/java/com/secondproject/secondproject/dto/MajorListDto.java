@@ -15,4 +15,6 @@ public class MajorListDto {
     private String office;
     private Long collegeId;
     private String collegeName;
+
+
 }

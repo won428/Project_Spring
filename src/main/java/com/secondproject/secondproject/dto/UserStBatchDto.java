@@ -1,6 +1,9 @@
 package com.secondproject.secondproject.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.secondproject.secondproject.Enum.Gender;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,7 +29,8 @@ public class UserStBatchDto {
     private LocalDate birthDate;
 
     @NotNull(message = "성별을 선택해주세요.")
-    private String gender;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     @NotBlank(message = "이메일은 필수 입력 사항입니다.")
     @Email(message = "이메일 형식이 올바르지 않습니다.")

@@ -148,4 +148,22 @@ public class MajorService {
 
         return new MajorResponseDto(saved.getId(), saved.getName(), saved.getOffice(), saved.getCollege().getId());
     }
+
+    public List<MajorListDto> selectAll() {
+        List<Major> majorLists = this.majorRepository.findAll();
+        List<MajorListDto> majorDtos = new ArrayList<>();
+
+        for (Major m : majorLists){
+            Long id = m.getId();
+            String name = m.getName();
+            String office = m.getOffice();
+            Long collegeId = m.getCollege().getId();
+            String collegeName = m.getCollege().getType();
+
+            MajorListDto rs = new MajorListDto(id,name,office,collegeId,collegeName);
+
+            majorDtos.add(rs);
+        }
+        return majorDtos;
+    }
 }
