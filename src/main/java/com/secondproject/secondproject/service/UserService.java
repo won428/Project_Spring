@@ -2,6 +2,7 @@ package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.Gender;
 import com.secondproject.secondproject.Enum.UserType;
+import com.secondproject.secondproject.dto.UserImportDto;
 import com.secondproject.secondproject.dto.UserListDto;
 import com.secondproject.secondproject.dto.UserStBatchDto;
 import com.secondproject.secondproject.dto.UserUpdateDto;
@@ -13,6 +14,7 @@ import com.secondproject.secondproject.repository.CollegeRepository;
 import com.secondproject.secondproject.repository.MajorRepository;
 import com.secondproject.secondproject.repository.StatusRecordsRepository;
 import com.secondproject.secondproject.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.poi.ss.usermodel.*;
@@ -33,6 +35,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -380,5 +383,45 @@ public class UserService {
             } catch (Exception ignore) {}
         }
         return null; // 못 읽으면 null
+    }
+
+    @Transactional
+    public void importUsers(@Valid List<UserStBatchDto> users) {
+        var majorIds = users.stream()// 매핑, 필터링을 한줄씩 작성하게 해주는 API
+                .map(UserStBatchDto::getMajorId) // UserStBatchDto에서 getMajorId만 뽑아냄
+                .filter(id -> id != null) // null인 id 필터링해서 제거
+                .collect(Collectors.toSet()); // 중복제거된 Set으로 묶음
+
+        // 존재하는 학과 id 전부 찾아서 map에 저장
+        var majorById = majorRepository.findAllById(majorIds).stream()
+                .collect(Collectors.toMap(Major::getId, m -> m));
+
+        UserType type = UserType.STUDENT;
+
+        for (UserStBatchDto u : users){
+            User user = new User();
+
+            int year = java.time.LocalDate.now().getYear();
+            Long id = user.getId();
+            Long major = u.getMajorId(); // 학과 코드
+
+            String stringYear = Integer.toString(year); // 입학년도 문자열로 변환
+            String stringMajor = Long.toString(major); // 학과 코드 문자열로 변환
+            String stringId = Long.toString(id); // id 문자열로 변환
+
+            String stringStudentId = stringYear + stringId + stringMajor;
+
+            Long studentId = Long.parseLong(stringStudentId);
+
+            user.setUserCode(studentId);
+            user.setName(u.getName());
+            user.setPassword(passwordEncoder.encode(u.getPhoneNumber()));
+            user.setBirthDate(u.getBirthDate());
+            user.setEmail(u.getEmail());
+            user.setPhone(u.getPhoneNumber());
+            user.setGender(u.getGender());
+//            user.setMajor(u.getMajorId());
+            user.setType(type);
+        }
     }
 }

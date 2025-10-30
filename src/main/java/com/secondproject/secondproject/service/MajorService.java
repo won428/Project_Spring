@@ -4,6 +4,7 @@ import com.secondproject.secondproject.Enum.MajorPaging;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.College;
 import com.secondproject.secondproject.entity.Major;
+import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.repository.CollegeRepository;
 import com.secondproject.secondproject.repository.MajorRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -166,4 +167,6 @@ public class MajorService {
         }
         return majorDtos;
     }
+
+
 }

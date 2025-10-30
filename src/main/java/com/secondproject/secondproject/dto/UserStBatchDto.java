@@ -50,6 +50,7 @@ public class UserStBatchDto {
 
     private boolean valid;
 
+
     // userType, pw(전화번호로 강제) 서비스에서 강제할당, id는 자동증가
 }
 

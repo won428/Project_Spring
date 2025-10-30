@@ -8,6 +8,7 @@ import com.secondproject.secondproject.service.CollegeService;
 import com.secondproject.secondproject.service.LectureService;
 import com.secondproject.secondproject.service.MajorService;
 import com.secondproject.secondproject.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,8 +17,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.swing.plaf.OptionPaneUI;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -117,6 +120,9 @@ public class UserController {
     }
 
     // 학생 일괄 저장(DB에 저장)
-
+    public ResponseEntity<Void> inserBatchUser(@RequestBody @Valid List<UserStBatchDto> users){
+        userService.importUsers(users);
+     return ResponseEntity.ok().build(); // 200 OK + 배열 본문
+    }
 
 }
