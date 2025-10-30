@@ -46,4 +46,22 @@ public class LectueInsert extends AbstractTestNGSpringContextTests {
 
     }
 
+    @Test
+    public void insertLectureList1() {
+        Lecture lecture = new Lecture();
+        User user = userRepository.findByEmail("younghee.kim@example.com")
+                .orElseThrow(() -> new RuntimeException());
+        lecture.setName("일반물리학2");
+        lecture.setUser(user);
+        lecture.setCredit(3);
+        lecture.setStartDate(LocalDate.now());
+        lecture.setDescription("123123");
+
+        lecture.setMajor(user.getMajor());
+        lecture.setTotalStudent(40);
+        lecture.setStatus(Status.COMPLETED);
+
+        lectureRepository.save(lecture);
+
+    }
 }

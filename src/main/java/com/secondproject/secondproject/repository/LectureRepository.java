@@ -9,4 +9,7 @@ import java.util.Optional;
 
 public interface LectureRepository extends JpaRepository<Lecture, Long> {
     List<Lecture> findByUser(User user);
+
+
+
 }

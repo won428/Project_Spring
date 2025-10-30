@@ -9,10 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.Optional;
 
 @Service
@@ -23,7 +23,7 @@ public class LectureService {
     private final MajorRepository majorRepository;
     private final CourseRegRepository courseRegRepository;
     private final EnrollmentRepository enrollmentRepository;
-    private final GradeRepository gradeRepository;
+
 
     public void insertByAdmin(LectureDto lectureDto) {
         Lecture lecture = new Lecture();
@@ -162,4 +162,6 @@ public class LectureService {
 
         return lectureDto;
     }
+
+
 }
