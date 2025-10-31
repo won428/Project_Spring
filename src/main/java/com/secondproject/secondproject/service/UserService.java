@@ -2,16 +2,14 @@ package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.Gender;
 import com.secondproject.secondproject.Enum.UserType;
-import com.secondproject.secondproject.dto.UserImportDto;
 import com.secondproject.secondproject.dto.UserDto;
 import com.secondproject.secondproject.dto.UserListDto;
 import com.secondproject.secondproject.dto.UserStBatchDto;
 import com.secondproject.secondproject.dto.UserListSearchDto;
 import com.secondproject.secondproject.dto.UserUpdateDto;
-
-import jakarta.validation.Valid;
 import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.repository.*;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.math3.stat.descriptive.summary.Product;
 import org.springframework.data.domain.Page;
@@ -102,13 +100,13 @@ public class UserService {
 
         int year = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).getYear();     // 1997-04-28
         Long id = saved.getId();
-        Long major = saved.getMajor().getId(); // 학과 코드
+        Long majors = saved.getMajor().getId(); // 학과 코드
 
-        if (id == null || major == null){
+        if (id == null || majors == null){
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"학번 생성 데이터 누락.");
         }
 
-        String userCode = String.format("%04d%04d%03d",year,id,major);
+        String userCode = String.format("%04d%04d%03d",year,id,majors);
 
         Long studentId = Long.parseLong(userCode);
 
