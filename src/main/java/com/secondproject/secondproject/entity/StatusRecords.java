@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
 
@@ -28,6 +29,10 @@ public class StatusRecords {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_stausRecord_user")) // 학적 유저ID, FK
     private User user;
+
+    @Column(name = "level")
+    @ColumnDefault("1")
+    private int level = 1; // 학년
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "admission_date", nullable = false)
