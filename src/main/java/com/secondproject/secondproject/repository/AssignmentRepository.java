@@ -9,5 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
 
 
-    Page<Assignment> findById(Long id, Pageable pageable);
+    Page<Assignment> findByLectureId(Long id, Pageable pageable);
+
+    Assignment findByLectureId(Long id);
 }

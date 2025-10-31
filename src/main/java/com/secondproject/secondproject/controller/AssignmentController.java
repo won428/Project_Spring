@@ -3,6 +3,7 @@ package com.secondproject.secondproject.controller;
 
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.service.AssignmentService;
+import com.secondproject.secondproject.service.SubmitAsgmtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import java.util.List;
 public class AssignmentController {
 
     private final AssignmentService assignmentService;
+    private final SubmitAsgmtService submitAsgmtService;
 
     @PostMapping("/insert")
     public ResponseEntity<?> uploadAssignment(
@@ -47,14 +49,31 @@ public class AssignmentController {
 
 
     @GetMapping("/specific")
-    public ResponseEntity<?> SpecPage(@RequestParam Long id) {
+    public ResponseEntity<?> SpecPage(@RequestParam Long id, @RequestParam String email) {
         try {
-            AssignmentResDto resDto = assignmentService.findById(id);
+            AssignmentResDto resDto = assignmentService.findById(id, email);
             return ResponseEntity.ok(resDto);
+
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
 
     }
+
+    @PostMapping("/submit")
+    public ResponseEntity<?> AssignSubmit(
+            @ModelAttribute AssignSubmitInsertDto assignSubmitInsertDto,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) {
+        try {
+            submitAsgmtService.assignmentSubmit(assignSubmitInsertDto, files);
+
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+
 }
