@@ -4,6 +4,7 @@ import com.secondproject.secondproject.Enum.MajorPaging;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.College;
 import com.secondproject.secondproject.entity.Major;
+import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.repository.CollegeRepository;
 import com.secondproject.secondproject.repository.MajorRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -122,6 +123,25 @@ public class MajorService {
         return majorRepository.findByMajorId(id);
     }
 
+    // 전체 학과 조회
+    public List<MajorListDto> majorList() {
+        List<Major> majorList = this.majorRepository.findAll();
+        List<MajorListDto> majorListDtos = new ArrayList<>();
+        for(Major major : majorList){
+            MajorListDto majorListDto = new MajorListDto();
+
+            majorListDto.setId(major.getId());
+            majorListDto.setName(major.getName());
+            majorListDto.setOffice(major.getOffice());
+            majorListDto.setCollegeId(major.getCollege().getId());
+
+            majorListDtos.add(majorListDto);
+        }
+
+        return  majorListDtos;
+    }
+
+
 //    public MajorListDto toDto(Major major) {
 //        MajorListDto majorListDto = new MajorListDto();
 //
@@ -149,21 +169,23 @@ public class MajorService {
         return new MajorResponseDto(saved.getId(), saved.getName(), saved.getOffice(), saved.getCollege().getId());
     }
 
-    // 전체 학과 조회
-    public List<MajorListDto> majorList() {
-        List<Major> majorList = this.majorRepository.findAll();
-        List<MajorListDto> majorListDtos = new ArrayList<>();
-        for(Major major : majorList){
-            MajorListDto majorListDto = new MajorListDto();
+    public List<MajorListDto> selectAll() {
+        List<Major> majorLists = this.majorRepository.findAll();
+        List<MajorListDto> majorDtos = new ArrayList<>();
 
-            majorListDto.setId(major.getId());
-            majorListDto.setName(major.getName());
-            majorListDto.setOffice(major.getOffice());
-            majorListDto.setCollegeId(major.getCollege().getId());
+        for (Major m : majorLists){
+            Long id = m.getId();
+            String name = m.getName();
+            String office = m.getOffice();
+            Long collegeId = m.getCollege().getId();
+            String collegeName = m.getCollege().getType();
 
-            majorListDtos.add(majorListDto);
+            MajorListDto rs = new MajorListDto(id,name,office,collegeId,collegeName);
+
+            majorDtos.add(rs);
         }
-
-        return  majorListDtos;
+        return majorDtos;
     }
+
+
 }

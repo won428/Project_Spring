@@ -30,6 +30,10 @@ public class StatusRecords {
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_stausRecord_user")) // 학적 유저ID, FK
     private User user;
 
+    @Column(name = "level")
+    @ColumnDefault("1")
+    private int level = 1; // 학년
+
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "admission_date", nullable = false)
     private LocalDate admissionDate; // 입학일
@@ -54,10 +58,6 @@ public class StatusRecords {
     @JsonFormat(pattern = "yyyy-MM-dd")// 퇴학일, NULL 허용
     private LocalDate expelledDate;
     // 제적일
-
-    @Column(name = "level")
-    @ColumnDefault("1")
-    private int level = 1; // 학년
 
     @Column(name = "total_credit", nullable = false)
     private int  totalCredit = 0;               // 총 학점 (number)

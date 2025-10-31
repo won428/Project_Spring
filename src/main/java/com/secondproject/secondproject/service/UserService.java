@@ -9,6 +9,7 @@ import com.secondproject.secondproject.dto.UserListSearchDto;
 import com.secondproject.secondproject.dto.UserUpdateDto;
 import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.repository.*;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.math3.stat.descriptive.summary.Product;
 import org.springframework.data.domain.Page;
@@ -35,8 +36,10 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -95,18 +98,17 @@ public class UserService {
 
         StatusRecords savedRecords = statusRecordsRepository.save(userStatus);
 
-        LocalDate b = savedRecords.getAdmissionDate();     // 1997-04-28
+        int year = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).getYear();     // 1997-04-28
         Long id = saved.getId();
-        int year = b.getYear();                // 입학년도
-        Long majorCode = saved.getMajor().getId(); // 학과 코드
+        Long majors = saved.getMajor().getId(); // 학과 코드
 
-        String stringYear = Integer.toString(year); // 입학년도 문자열로 변환
-        String stringMajor = Long.toString(majorCode); // 학과 코드 문자열로 변환
-        String stringId = Long.toString(id); // id 문자열로 변환
+        if (id == null || majors == null){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"학번 생성 데이터 누락.");
+        }
 
-        String stringStudentId = stringYear + stringId + stringMajor;
+        String userCode = String.format("%04d%04d%03d",year,id,majors);
 
-        Long studentId = Long.parseLong(stringStudentId);
+        Long studentId = Long.parseLong(userCode);
 
         saved.setUserCode(studentId);
     }
@@ -326,7 +328,15 @@ public class UserService {
 
                     dto.setName(name);
                     dto.setBirthDate(birth);
-                    dto.setGender(genderRaw);
+
+                    try {
+                        Gender gender = mapGender(genderRaw);
+                        dto.setGender(gender);
+                    } catch (Exception e) {
+                        errors.add("gender : "+e.getMessage());
+                        dto.setGender(null);
+                    }
+
                     dto.setEmail(email);
                     dto.setPhoneNumber(phone);
                     dto.setMajorId(majorId);
@@ -353,7 +363,7 @@ public class UserService {
                     errors.add("row " + (r + 1) + " 파싱 오류: " + ex.getMessage());
                 }
 
-                dto.setErrors(errors);
+//                dto.setErrors(errors);
                 dto.setValid(errors.isEmpty());
                 userRow.add(dto);
             }
@@ -487,5 +497,115 @@ public class UserService {
             } catch (Exception ignore) {}
         }
         return null; // 못 읽으면 null
+    }
+
+    @Transactional
+    public void importUsers(@Valid List<UserStBatchDto> users) {
+        // 이메일 정규화(공백제거+소문자)
+        List<String> emailNorm = users.stream()
+                .map(r->normalizeEmail(r.getEmail()))
+                .filter(o -> o != null)
+                .toList();
+
+        // 업로드 파일 내부 중복 탐지
+        Map<String,Long> inFileCounts = emailNorm.stream() // 정규화한 이메일 리스트를 스트림으로
+                .collect(Collectors.groupingBy(e -> e,Collectors.counting()));
+        // groupingBy(e -> e, ...) :같은 이메일끼리 묶기 / Collectors.counting() : 각 그룹의 개수 Long으로 카운팅
+
+        Set<String> dupInFile = inFileCounts.entrySet().stream() // 위에서 Map(키, 값) 페어를 담은 스트림
+                .filter(e -> e.getValue() > 1) // 등장횟수가 2회 이상인 항목 = 중복된 이메일만 남김
+                .map(Map.Entry::getKey) // 중복이메일 Map(이메일, 횟수)에서 이메일만 추출
+                .collect(Collectors.toSet()); // 중복 이메일을 Set집합으로 수집
+
+        // 중복 이메일이 존재하면 에러 반영
+        if (!dupInFile.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST
+                    ,"업로드 파일 내부에 중복된 이메일이 있습니다.\n중복된 이메일 : "+String.join(", ",dupInFile));
+        }
+
+        // DB에 존재하는 데이터인지 중복 확인
+        List<User> existed = userRepository.findAllByEmailIn(emailNorm); // 정규화된 이메일 집합의 존재여부 확인
+        Set<String> existedSet = existed.stream()
+                .map(u -> normalizeEmail(u.getEmail()))
+                .filter(e -> e != null)
+                .collect(Collectors.toSet());
+        if (!existedSet.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 이메일 : "+String.join(", ", existedSet));
+        }
+
+        // users리스트에서 중복 제거한 MajorId 컬렉션으로 묶기
+        var majorIds = users.stream()// 매핑, 필터링을 한줄씩 작성하게 해주는 API
+                .map(UserStBatchDto::getMajorId) // UserStBatchDto에서 getMajorId만 뽑아냄
+                .filter(id -> id != null) // null인 id 필터링해서 제거
+                .collect(Collectors.toSet()); // 중복제거된 Set으로 묶음
+
+        // set컬렉션으로 묶은 majorId를 Map<키, 값>형태로 저장
+        var majorById = majorRepository.findAllById(majorIds)
+                .stream()
+                .collect(Collectors.toMap(Major::getId, m -> m));
+
+        // user 리스트 생성
+        List<User> userList = new ArrayList<>(users.size());
+        UserType type = UserType.STUDENT;
+
+        // user 생성(학번은 nullable)
+        for (UserStBatchDto u : users){
+            Major major = Optional.ofNullable(
+                    majorById.get(u.getMajorId()))
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+            User user = new User();
+
+            user.setName(u.getName());
+            user.setBirthDate(u.getBirthDate());
+            user.setGender(u.getGender());
+            user.setEmail(u.getEmail());
+            user.setType(type);
+            user.setPassword(passwordEncoder.encode(u.getPhoneNumber()));
+            user.setPhone(u.getPhoneNumber());
+            user.setMajor(major);
+            userList.add(user);
+        }
+        userRepository.saveAll(userList); // 유저 저장 => id 생성됨
+
+        // 연도 가져오기(학번생성 1단계)
+        int year = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).getYear();
+
+        // 학적정보도 함께 생성
+        List<StatusRecords> statusRecords = new ArrayList<>(userList.size());
+
+        for (User u : userList){
+            // 유저id 불러오기(학번생성 2단계)
+            Long userId = u.getId();
+            Long majorId = u.getMajor().getId();
+
+            // 유저Id, 학과Id 없을 경우 예외처리
+            if (userId == null || majorId == null) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"학번 생성 데이터가 누락되었습니다.");
+            }
+
+            // 연도4자리+유저번호 0포함 4자리+학과코드
+            String userNum = String.format("%04d%04d%03d",year,userId,majorId);
+
+            // Long으로 타입변환
+            Long userCode = Long.parseLong(userNum);
+
+            // 유저 학번 업데이트
+            u.setUserCode(userCode);
+
+            StatusRecords statusRecordList = new StatusRecords();
+
+            statusRecordList.setUser(u);
+            statusRecordList.setAdmissionDate(LocalDate.now());
+            statusRecords.add(statusRecordList);
+
+        }
+        userRepository.saveAll(userList);
+        statusRecordsRepository.saveAll(statusRecords);
+    }
+
+    // email 소문자로 변환
+    private String normalizeEmail(String s) {
+        return s == null ? null : s.trim().toLowerCase();
     }
 }

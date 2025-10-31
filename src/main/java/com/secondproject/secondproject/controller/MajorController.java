@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -29,6 +30,12 @@ public class MajorController {
     private final MajorService majorService;
     private final CollegeService collegeService;
     private final LectureService lectureService;
+
+    @GetMapping("/listAll")
+    public List<MajorListDto> selectAll(){
+        List<MajorListDto> majorListDtos = majorService.selectAll();
+        return majorListDtos;
+    }
 
     // 단과대학에 속한 학과목록 조회
     @GetMapping("/list") // 매핑주소 수정 필요
