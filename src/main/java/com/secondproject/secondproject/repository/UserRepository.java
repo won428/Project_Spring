@@ -4,6 +4,7 @@ import com.secondproject.secondproject.entity.Major;
 import com.secondproject.secondproject.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,16 +12,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findById(Long id);
 
-
     Optional<User> findByEmail(String email);
-
-
 
     Optional<User> getByEmail(String email);
     Optional<User> findByUserCode(Long userCode);
 
-
-
     List<User> findAllByMajor(Major major);
+
+    // 이메일 존재하는지 확인
+    boolean existsByEmail(String email);
+
+    // DB에 존재하는 모든 이메일 리스트로 받아오기
+    List<User> findAllByEmailIn(Collection<String> emails);
 }
 

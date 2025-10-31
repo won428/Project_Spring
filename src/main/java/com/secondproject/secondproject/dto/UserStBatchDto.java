@@ -46,7 +46,7 @@ public class UserStBatchDto {
     @Positive(message = "소속 학과 ID가 올바르지 않습니다.")
     private Long majorId;
 
-    private List<String> errors = new ArrayList<>();
+//    private List<String> errors = new ArrayList<>();
 
     private boolean valid;
 
