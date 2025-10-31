@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Digits;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 
@@ -28,23 +29,28 @@ public class Grade {
 
     @Column(name = "a_score", precision = 4, scale = 2, nullable = false) // => DECIMAL(4,2)
     @Digits(integer = 2, fraction = 2)  // Bean Validation (00.00 ~ 99.99)
-    private BigDecimal aScore; // 출석 점수
+    @ColumnDefault("0")
+    private BigDecimal aScore = BigDecimal.ZERO; // 출석 점수
 
     @Column(name = "as_score", precision = 4, scale = 2, nullable = false) // => DECIMAL(4,2)
     @Digits(integer = 2, fraction = 2)  // Bean Validation (00.00 ~ 99.99)
-    private BigDecimal asScore; // 과제 점수
+    @ColumnDefault("0")
+    private BigDecimal asScore = BigDecimal.ZERO; // 과제 점수
 
     @Column(name = "t_score", precision = 4, scale = 2, nullable = false) // => DECIMAL(4,2)
     @Digits(integer = 2, fraction = 2)  // Bean Validation (00.00 ~ 99.99)
-    private BigDecimal tScore; // 중간 점수
+    @ColumnDefault("0")
+    private BigDecimal tScore = BigDecimal.ZERO; // 중간 점수
 
     @Column(name = "ft_score", precision = 4, scale = 2, nullable = false) // => DECIMAL(4,2)
     @Digits(integer = 2, fraction = 2)  // Bean Validation (00.00 ~ 99.99)
-    private BigDecimal ftScore; // 기말 점수
+    @ColumnDefault("0")
+    private BigDecimal ftScore = BigDecimal.ZERO; // 기말 점수
 
     @Column(name = "total_score", precision = 4, scale = 2, nullable = false) // => DECIMAL(4,2)
     @Digits(integer = 2, fraction = 2)  // Bean Validation (00.00 ~ 99.99)
-    private BigDecimal totalScore; // 총점
+    @ColumnDefault("0")
+    private BigDecimal totalScore = BigDecimal.ZERO; // 총점
 
     @Column(name = "lecture_grade")
     private String lectureGrade; // 학점

@@ -15,6 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -39,6 +42,15 @@ public class MajorController {
     public List<MajorInCollegeDto> majorListByCollege(@RequestParam("college_id") Long collegeId){
         List<MajorInCollegeDto> majorList = majorService.getMajorListByCollege(collegeId);
         return majorList;
+    }
+
+    // 전체 학과조회
+    @GetMapping("/all/list")
+    public List<MajorListDto> majorList(){
+
+        List<MajorListDto> listDtos = this.majorService.majorList();
+
+        return listDtos;
     }
 
     // 선택한 특정 학과 가져오기(업데이트용)

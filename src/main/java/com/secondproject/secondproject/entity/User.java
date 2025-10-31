@@ -50,6 +50,7 @@ public class User implements UserDetails {
     private String phone; // 휴대전화
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Gender gender; // 성별 (enum, 문자열 컬럼)
 
     @ManyToOne(fetch=FetchType.LAZY)

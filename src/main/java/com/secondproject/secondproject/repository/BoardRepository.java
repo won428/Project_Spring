@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface BoardRepository extends JpaRepository<Notice, Long> {
     List<Notice> findNoticeByUser(User user);
+
+    Notice findByUser(User user);
 }
