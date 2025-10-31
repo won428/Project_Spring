@@ -20,10 +20,10 @@ public class Assignment {
     @Column(name = "assignment_id", columnDefinition = "BIGINT")
     private long id; // 과제ID(PK)
 
-    @Column(name = "ass_title",nullable = false, length = 200)
+    @Column(name = "ass_title", nullable = false, length = 200)
     private String title; // 공지 제목
 
-    @Column(name = "ass_content", columnDefinition = "MEDIUMTEXT",  nullable = false)
+    @Column(name = "ass_content", columnDefinition = "MEDIUMTEXT", nullable = false)
     private String content; // 공지 본문
 
     @Column(name = "is_enabled", nullable = false)
@@ -62,4 +62,19 @@ public class Assignment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecture_id", nullable = false, foreignKey = @ForeignKey(name = "fk_assignment_lecture"))
     private Lecture lecture; // Lecture(강의) 테이블 FK참조
+
+    @PrePersist
+        // @PrePersist: 엔티티가 처음 INSERT 되기 직전에 자동 실행
+    void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        if (createAt == null) createAt = now; // 최초 생성 시간
+        updateAt = now;                              // 최초 업데이트 시간도 now
+    }
+
+    @PreUpdate
+        // @PreUpdate: 엔티티가 UPDATE되기 직전에 자동 실행
+    void onUpdate() {
+        updateAt = LocalDateTime.now();             // 수정 시마다 갱신
+    }
+
 }

@@ -6,6 +6,10 @@ import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -96,6 +100,7 @@ public class LectureService {
         } else if (userId == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자 없음");
         }
+
         User user = this.userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 사용자"));
 
@@ -155,12 +160,15 @@ public class LectureService {
             }
 
             CourseRegistration courseRegistration = new CourseRegistration();
+
             // 수강 신청 테이블 생성
             courseRegistration.setUser(user);
             courseRegistration.setLecture(lecture);
             courseRegistration.setDate(LocalDateTime.now());
             courseRegistration.setStatus(Status.PENDING);
             this.courseRegRepository.save(courseRegistration);
+
+        }
     }
 
     public List<LectureDto> myLectureList(Long userId) {
@@ -303,5 +311,28 @@ public class LectureService {
                 }
 
         }
+    }
+    public List<LectureDto> findByStudent(User user) {
+        List<Enrollment> enrollments = enrollmentRepository.findByUser(user);
+
+        List<Long> lectureId = enrollments.stream()
+                .map(Enrollment::getLecture)
+                .map(Lecture::getId)
+                .toList();
+
+
+        List<Lecture> lectures = lectureRepository.findAllById(lectureId);
+
+
+//        for(Long lec : lectureId){
+//            Lecture lectures = lectureRepository.findAllById(lec)
+//                    .orElseThrow(()->new EntityNotFoundException("sdsd"));
+//            lectureDtoList.add(lectures);
+//        }
+
+        return lectures.stream()
+                .map(LectureDto::fromEntity)
+                .toList();
+
     }
 }

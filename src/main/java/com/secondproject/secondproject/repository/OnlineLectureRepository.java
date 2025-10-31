@@ -8,4 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface OnlineLectureRepository extends JpaRepository<OnlineLecture, Long> {
+    OnlineLecture findByLectureId(Long id);
 }

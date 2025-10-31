@@ -48,14 +48,14 @@ public class LectureNoticeController {
 
     @GetMapping("/List")
     public ResponseEntity<?> NotionList(
-            @RequestParam String email,
+            @RequestParam Long id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
 
     ) {
         try {
             //   List<LectureNoticeListDto> noticeList = lectureNoticeService.getNoticeByEmail(email);
-            Page<LectureNoticeListDto> res = lectureNoticeService.getPagedNotices(email, page, size);
+            Page<LectureNoticeListDto> res = lectureNoticeService.getPagedNotices(id, page, size);
             return ResponseEntity.ok(res);
 
         } catch (Exception e) {
@@ -72,8 +72,6 @@ public class LectureNoticeController {
         try {
 //           게시물 id 로 불러오고
             NoticeResponseDto attachments = lectureNoticeService.findById(id);
-
-
             return ResponseEntity.ok(attachments);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
