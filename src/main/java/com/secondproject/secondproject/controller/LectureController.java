@@ -37,6 +37,8 @@ public class LectureController {
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
 
+    // 수강신청 관련해서 나중에 수강신청 컨트롤러로 이식할게요.
+
     // 관리자용 강의 등록
     @PostMapping("/admin/lectureRegister")
     public ResponseEntity<?> lectureRegisterByAdmin(@RequestBody LectureDto lectureDto) {
@@ -67,12 +69,41 @@ public class LectureController {
         return ResponseEntity.ok(200);
     }
 
+    // 일괄 신청(수강신청 컨트롤러로 추후에 이식)
     @PostMapping("/apply")
     public ResponseEntity<?> applyLecture(@RequestBody List<Long> idList, @RequestParam Long id) {
 
 
         try {
             this.lectureService.applyLecture(idList, id);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (ResponseStatusException ex) {
+            try {
+
+                int status = ex.getStatusCode().value();
+                String error = HttpStatus.valueOf(status).name();
+
+                Map<String, Object> body = Map.of(
+                        "status", status,
+                        "error", error,
+                        "message", ex.getReason(),
+                        "timestamp", java.time.OffsetDateTime.now().toString()
+                );
+
+                return ResponseEntity.status(ex.getStatusCode()).body(body);
+            } catch (Exception otherEx) {
+                return ResponseEntity.status(500).body("알수없는 오류");
+            }
+        }
+    }
+
+
+
+    // 단일 신청(추후에 수강신청 컨트롤러로 이식)
+    @PostMapping("/applyOne")
+    public ResponseEntity<?> applyLectureOne(@RequestBody Long lecId, @RequestParam Long id) {
+        try {
+            this.lectureService.applyLectureOne(lecId, id);
             return ResponseEntity.ok(Map.of("success", true));
         } catch (ResponseStatusException ex) {
             try {

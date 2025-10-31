@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.repository;
 
+import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.entity.CourseRegistration;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,9 +11,12 @@ public interface CourseRegRepository extends JpaRepository<CourseRegistration, L
 
     boolean existsByUser_IdAndLecture_Id(Long userId, Long lecId);
 
-    Long countByLecture_Id(Long lecId);
+    CourseRegistration findByLecture_Id(Long lectureId);
 
-    List<CourseRegistration> findByLecture_Id(Long lectureId);
+    List<CourseRegistration> findAllByLecture_IdAndStatus(Long lectureId, Status status);
+
 
     List<CourseRegistration> findAllByLecture_Id(Long lectureId);
+
+    Long countByLecture_IdAndStatus(Long id, Status status);
 }

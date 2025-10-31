@@ -30,6 +30,7 @@ public class CourseRegistration {
     private LocalDateTime date; // 신청날짜 ~년도 ~월 ~일 ~몇분 ~몇초
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Status status; // 신청 상태
 
 }

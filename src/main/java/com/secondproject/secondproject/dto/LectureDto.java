@@ -47,6 +47,9 @@ public class LectureDto {
     @Enumerated(EnumType.STRING)
     private CompletionDiv completionDiv;
 
+    @Enumerated(EnumType.STRING)
+    private Status lecStatus;
+
     // 강의 등록용 생성자
     public LectureDto(String name, Long user, int credit, LocalDate startDate, LocalDate endDate, String description, Long major, int totalStudent, Status status) {
         this.name = name;

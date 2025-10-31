@@ -215,7 +215,7 @@ public class UserService {
     }
 
     public List<UserDto> findUserLectureDetail(Long lectureId) {
-        List<CourseRegistration> courseRegistrations = this.courseRegRepository.findByLecture_Id(lectureId);
+        List<CourseRegistration> courseRegistrations = this.courseRegRepository.findAllByLecture_Id(lectureId);
         List<UserDto> userDtoList = new ArrayList<>();
 
         for (CourseRegistration courseRegistration: courseRegistrations){
