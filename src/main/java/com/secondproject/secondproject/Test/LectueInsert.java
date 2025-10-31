@@ -117,7 +117,6 @@ public class LectueInsert extends AbstractTestNGSpringContextTests {
         enrollment.setGrade(grade);
         enrollment.setLecture(lecture);
         enrollment.setStatus(Status.PENDING);
-        enrollment.setCompletionDiv("전공핵심");
         enrollmentRepository.save(enrollment);
 
     }

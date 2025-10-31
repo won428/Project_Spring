@@ -29,7 +29,6 @@ public class LectureService {
     private final EnrollmentRepository enrollmentRepository;
     private final GradeRepository gradeRepository;
 
-
     public void insertByAdmin(LectureDto lectureDto) {
         Lecture lecture = new Lecture();
         Optional<User> optUser = this.userRepository.findById(lectureDto.getUser());
@@ -58,8 +57,7 @@ public class LectureService {
         List<Lecture> lectureList = this.lectureRepository.findAll();
         List<LectureDto> lectureDtoList = new ArrayList<>();
         for (Lecture lecture : lectureList) {
-            Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(),Status.SUBMITTED);
-
+            Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
 
             LectureDto lectureDto = new LectureDto();
             lectureDto.setId(lecture.getId());
@@ -77,7 +75,6 @@ public class LectureService {
             lectureDto.setLevel(lecture.getLevel());
 
             lectureDtoList.add(lectureDto);
-
         }
 
         return lectureDtoList;
@@ -107,26 +104,25 @@ public class LectureService {
         for (Long lecId : idList) {
             Lecture lecture = this.lectureRepository.findById(lecId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않습니다."));
-            Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(),Status.SUBMITTED);
+            Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
             int totalStudent = lecture.getTotalStudent();
 
             if (nowStudent >= totalStudent) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, lecture.getName() + " 강의는 정원 초과입니다.");
-
             }
 
             boolean alreadyApplied = courseRegRepository.existsByUser_IdAndLecture_Id(userId, lecId);
-                if (alreadyApplied) {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, lecture.getName() + " 강의는 이미 신청한 강의입니다.");
-                }
+            if (alreadyApplied) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, lecture.getName() + " 강의는 이미 신청한 강의입니다.");
+            }
 
-//            boolean alreadyEnrollment = enrollmentRepository.existsByUser_IdAndLecture_Id(userId, lecture.getId());
-//            if(alreadyEnrollment){
-//                throw new ResponseStatusException(HttpStatus.CONFLICT, lecture.getName() + " 강의는 이미 수강한 강의입니다.");
-//            }
+//          boolean alreadyEnrollment = enrollmentRepository.existsByUser_IdAndLecture_Id(userId, lecture.getId());
+//          if(alreadyEnrollment){
+//              throw new ResponseStatusException(HttpStatus.CONFLICT, lecture.getName() + " 강의는 이미 수강한 강의입니다.");
+//          }
 
             CourseRegistration courseRegistration = new CourseRegistration();
-           // 수강 신청 테이블 생성
+            // 수강 신청 테이블 생성
             courseRegistration.setUser(user);
             courseRegistration.setLecture(lecture);
             courseRegistration.setDate(LocalDateTime.now());
@@ -134,10 +130,11 @@ public class LectureService {
             this.courseRegRepository.save(courseRegistration);
         }
     }
+
     // 단일 수강신청
     public void applyLectureOne(Long lecId, Long userId) {
 
-        if (userId == null){
+        if (userId == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자 없음");
         }
 
@@ -145,30 +142,28 @@ public class LectureService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 사용자"));
 
         Lecture lecture = this.lectureRepository.findById(lecId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않습니다."));
 
-        Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(),Status.SUBMITTED);
+        Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
         int totalStudent = lecture.getTotalStudent();
 
         if (nowStudent >= totalStudent) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, lecture.getName() + " 강의는 정원 초과입니다.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, lecture.getName() + " 강의는 정원 초과입니다.");
         }
 
         boolean alreadyApplied = courseRegRepository.existsByUser_IdAndLecture_Id(userId, lecId);
-            if (alreadyApplied) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, lecture.getName() + " 강의는 이미 신청한 강의입니다.");
-            }
-
-            CourseRegistration courseRegistration = new CourseRegistration();
-
-            // 수강 신청 테이블 생성
-            courseRegistration.setUser(user);
-            courseRegistration.setLecture(lecture);
-            courseRegistration.setDate(LocalDateTime.now());
-            courseRegistration.setStatus(Status.PENDING);
-            this.courseRegRepository.save(courseRegistration);
-
+        if (alreadyApplied) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, lecture.getName() + " 강의는 이미 신청한 강의입니다.");
         }
+
+        CourseRegistration courseRegistration = new CourseRegistration();
+
+        // 수강 신청 테이블 생성
+        courseRegistration.setUser(user);
+        courseRegistration.setLecture(lecture);
+        courseRegistration.setDate(LocalDateTime.now());
+        courseRegistration.setStatus(Status.PENDING);
+        this.courseRegRepository.save(courseRegistration);
     }
 
     public List<LectureDto> myLectureList(Long userId) {
@@ -195,9 +190,7 @@ public class LectureService {
             lectureDto.setLecStatus(lecture.getStatus());
 
             myLectureList.add(lectureDto);
-
         }
-
 
         return myLectureList;
     }
@@ -206,7 +199,7 @@ public class LectureService {
         Lecture lecture = this.lectureRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
         LectureDto lectureDto = new LectureDto();
-        Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(),Status.SUBMITTED);
+        Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
 
         lectureDto.setName(lecture.getName());
         lectureDto.setMajorName(lecture.getMajor().getName());
@@ -217,32 +210,26 @@ public class LectureService {
         return lectureDto;
     }
 
-
     public List<LectureDto> findByUser(User user) {
-
         List<Lecture> lectures = lectureRepository.findByUser(user);
         List<LectureDto> lectureListDto = new ArrayList<>();
         for (Lecture lecture : lectures) {
             lectureListDto.add(LectureDto.fromEntity(lecture));
         }
         return lectureListDto;
-
     }
 
-
     public LectureDto LectureSpec(Long id) {
-
         Lecture lecture = lectureRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("강의가 존재하지 않습니다."));
         return LectureDto.fromEntity(lecture);
     }
 
-
     public List<LectureDto> applyLecturList(Long id) {
         List<Lecture> lectureList = this.lectureRepository.findAllNotRegisteredByUser(id);
         List<LectureDto> lectureDtoList = new ArrayList<>();
 
-        for(Lecture lecture : lectureList){
+        for (Lecture lecture : lectureList) {
             LectureDto lectureDto = new LectureDto();
 
             lectureDto.setName(lecture.getName());
@@ -272,46 +259,42 @@ public class LectureService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "강의는 최소 1개 이상 선택해야합니다.");
         }
 
-        for(Long lectureId : idList){
+        for (Long lectureId : idList) {
             Lecture lecture = this.lectureRepository.findById(lectureId)
-                    .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
 
             List<CourseRegistration> courseRegistrationList = this.courseRegRepository.findAllByLecture_IdAndStatus(lectureId, Status.SUBMITTED);
-
 
             int total = lecture.getTotalStudent();
             int minRequired = (int) Math.ceil(total * 0.3); // 신청인원 일정 비율 이상일때 개강가능
 
-
-            if(minRequired > courseRegistrationList.size()){
-                throw new ResponseStatusException(HttpStatus.CONFLICT,"신청 인원이 부족합니다");
+            if (minRequired > courseRegistrationList.size()) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "신청 인원이 부족합니다");
             }
 
-                for (CourseRegistration courseReg : courseRegistrationList){
-                    User user = this.userRepository.findById(courseReg.getUser().getId())
-                            .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."));
+            for (CourseRegistration courseReg : courseRegistrationList) {
+                User user = this.userRepository.findById(courseReg.getUser().getId())
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."));
 
-                    lecture.setStatus(status);
+                lecture.setStatus(status);
 
-                    Grade grade = new Grade();
-                    grade.setLecture(lecture);
-                    grade.setUser(user);
+                Grade grade = new Grade();
+                grade.setLecture(lecture);
+                grade.setUser(user);
 
-                    Grade newGrade = this.gradeRepository.save(grade);
+                Grade newGrade = this.gradeRepository.save(grade);
 
-                    Enrollment enrollment = new Enrollment();
-                    enrollment.setUser(user);
-                    enrollment.setGrade(newGrade);
-                    enrollment.setLecture(lecture);
-                    enrollment.setStatus(Status.INPROGRESS);
+                Enrollment enrollment = new Enrollment();
+                enrollment.setUser(user);
+                enrollment.setGrade(newGrade);
+                enrollment.setLecture(lecture);
+                enrollment.setStatus(Status.INPROGRESS);
 
-                    this.enrollmentRepository.save(enrollment);
-
-
-                }
-
+                this.enrollmentRepository.save(enrollment);
+            }
         }
     }
+
     public List<LectureDto> findByStudent(User user) {
         List<Enrollment> enrollments = enrollmentRepository.findByUser(user);
 
@@ -320,9 +303,7 @@ public class LectureService {
                 .map(Lecture::getId)
                 .toList();
 
-
         List<Lecture> lectures = lectureRepository.findAllById(lectureId);
-
 
 //        for(Long lec : lectureId){
 //            Lecture lectures = lectureRepository.findAllById(lec)
@@ -333,6 +314,5 @@ public class LectureService {
         return lectures.stream()
                 .map(LectureDto::fromEntity)
                 .toList();
-
     }
 }
