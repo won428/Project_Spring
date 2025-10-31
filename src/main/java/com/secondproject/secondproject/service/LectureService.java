@@ -315,4 +315,20 @@ public class LectureService {
                 .map(LectureDto::fromEntity)
                 .toList();
     }
+
+    public void lectureChangeStatus(List<Long> idList, Status status) {
+
+        if (idList == null || idList.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "강의는 최소 1개 이상 선택해야합니다.");
+        }
+
+        for (Long lectureId : idList) {
+            Lecture lecture = this.lectureRepository.findById(lectureId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
+            lecture.setStatus(status);
+
+            this.lectureRepository.save(lecture);
+        }
+
+    }
 }
