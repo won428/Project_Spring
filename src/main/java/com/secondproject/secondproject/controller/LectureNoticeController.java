@@ -96,4 +96,32 @@ public class LectureNoticeController {
                         "attachment; filename=\"" + storedKey.substring(storedKey.indexOf("_") + 1) + "\"").body(resource);
     }
 
+    @DeleteMapping("/delete/{noticeId}")
+    public ResponseEntity<?> deleteNotice(@PathVariable Long noticeId) {
+        try {
+            lectureNoticeService.deleteNotice(noticeId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+
+    @PutMapping("/update/{noticeId}")
+    public ResponseEntity<?> updateNotice(
+            @PathVariable Long noticeId,
+            @ModelAttribute LectureNoticeUploadDto noticeDto,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) {
+        try {
+
+            lectureNoticeService.updateNotice(noticeId, noticeDto, files);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+
+    }
+
+
 }

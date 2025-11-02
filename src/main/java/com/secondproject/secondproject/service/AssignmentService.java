@@ -125,4 +125,29 @@ public class AssignmentService {
         }
 
     }
+
+    public void updateAssignment(
+            Long assignId,
+            AssignSubmitInsertDto assignSubmitInsertDto,
+            List<MultipartFile> files) throws IOException {
+
+        User user = userRepository.findByEmail(assignSubmitInsertDto.getEmail())
+                .orElseThrow(() -> new EntityNotFoundException("유저 없음"));
+        Assignment assignment = assignmentRepository.findById(assignId)
+                .orElseThrow(() -> new EntityNotFoundException("과제 없음"));
+        assignment.setTitle(assignSubmitInsertDto.getTitle());
+        assignment.setContent(assignSubmitInsertDto.getContent());
+
+
+        if (files != null && !files.isEmpty()) {
+            assignmentAttachRepository.deleteByAssignment(assignment);
+            for (MultipartFile file : files) {
+                Attachment attachment = attachmentService.save(file, user);
+                AssignmentAttach assignmentAttach = new AssignmentAttach();
+                assignmentAttach.setAssignment(assignment);
+                assignmentAttach.setAttachment(attachment);
+                assignmentAttachRepository.save(assignmentAttach);
+            }
+        }
+    }
 }
