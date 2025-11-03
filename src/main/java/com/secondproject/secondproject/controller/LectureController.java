@@ -1,14 +1,11 @@
 package com.secondproject.secondproject.controller;
 
-import com.secondproject.secondproject.dto.LecRegisterRequestDto;
-import com.secondproject.secondproject.dto.LectureScheduleDto;
+import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.repository.LectureRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import com.secondproject.secondproject.Enum.Status;
-import com.secondproject.secondproject.dto.LectureDto;
-import com.secondproject.secondproject.dto.UserDto;
 import com.secondproject.secondproject.service.LectureService;
 import com.secondproject.secondproject.service.MajorService;
 import com.secondproject.secondproject.service.UserService;
@@ -24,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -41,11 +39,16 @@ public class LectureController {
 
     // 수강신청 관련해서 나중에 수강신청 컨트롤러로 이식할게요.
 
-    // 관리자용 강의 등록
-    @PostMapping("/admin/lectureRegister")
-    public ResponseEntity<?> lectureRegisterByAdmin(@RequestBody LecRegisterRequestDto lecRegisterRequestDto) {
+    // 강의 등록
+    @PostMapping("/lectureRegister")
+    public ResponseEntity<?> lectureRegisterByAdmin(
+            @RequestPart LectureDto lecture,
+            @RequestPart List<LectureScheduleDto> schedule,
+            @RequestPart List<MultipartFile> files,
+            @RequestPart PercentDto percent
+    ) {
 
-        this.lectureService.insertByAdmin(lecRegisterRequestDto);
+        this.lectureService.insertByAdmin(lecture, schedule, files, percent);
 
         return ResponseEntity.ok(200);
     }

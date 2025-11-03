@@ -1,17 +1,22 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.Status;
-import com.secondproject.secondproject.dto.LecRegisterRequestDto;
 import com.secondproject.secondproject.dto.LectureDto;
 import com.secondproject.secondproject.dto.LectureScheduleDto;
+import com.secondproject.secondproject.dto.PercentDto;
 import com.secondproject.secondproject.entity.*;
+import com.secondproject.secondproject.entity.Mapping.LecRegAttach;
 import com.secondproject.secondproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +32,25 @@ public class LectureService {
     private final EnrollmentRepository enrollmentRepository;
     private final GradeRepository gradeRepository;
     private final LecScheduleRepository lecScheduleRepository;
+    private final AttachmentService attachmentService;
+    private final LecRegAttachRepository lecRegAttachRepository;
+    private final GradingWeightsRepository gradingWeightsRepository;
 
-    public void insertByAdmin(LecRegisterRequestDto lecRegDto) {
+    public void insertByAdmin(LectureDto lectureDto, List<LectureScheduleDto> lectureScheduleDtos, List<MultipartFile> files, PercentDto percent) {
+
+
+            BigDecimal totalPercent = percent.getAssignment()
+                    .add(percent.getAttendance())
+                    .add(percent.getMidtermExam())
+                    .add(percent.getFinalExam());
+            BigDecimal overPercent = new BigDecimal("100.00");
+            if (totalPercent.compareTo(overPercent) > 0){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"비율은 100을 넘을 수 없습니다.");
+            }
+
+
         Lecture lecture = new Lecture();
-        LectureDto lectureDto = lecRegDto.getLecture();
+
         Optional<User> optUser = this.userRepository.findById(lectureDto.getUser());
         User user = optUser.orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자 없음"));
@@ -51,7 +71,7 @@ public class LectureService {
         lecture.setCompletionDiv(lectureDto.getCompletionDiv());
 
         Lecture saveLecture = this.lectureRepository.save(lecture);
-        List<LectureScheduleDto> lectureScheduleDtos = lecRegDto.getSchedule();
+
         for (LectureScheduleDto dtoSchedule : lectureScheduleDtos){
             LectureSchedule schedule = new LectureSchedule();
             schedule.setDay(dtoSchedule.getDay());
@@ -61,7 +81,37 @@ public class LectureService {
 
             this.lecScheduleRepository.save(schedule);
         }
+
+        GradingWeights gradingWeights = new GradingWeights();
+        gradingWeights.setLecture(saveLecture);
+        gradingWeights.setAttendanceScore(percent.getAttendance());
+        gradingWeights.setAssignmentScore(percent.getAssignment());
+        gradingWeights.setMidtermExam(percent.getMidtermExam());
+        gradingWeights.setFinalExam(percent.getFinalExam());
+
+        this.gradingWeightsRepository.save(gradingWeights);
+
+        if(files != null && !files.isEmpty()){
+            for (MultipartFile file : files){
+                try {
+                    Attachment attachment = attachmentService.save(file,user);
+
+                    LecRegAttach lecRegAttach = new LecRegAttach();
+                    lecRegAttach.setAttachment(attachment);
+                    lecRegAttach.setLecture(saveLecture);
+
+                    this.lecRegAttachRepository.save(lecRegAttach);
+
+                }catch (IOException ex){
+                    throw new UncheckedIOException("파일 저장 실패", ex);
+                }
+
+
+            }
+        }
     }
+
+
 
     public List<LectureDto> findAll() {
         List<Lecture> lectureList = this.lectureRepository.findAll();
