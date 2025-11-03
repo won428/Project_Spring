@@ -7,6 +7,7 @@ import com.secondproject.secondproject.dto.NoticeResponseDto;
 import com.secondproject.secondproject.entity.Attachment;
 import com.secondproject.secondproject.entity.LectureNotice;
 import com.secondproject.secondproject.entity.Mapping.NoticeAttach;
+import com.secondproject.secondproject.entity.Mapping.SubmitAssignAttach;
 import com.secondproject.secondproject.entity.OnlineLecture;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.repository.*;
@@ -121,5 +122,43 @@ public class LectureNoticeService {
         OnlineLecture onlineLecture = onlineLectureRepository.findByLectureId(id);
         Page<LectureNotice> result = lectureNoticeRepository.findByOnlineLecture(onlineLecture, pageable);
         return result.map(LectureNoticeListDto::fromEntity);
+    }
+
+    @Transactional
+    public void deleteNotice(Long noticeId) {
+        LectureNotice lectureNotice = lectureNoticeRepository.findById(noticeId)
+                .orElseThrow(() -> new EntityNotFoundException("없는 공지입니다."));
+        List<NoticeAttach> noticeAttach = noticeAttachRepository.findByLectureNotice_Id(noticeId);
+        for (NoticeAttach nn : noticeAttach) {
+            attachmentService.deleteById(nn.getAttachment().getId());
+            noticeAttachRepository.deleteById(nn.getId());
+        }
+        lectureNoticeRepository.deleteById(noticeId);
+
+
+    }
+
+
+    public void updateNotice(Long noticeId, LectureNoticeUploadDto noticeDto, List<MultipartFile> files) throws IOException {
+        LectureNotice lectureNotice = lectureNoticeRepository.findById(noticeId)
+                .orElseThrow(() -> new EntityNotFoundException("찾을 수 없습니다."));
+        lectureNotice.setLnTitle(noticeDto.getTitle());
+        lectureNotice.setLnContent(noticeDto.getContent());
+        lectureNoticeRepository.save(lectureNotice);
+
+        List<NoticeAttach> noticeAttach = noticeAttachRepository.findByLectureNotice_Id(lectureNotice.getId());
+
+
+        if (files != null && !files.isEmpty()) {
+            noticeAttachRepository.deleteById(lectureNotice.getId());
+            for (MultipartFile file : files) {
+                Attachment attachment = attachmentService.save(file, lectureNotice.getUser());
+                NoticeAttach saved = new NoticeAttach();
+                saved.setLectureNotice(lectureNotice);
+                saved.setAttachment(attachment);
+                noticeAttachRepository.save(saved);
+            }
+        }
+
     }
 }

@@ -80,4 +80,7 @@ public class AttachmentService {
     }
 
 
+    public void deleteById(Long id) {
+        attachmentRepository.deleteById(id);
+    }
 }
