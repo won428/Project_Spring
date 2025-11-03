@@ -8,7 +8,7 @@ import lombok.Setter;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 
-@Getter @Setter@Entity
+@Getter @Setter @Entity
 @Table(name = "lectureSchedule")
 public class LectureSchedule {
 
