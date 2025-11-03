@@ -1,21 +1,12 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.Status;
-import com.secondproject.secondproject.dto.LecSessionListDto;
-import com.secondproject.secondproject.dto.LecSessionRequestDto;
-import com.secondproject.secondproject.dto.LecSessionResponseDto;
-import com.secondproject.secondproject.dto.LectureDto;
-import com.secondproject.secondproject.dto.LectureScheduleDto;
-import com.secondproject.secondproject.dto.PercentDto;
+import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.entity.Mapping.LecRegAttach;
 import com.secondproject.secondproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,7 +18,6 @@ import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
@@ -48,16 +38,16 @@ public class LectureService {
     public void insertByAdmin(LectureDto lectureDto, List<LectureScheduleDto> lectureScheduleDtos, List<MultipartFile> files, PercentDto percent) {
 
 
-            BigDecimal totalPercent = percent.getAssignment()
-                    .add(percent.getAttendance())
-                    .add(percent.getMidtermExam())
-                    .add(percent.getFinalExam());
-            BigDecimal overPercent = new BigDecimal("100.00");
-            if (totalPercent.compareTo(overPercent) > 0){
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"비율은 100을 넘을 수 없습니다.");
-            }
+        BigDecimal totalPercent = percent.getAssignment()
+                .add(percent.getAttendance())
+                .add(percent.getMidtermExam())
+                .add(percent.getFinalExam());
+        BigDecimal overPercent = new BigDecimal("100.00");
+        if (totalPercent.compareTo(overPercent) > 0){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"비율은 100을 넘을 수 없습니다.");
+        }
 
-    public void insertByAdmin(LectureDto lectureDto) {
+
         Lecture lecture = new Lecture();
 
         Optional<User> optUser = this.userRepository.findById(lectureDto.getUser());
@@ -422,8 +412,8 @@ public class LectureService {
             LocalDate first = start.with( // 시작일 이상에서
                     TemporalAdjusters.nextOrSame(dow)); // 해당 요일의 첫번째 날짜를 계산
             for (LocalDate d = first; // 첫번째 날짜가 d면서,
-            !d.isAfter(end); // 종료일을 초과하지 않으면서,
-            d = d.plusWeeks(1)){ // 1주(7일)씩 증가하여 매주 같은 요일로 증가
+                 !d.isAfter(end); // 종료일을 초과하지 않으면서,
+                 d = d.plusWeeks(1)){ // 1주(7일)씩 증가하여 매주 같은 요일로 증가
                 out.add(d); // 해당 날짜를 결과 리스트에 담기
             }
         }

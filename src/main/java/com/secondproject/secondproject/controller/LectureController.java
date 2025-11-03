@@ -53,7 +53,7 @@ public class LectureController {
             @RequestPart PercentDto percent
     ) {
 
-        this.lectureService.insertByAdmin(lectureDto);
+        this.lectureService.insertByAdmin(lecture, schedule, files, percent);
 
         return ResponseEntity.ok(200);
     }
