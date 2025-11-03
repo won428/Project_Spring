@@ -111,10 +111,11 @@ public class LectureNoticeController {
     public ResponseEntity<?> updateNotice(
             @PathVariable Long noticeId,
             @ModelAttribute LectureNoticeUploadDto noticeDto,
-            @RequestPart(value = "files", required = false) List<MultipartFile> files) {
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            @RequestParam(value = "existingFileKeys", required = false) List<String> existingFileKeys) {
         try {
 
-            lectureNoticeService.updateNotice(noticeId, noticeDto, files);
+            lectureNoticeService.updateNotice(noticeId, noticeDto, files, existingFileKeys);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();

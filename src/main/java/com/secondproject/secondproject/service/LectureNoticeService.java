@@ -31,6 +31,7 @@ public class LectureNoticeService {
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
     private final AttachmentService attachmentService;
+    private final AttachmentRepository attachmentRepository;
     private final NoticeAttachRepository noticeAttachRepository;
     private final LectureNoticeRepository lectureNoticeRepository;
     private final OnlineLectureRepository onlineLectureRepository;
@@ -139,18 +140,19 @@ public class LectureNoticeService {
     }
 
 
-    public void updateNotice(Long noticeId, LectureNoticeUploadDto noticeDto, List<MultipartFile> files) throws IOException {
+    public void updateNotice(Long noticeId, LectureNoticeUploadDto noticeDto, List<MultipartFile> files, List<String> existingFileKeys) throws IOException {
         LectureNotice lectureNotice = lectureNoticeRepository.findById(noticeId)
                 .orElseThrow(() -> new EntityNotFoundException("찾을 수 없습니다."));
         lectureNotice.setLnTitle(noticeDto.getTitle());
         lectureNotice.setLnContent(noticeDto.getContent());
         lectureNoticeRepository.save(lectureNotice);
 
-        List<NoticeAttach> noticeAttach = noticeAttachRepository.findByLectureNotice_Id(lectureNotice.getId());
+        List<NoticeAttach> noticeAttach = noticeAttachRepository.findByLectureNotice_Id(noticeId);
 
-
-        if (files != null && !files.isEmpty()) {
-            noticeAttachRepository.deleteById(lectureNotice.getId());
+        if (noticeAttach != null && !noticeAttach.isEmpty()) {
+            noticeAttachRepository.deleteAll(noticeAttach);
+        }
+        if ((files != null && !files.isEmpty())) {
             for (MultipartFile file : files) {
                 Attachment attachment = attachmentService.save(file, lectureNotice.getUser());
                 NoticeAttach saved = new NoticeAttach();
@@ -159,6 +161,17 @@ public class LectureNoticeService {
                 noticeAttachRepository.save(saved);
             }
         }
+        //기존에 있는 파일처리
+        if ((existingFileKeys != null && !existingFileKeys.isEmpty())) {
+            for (String storedKey : existingFileKeys) {
+                Attachment existingAttachment = attachmentService.findByStoredKey(storedKey)
+                        .orElseThrow(() -> new EntityNotFoundException("기존 파일 키를 찾을 수 없습니다: " + storedKey));
+                NoticeAttach reSaved = new NoticeAttach();
+                reSaved.setLectureNotice(lectureNotice);
+                reSaved.setAttachment(existingAttachment);
+                noticeAttachRepository.save(reSaved);
+            }
 
+        }
     }
 }

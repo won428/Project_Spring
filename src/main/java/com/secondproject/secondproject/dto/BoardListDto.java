@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class LectureNoticeListDto {
+public class BoardListDto {
     Long id;
     String username;
     String title;
@@ -21,11 +21,11 @@ public class LectureNoticeListDto {
 //    List<MultipartFile> files;
 
 
-    public static LectureNoticeListDto fromEntity(LectureNotice notice) {
-        LectureNoticeListDto dto = new LectureNoticeListDto();
+    public static BoardListDto fromEntity(Notice notice) {
+        BoardListDto dto = new BoardListDto();
         dto.setId(notice.getId());
-        dto.setTitle(notice.getLnTitle());
-        dto.setContent(notice.getLnContent());
+        dto.setTitle(notice.getTitle());
+        dto.setContent(notice.getContent());
 
         if (notice.getUser() != null) {
             dto.setUsername(notice.getUser().getName());
@@ -33,8 +33,8 @@ public class LectureNoticeListDto {
 
         }
 
-        dto.setCreatedAt(notice.getLnCreateAt());
-        dto.setUpdatedAt(notice.getLnUpdateAt());
+        dto.setCreatedAt(notice.getCreatedAt());
+        dto.setUpdatedAt(notice.getUpdatedAt());
         return dto;
     }
 

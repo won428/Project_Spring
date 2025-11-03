@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,5 +15,6 @@ public class LectureNoticeUploadDto {
     private Long id;
     private String title;
     private String content;
+//    private List<String> existingFileKeys;
 
 }

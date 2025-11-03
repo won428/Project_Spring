@@ -83,4 +83,8 @@ public class AttachmentService {
     public void deleteById(Long id) {
         attachmentRepository.deleteById(id);
     }
+
+    public Optional<Attachment> findByStoredKey(String storedKey) {
+        return attachmentRepository.findByStoredKey(storedKey);
+    }
 }
