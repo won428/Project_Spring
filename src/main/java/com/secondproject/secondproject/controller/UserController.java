@@ -9,18 +9,24 @@ import com.secondproject.secondproject.service.CollegeService;
 import com.secondproject.secondproject.service.LectureService;
 import com.secondproject.secondproject.service.MajorService;
 import com.secondproject.secondproject.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.ErrorResponse;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.entity.StatusRecords;
@@ -38,6 +44,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.net.URI;
+import java.time.Instant;
+import java.util.*;
 
 import static com.secondproject.secondproject.Enum.UserType.STUDENT;
 
@@ -121,7 +130,7 @@ public class UserController {
         return userList;
     }
 
-    // 유저코드로 유저 찾기(컨트롤러 부분 나중에 서비스로 이식할겁니다.)
+    // 유저코드로 유저 찾기
     @GetMapping("/selectUserCode/{id}")
     public UserUpdateDto findByUsercode(@PathVariable Long id){
 
@@ -157,7 +166,7 @@ public class UserController {
                         new ResponseStatusException(HttpStatus.NOT_FOUND, id + "사용자 없음"));
         Major major = this.majorService.findMajor(userReactDto.getMajor());
 
-        this.userService.save(id, userReactDto, findUser , major);
+        this.userService.update(id, userReactDto, findUser , major);
 
         return ResponseEntity.ok(200);
     }
@@ -189,48 +198,20 @@ public class UserController {
 
         // 4) 학적 상태 조회
         StatusRecords statusRecord = studentService.getStatusRecordByUserId(user.getId());
+    // 학생 일괄 저장(DB에 저장)
+    @PostMapping("/import")
+    public ResponseEntity<?> inserBatchUser(@RequestBody @Valid List<UserStBatchDto> users, HttpServletRequest request){
+        try {
+            userService.importUsers(users);
+            return ResponseEntity.ok().build();
 
-        // 5) DTO 생성(생성자에서 모든 필드 매핑)
-        StudentInfoDto dto = new StudentInfoDto(user, statusRecord);
-
-        // 6) 프론트 기대 형태로 감싸서 반환
-        Map<String, Object> statusMap = new HashMap<>();
-        statusMap.put("statusid", dto.getStatusId());
-        statusMap.put("studentStatus", dto.getStudent_status());
-        statusMap.put("admissionDate", dto.getAdmissionDate());
-        statusMap.put("leaveDate", dto.getLeaveDate());
-        statusMap.put("returnDate", dto.getReturnDate());
-        statusMap.put("graduationDate", dto.getGraduationDate());
-        statusMap.put("retentionDate", dto.getRetentionDate());
-        statusMap.put("expelledDate", dto.getExpelledDate());
-        statusMap.put("majorCredit", dto.getMajorCredit());
-        statusMap.put("generalCredit", dto.getGeneralCredit());
-        statusMap.put("totalCredit", dto.getTotalCredit());
-        statusMap.put("currentCredit", dto.getCurrentCredit());
-        statusMap.put("studentImage", dto.getStudentImage());
-
-        Map<String, Object> studentMap = new HashMap<>();
-        studentMap.put("userid", dto.getId());
-        studentMap.put("userCode", dto.getUserCode());
-        studentMap.put("name", dto.getName());
-        studentMap.put("password", dto.getPassword());
-        studentMap.put("birthDate", dto.getBirthDate());
-        studentMap.put("email", dto.getEmail());
-        studentMap.put("phone", dto.getPhone());
-        studentMap.put("gender", dto.getGender());
-        // major는 엔티티 전체 직렬화 시 순환 참조 위험이 있을 수 있으므로 필요한 필드만 노출 권장
-        // 예: 학과명만 사용한다면 아래처럼 가공
-        studentMap.put("major", dto.getMajor()); // 필요 시 Map.of("name", dto.getMajor().getName()) 로 축소
-        // type은 Enum → 문자열로 직렬화되므로 프론트 비교가 가능
-        studentMap.put("type", dto.getType());
-
-        Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("type", dto.getType()); // "STUDENT"
-        responseBody.put("studentInfo", studentMap);
-        responseBody.put("statusRecords", statusMap);
-
-        return ResponseEntity.ok(responseBody);
+            // 서비스에서 명시적으로 던진 상태예외
+        } catch (ResponseStatusException ex) {
+            ProblemDetail pd = ex.getBody();
+            pd.setProperty("path", request.getRequestURI());
+            pd.setProperty("timestamp", Instant.now().toString());
+            return ResponseEntity.status(ex.getStatusCode()).body(pd);
+        }
     }
-
 
 }

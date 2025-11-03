@@ -37,6 +37,8 @@ public class LectureController {
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
 
+    // 수강신청 관련해서 나중에 수강신청 컨트롤러로 이식할게요.
+
     // 관리자용 강의 등록
     @PostMapping("/admin/lectureRegister")
     public ResponseEntity<?> lectureRegisterByAdmin(@RequestBody LectureDto lectureDto) {
@@ -67,6 +69,7 @@ public class LectureController {
         return ResponseEntity.ok(200);
     }
 
+    // 일괄 신청(수강신청 컨트롤러로 추후에 이식)
     @PostMapping("/apply")
     public ResponseEntity<?> applyLecture(@RequestBody List<Long> idList, @RequestParam Long id) {
 
@@ -94,13 +97,49 @@ public class LectureController {
         }
     }
 
-    // 학생 수강신청 목록
+
+
+    // 단일 신청(추후에 수강신청 컨트롤러로 이식)
+    @PostMapping("/applyOne")
+    public ResponseEntity<?> applyLectureOne(@RequestBody Long lecId, @RequestParam Long id) {
+        try {
+            this.lectureService.applyLectureOne(lecId, id);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (ResponseStatusException ex) {
+            try {
+
+                int status = ex.getStatusCode().value();
+                String error = HttpStatus.valueOf(status).name();
+
+                Map<String, Object> body = Map.of(
+                        "status", status,
+                        "error", error,
+                        "message", ex.getReason(),
+                        "timestamp", java.time.OffsetDateTime.now().toString()
+                );
+
+                return ResponseEntity.status(ex.getStatusCode()).body(body);
+            } catch (Exception otherEx) {
+                return ResponseEntity.status(500).body("알수없는 오류");
+            }
+        }
+    }
+
+    // 학생 수강신청한 목록
     @GetMapping("/mylist")
     public List<LectureDto> myLectureList(@RequestParam Long userId) {
 
         List<LectureDto> myLecture = this.lectureService.myLectureList(userId);
 
         return myLecture;
+    }
+
+    // 학생 수강신청 가능 목록
+    @GetMapping("/apply/list")
+    public List<LectureDto> applyLectureList(@RequestParam Long id){
+        List <LectureDto> lectureList = this.lectureService.applyLecturList(id);
+
+        return lectureList;
     }
 
     // 교수 개설된 강의 상세정보
@@ -149,5 +188,46 @@ public class LectureController {
         }
     }
 
+    // 관리자가 승인이 완료되고 정원이 모두 채워진 강의를 개강으로 전환합니다.
+    @PatchMapping("/inprogress")
+    public ResponseEntity<?> lectureInprogress(@RequestBody List<Long> idList, @RequestParam Status status){
+        try {
+            this.lectureService.lectureInprogress(idList, status);
+            return ResponseEntity.ok(200);
+        }catch (ResponseStatusException ex) {
+            try {
 
+                int errStatus = ex.getStatusCode().value();
+                String error = HttpStatus.valueOf(errStatus).name();
+
+                Map<String, Object> body = Map.of(
+                        "status", status,
+                        "error", error,
+                        "message", ex.getReason(),
+                        "timestamp", java.time.OffsetDateTime.now().toString()
+                );
+
+                return ResponseEntity.status(ex.getStatusCode()).body(body);
+            } catch (Exception otherEx) {
+                return ResponseEntity.status(500).body("알수없는 오류");
+            }
+        }
+    }
+
+    @GetMapping("/stlist")
+    public ResponseEntity<?> StudentLecList(@RequestParam String email) {
+        try {
+            User user = userService.findUserByEmail(email)
+                    .orElseThrow(() -> (new UsernameNotFoundException("존재하지 않는 사용자 입니다.")));
+
+            List<LectureDto> lectureListDto = lectureService.findByStudent(user);
+            return ResponseEntity.ok(lectureListDto);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("오류 발생");
+        }
+
+
+    }
 }

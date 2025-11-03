@@ -7,11 +7,9 @@ import com.secondproject.secondproject.dto.NoticeResponseDto;
 import com.secondproject.secondproject.entity.Attachment;
 import com.secondproject.secondproject.entity.LectureNotice;
 import com.secondproject.secondproject.entity.Mapping.NoticeAttach;
+import com.secondproject.secondproject.entity.OnlineLecture;
 import com.secondproject.secondproject.entity.User;
-import com.secondproject.secondproject.repository.BoardRepository;
-import com.secondproject.secondproject.repository.LectureNoticeRepository;
-import com.secondproject.secondproject.repository.NoticeAttachRepository;
-import com.secondproject.secondproject.repository.UserRepository;
+import com.secondproject.secondproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -34,21 +32,24 @@ public class LectureNoticeService {
     private final AttachmentService attachmentService;
     private final NoticeAttachRepository noticeAttachRepository;
     private final LectureNoticeRepository lectureNoticeRepository;
+    private final OnlineLectureRepository onlineLectureRepository;
 
 
     @Transactional // 데이터 변경이 있으므로 트랜잭션 처리
     public void createNotice(LectureNoticeUploadDto noticeDto, List<MultipartFile> files) throws IOException {
-        if (noticeDto.getEmail() == null || noticeDto.getEmail().isEmpty()) {
-            throw new IllegalArgumentException("사용자 이메일이 없습니다.");
+        if (noticeDto.getId() == null || noticeDto.getId().equals("undefined")) {
+            throw new IllegalArgumentException("잘못된 접근 입니다.");
         }
 
         // 1. DTO 에서 이메일을 가져와 사용자를 찾습니다.
         User user = userRepository.findByEmail(noticeDto.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("해당 이메일의 사용자를 찾을 수 없습니다."));
 
+        OnlineLecture onlineLecture = onlineLectureRepository.findByLectureId(noticeDto.getId());
         // 2. Notice 객체를 생성하고 값을 설정합니다.
         LectureNotice LN = new LectureNotice();
         LN.setUser(user);
+        LN.setOnlineLecture(onlineLecture);
         LN.setLnTitle(noticeDto.getTitle());
         LN.setLnContent(noticeDto.getContent());
 
@@ -100,10 +101,10 @@ public class LectureNoticeService {
 
         List<NoticeAttach> noticeAttach = noticeAttachRepository.findByLectureNotice_Id(id);
 
-
         //게시물 목록 호출
         LectureNotice lectureNotice = lectureNoticeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("공지 없다"));
+
 
         List<Attachment> attachments = noticeAttach.stream()
                 .map(NoticeAttach::getAttachment)
@@ -115,11 +116,10 @@ public class LectureNoticeService {
 
     }
 
-    public Page<LectureNoticeListDto> getPagedNotices(String email, int page, int size) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("해당 이메일의 사용자를 찾을 수 없습니다."));
+    public Page<LectureNoticeListDto> getPagedNotices(Long id, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by((Sort.Direction.DESC), "lnCreateAt"));
-        Page<LectureNotice> result = lectureNoticeRepository.findByUser(user, pageable);
+        OnlineLecture onlineLecture = onlineLectureRepository.findByLectureId(id);
+        Page<LectureNotice> result = lectureNoticeRepository.findByOnlineLecture(onlineLecture, pageable);
         return result.map(LectureNoticeListDto::fromEntity);
     }
 }

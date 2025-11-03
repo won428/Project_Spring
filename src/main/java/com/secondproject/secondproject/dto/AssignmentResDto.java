@@ -2,6 +2,7 @@ package com.secondproject.secondproject.dto;
 
 import com.secondproject.secondproject.entity.Assignment;
 import com.secondproject.secondproject.entity.Attachment;
+import com.secondproject.secondproject.entity.SubmitAsgmt;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -40,10 +41,19 @@ public class AssignmentResDto {
 
     private List<AttachmentDto> attachmentDto;
 
+    private List<AttachmentDto> attachmentSubmittedDto;
+
+    private List<SubmitAsgmtDto> submitAsgmtDto;
+
+    private SubmitAsgmtDto SubmittedOne;
+
 
     public static AssignmentResDto fromEntity(
             Assignment assignment,
-            List<Attachment> attachments) {
+            List<Attachment> attachments,
+            SubmitAsgmt submitAsgmts,
+            List<Attachment> attachmentSubmitted
+    ) {
         AssignmentResDto dto = new AssignmentResDto();
         dto.setId(assignment.getId());
         dto.setTitle(assignment.getTitle());
@@ -58,7 +68,7 @@ public class AssignmentResDto {
 
 
         List<AttachmentDto> ListAttach = new ArrayList<>();
-        if (!attachments.isEmpty() || attachments != null) {
+        if (attachments != null && !attachments.isEmpty()) {
             for (Attachment attachment : attachments) {
                 AttachmentDto Ado = new AttachmentDto();
                 Ado.setId(attachment.getId());
@@ -72,13 +82,126 @@ public class AssignmentResDto {
 
                 ListAttach.add(Ado);
             }
-
             dto.setAttachmentDto(ListAttach);
+        } else {
+            dto.setAttachmentDto(new ArrayList<>());//공지에 첨부파일 없음
         }
 
+
+        if (submitAsgmts != null) {
+            SubmitAsgmtDto dtoS = new SubmitAsgmtDto();
+            dtoS.setId(submitAsgmts.getId());
+            dtoS.setUsername(submitAsgmts.getUser().getName());
+            dtoS.setTitle(submitAsgmts.getTitle());
+            dtoS.setContent(submitAsgmts.getContent());
+            dtoS.setSubmitStatus(submitAsgmts.getSubmitStatus());
+            dtoS.setSubmitAt(submitAsgmts.getSubmitAt());
+            dtoS.setUpdateAt(submitAsgmts.getUpdateAt());
+            dto.setSubmittedOne(dtoS);
+        } else {
+            dto.setSubmittedOne(null); // 과제 미제출 상태
+        }
+
+        List<AttachmentDto> ListSubmittedAttach = new ArrayList<>();
+        if (attachments != null && !attachments.isEmpty()) {
+            for (Attachment attachment : attachmentSubmitted) {
+                AttachmentDto Ado = new AttachmentDto();
+                Ado.setId(attachment.getId());
+                Ado.setName(attachment.getName());
+                Ado.setId(attachment.getUser().getId());
+                Ado.setContentType(attachment.getContentType());
+                Ado.setSha256(attachment.getSha256());
+                Ado.setSizeBytes(attachment.getSizeBytes());
+                Ado.setStoredKey(attachment.getStoredKey());
+                Ado.setUploadAt(attachment.getUploadAt());
+
+                ListSubmittedAttach.add(Ado);
+            }
+            dto.setAttachmentSubmittedDto(ListSubmittedAttach);
+        } else {
+            dto.setAttachmentSubmittedDto(new ArrayList<>()); //
+        }
 
         return dto;
     }
 
+    public static AssignmentResDto fromEntity(
+            Assignment assignment,
+            List<Attachment> attachments,
+            List<SubmitAsgmt> submitAsgmts,
+            List<Attachment> attachmentSubmitted
+    ) {
+        AssignmentResDto dto = new AssignmentResDto();
+        dto.setId(assignment.getId());
+        dto.setTitle(assignment.getTitle());
+        dto.setContent(assignment.getContent());
+        dto.setOpenAt(assignment.getOpenAt());
+        dto.setDueAt(assignment.getDueAt());
+        if (assignment.getUser() != null) {
+            dto.setUsername(assignment.getUser().getName());
+        }
+        dto.setCreateAt(assignment.getCreateAt());
+        dto.setUpdateAt(assignment.getUpdateAt());
+
+
+        List<AttachmentDto> ListAttach = new ArrayList<>();
+        if (attachments != null && !attachments.isEmpty()) {
+            for (Attachment attachment : attachments) {
+                AttachmentDto Ado = new AttachmentDto();
+                Ado.setId(attachment.getId());
+                Ado.setName(attachment.getName());
+                Ado.setId(attachment.getUser().getId());
+                Ado.setContentType(attachment.getContentType());
+                Ado.setSha256(attachment.getSha256());
+                Ado.setSizeBytes(attachment.getSizeBytes());
+                Ado.setStoredKey(attachment.getStoredKey());
+                Ado.setUploadAt(attachment.getUploadAt());
+
+                ListAttach.add(Ado);
+            }
+            dto.setAttachmentDto(ListAttach);
+        } else {
+            dto.setAttachmentDto(new ArrayList<>()); //
+        }
+
+        List<SubmitAsgmtDto> asgmtDtoList = new ArrayList<>();
+        if (!submitAsgmts.isEmpty()) {
+            for (SubmitAsgmt submitAsgmt : submitAsgmts) {
+                SubmitAsgmtDto dtoS = new SubmitAsgmtDto();
+                dtoS.setId(submitAsgmt.getId());
+                dtoS.setUsername(submitAsgmt.getUser().getName());
+                dtoS.setTitle(submitAsgmt.getTitle());
+                dtoS.setContent(submitAsgmt.getContent());
+                dtoS.setSubmitStatus(submitAsgmt.getSubmitStatus());
+                dtoS.setSubmitAt(submitAsgmt.getSubmitAt());
+                dtoS.setUpdateAt(submitAsgmt.getUpdateAt());
+                asgmtDtoList.add(dtoS);
+            }
+            dto.setSubmitAsgmtDto(asgmtDtoList);
+        } else {
+            dto.setSubmitAsgmtDto(new ArrayList<>()); //
+        }
+        List<AttachmentDto> ListSubmittedAttach = new ArrayList<>();
+        if (attachments != null && !attachments.isEmpty()) {
+            for (Attachment attachment : attachmentSubmitted) {
+                AttachmentDto Ado = new AttachmentDto();
+                Ado.setId(attachment.getId());
+                Ado.setName(attachment.getName());
+                Ado.setId(attachment.getUser().getId());
+                Ado.setContentType(attachment.getContentType());
+                Ado.setSha256(attachment.getSha256());
+                Ado.setSizeBytes(attachment.getSizeBytes());
+                Ado.setStoredKey(attachment.getStoredKey());
+                Ado.setUploadAt(attachment.getUploadAt());
+
+                ListSubmittedAttach.add(Ado);
+            }
+            dto.setAttachmentSubmittedDto(ListSubmittedAttach);
+        } else {
+            dto.setAttachmentSubmittedDto(new ArrayList<>()); //
+        }
+
+        return dto;
+    }
 
 }

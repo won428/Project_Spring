@@ -29,8 +29,7 @@ public class Enrollment {
     @JoinColumn(name = "grade_id", nullable = false)
     private Grade grade; // 성적 정보 id
 
-    @Column(nullable = false)
-    private String completionDiv; // 이수구분
+
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

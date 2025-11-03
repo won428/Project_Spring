@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -39,10 +40,25 @@ public class SubmitAsgmt {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "submit_at", columnDefinition = "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP")
-    private LocalDate submitAt; // 제출일
+    private LocalDateTime submitAt; // 제출일
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "update_at", columnDefinition = "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-    private LocalDate updateAt; // 제출 수정일
+    private LocalDateTime updateAt; // 제출 수정일
 
+
+    @PrePersist
+        // @PrePersist: 엔티티가 처음 INSERT 되기 직전에 자동 실행
+    void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        if (submitAt == null) submitAt = now; // 최초 생성 시간
+        updateAt = now;                              // 최초 업데이트 시간도 now
+    }
+
+    @PreUpdate
+        // @PreUpdate: 엔티티가 UPDATE되기 직전에 자동 실행
+    void onUpdate() {
+        updateAt = LocalDateTime.now();
+
+    }
 }

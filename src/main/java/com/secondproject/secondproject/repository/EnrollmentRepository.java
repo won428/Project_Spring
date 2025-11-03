@@ -17,6 +17,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findByLectureIdAndType(@Param("lecture_id") Long id, @Param("u_Type") UserType type);
 
 
-
+    List<Enrollment> findByUser(User user);
 }
 

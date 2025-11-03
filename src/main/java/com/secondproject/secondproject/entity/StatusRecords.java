@@ -30,6 +30,10 @@ public class StatusRecords {
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_stausRecord_user")) // 학적 유저ID, FK
     private User user;
 
+    @Column(name = "level")
+    @ColumnDefault("1")
+    private int level = 1; // 학년
+
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "admission_date", nullable = false)
     private LocalDate admissionDate; // 입학일

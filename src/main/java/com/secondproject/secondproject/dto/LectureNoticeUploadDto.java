@@ -10,6 +10,7 @@ import lombok.Setter;
 public class LectureNoticeUploadDto {
 
     private String email;
+    private Long id;
     private String title;
     private String content;
 

@@ -22,11 +22,7 @@ public class AssignmentInsertDto {
     private LocalDate openAt; // 제출 시작일
 
     private LocalDate dueAt; // 제출 마감일
-
-    private int maxFiles; // 업로드 가능한 파일 최대 갯수
-
-    private int maxSizeMb = 50; // 파일 최대 용량(mb), 기본값 50
-
+    
     private User user; // 공지한사람(=교수이름)
 
     private Lecture lecture; // Lecture(강의) 테이블 FK참조
