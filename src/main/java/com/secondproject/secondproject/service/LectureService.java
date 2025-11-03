@@ -1,15 +1,13 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.Status;
+import com.secondproject.secondproject.dto.LecRegisterRequestDto;
 import com.secondproject.secondproject.dto.LectureDto;
+import com.secondproject.secondproject.dto.LectureScheduleDto;
 import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,9 +26,11 @@ public class LectureService {
     private final CourseRegRepository courseRegRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final GradeRepository gradeRepository;
+    private final LecScheduleRepository lecScheduleRepository;
 
-    public void insertByAdmin(LectureDto lectureDto) {
+    public void insertByAdmin(LecRegisterRequestDto lecRegDto) {
         Lecture lecture = new Lecture();
+        LectureDto lectureDto = lecRegDto.getLecture();
         Optional<User> optUser = this.userRepository.findById(lectureDto.getUser());
         User user = optUser.orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자 없음"));
@@ -50,7 +50,17 @@ public class LectureService {
         lecture.setLevel(lectureDto.getLevel());
         lecture.setCompletionDiv(lectureDto.getCompletionDiv());
 
-        this.lectureRepository.save(lecture);
+        Lecture saveLecture = this.lectureRepository.save(lecture);
+        List<LectureScheduleDto> lectureScheduleDtos = lecRegDto.getSchedule();
+        for (LectureScheduleDto dtoSchedule : lectureScheduleDtos){
+            LectureSchedule schedule = new LectureSchedule();
+            schedule.setDay(dtoSchedule.getDay());
+            schedule.setLecture(saveLecture);
+            schedule.setStartTime(dtoSchedule.getStartTime());
+            schedule.setEndTime(dtoSchedule.getEndTime());
+
+            this.lecScheduleRepository.save(schedule);
+        }
     }
 
     public List<LectureDto> findAll() {

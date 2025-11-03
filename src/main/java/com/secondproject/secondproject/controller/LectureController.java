@@ -1,5 +1,7 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.dto.LecRegisterRequestDto;
+import com.secondproject.secondproject.dto.LectureScheduleDto;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.repository.LectureRepository;
@@ -41,9 +43,9 @@ public class LectureController {
 
     // 관리자용 강의 등록
     @PostMapping("/admin/lectureRegister")
-    public ResponseEntity<?> lectureRegisterByAdmin(@RequestBody LectureDto lectureDto) {
+    public ResponseEntity<?> lectureRegisterByAdmin(@RequestBody LecRegisterRequestDto lecRegisterRequestDto) {
 
-        this.lectureService.insertByAdmin(lectureDto);
+        this.lectureService.insertByAdmin(lecRegisterRequestDto);
 
         return ResponseEntity.ok(200);
     }
