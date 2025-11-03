@@ -19,8 +19,8 @@ public enum Gender {
         if (raw == null) return null;
         String v = String.valueOf(raw).trim().toUpperCase(); // 받은 문자열을 공백제거해서 대문자로 변환
         switch (v) {
-            case "여자" : return FEMALE;
-            case "남자" : return MALE;
+            case "여자", "FEMALE": return FEMALE;
+            case "남자", "MALE": return MALE;
         }
         throw new IllegalArgumentException("성별은 '여자' 또는 '남자'여야 합니다.");
     }
