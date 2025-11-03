@@ -33,6 +33,8 @@ public class AssignmentResDto {
 //    이미 Application 파일에 되어 있는데 굳이 사용해야하나 싶습니다.
 //    private int maxSizeMb = 50; // 파일 최대 용량(mb), 기본값 50
 
+    private Long userId;
+
     private String username; // 공지한사람(=교수이름)
 
     private LocalDateTime createAt; // 공지 등록일
@@ -62,6 +64,7 @@ public class AssignmentResDto {
         dto.setDueAt(assignment.getDueAt());
         if (assignment.getUser() != null) {
             dto.setUsername(assignment.getUser().getName());
+            dto.setUserId(assignment.getUser().getId());
         }
         dto.setCreateAt(assignment.getCreateAt());
         dto.setUpdateAt(assignment.getUpdateAt());
@@ -139,6 +142,7 @@ public class AssignmentResDto {
         dto.setDueAt(assignment.getDueAt());
         if (assignment.getUser() != null) {
             dto.setUsername(assignment.getUser().getName());
+            dto.setUserId(assignment.getUser().getId());
         }
         dto.setCreateAt(assignment.getCreateAt());
         dto.setUpdateAt(assignment.getUpdateAt());

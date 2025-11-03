@@ -188,7 +188,7 @@ public class LectureController {
         }
     }
 
-    // 관리자가 승인이 완료되고 정원이 모두 채워진 강의를 개강으로 전환합니다.
+    // 관리자가 승인이 완료되고 정원이 모두 채워진 강의 묶음을 개강으로 전환합니다.
     @PatchMapping("/inprogress")
     public ResponseEntity<?> lectureInprogress(@RequestBody List<Long> idList, @RequestParam Status status){
         try {
@@ -228,6 +228,31 @@ public class LectureController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("오류 발생");
         }
 
-
     }
+
+    @PatchMapping("/status/admin")
+    public ResponseEntity<?> lecturesChangeStatus(@RequestBody List<Long> idList, @RequestParam Status status){
+        try {
+            this.lectureService.lectureChangeStatus(idList, status);
+            return ResponseEntity.ok(200);
+        }catch (ResponseStatusException ex) {
+            try {
+
+                int errStatus = ex.getStatusCode().value();
+                String error = HttpStatus.valueOf(errStatus).name();
+
+                Map<String, Object> body = Map.of(
+                        "status", status,
+                        "error", error,
+                        "message", ex.getReason(),
+                        "timestamp", java.time.OffsetDateTime.now().toString()
+                );
+
+                return ResponseEntity.status(ex.getStatusCode()).body(body);
+            } catch (Exception otherEx) {
+                return ResponseEntity.status(500).body("알수없는 오류");
+            }
+        }
+    }
+
 }

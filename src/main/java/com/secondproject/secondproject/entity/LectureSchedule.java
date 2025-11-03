@@ -8,22 +8,20 @@ import lombok.Setter;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 
-@Getter
-@Setter
-@Entity
+@Getter @Setter@Entity
 @Table(name = "lectureSchedule")
 public class LectureSchedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "schedule_id") // 스케쥴 아이디
+    @Column(name = "schedule_id")
     Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn( name = "lecture_id", nullable = false, foreignKey = @ForeignKey(name = "fk_schedule_lecture"))
     Lecture lecture;
 
-    @Enumerated(EnumType.STRING)            // DB: 'MONDAY' … 'SUNDAY'
+    @Enumerated(EnumType.STRING)
     @Column(name = "day_of_week", nullable = false, length = 9)
     private DayOfWeek day;
 

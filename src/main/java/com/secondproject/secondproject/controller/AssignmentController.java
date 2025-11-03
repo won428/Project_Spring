@@ -2,6 +2,7 @@ package com.secondproject.secondproject.controller;
 
 
 import com.secondproject.secondproject.dto.*;
+import com.secondproject.secondproject.entity.LectureNotice;
 import com.secondproject.secondproject.service.AssignmentService;
 import com.secondproject.secondproject.service.SubmitAsgmtService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class AssignmentController {
 
     private final AssignmentService assignmentService;
     private final SubmitAsgmtService submitAsgmtService;
+
 
     @PostMapping("/insert")
     public ResponseEntity<?> uploadAssignment(
@@ -70,10 +72,53 @@ public class AssignmentController {
 
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return ResponseEntity.badRequest().build();
         }
 
     }
 
+    @PutMapping("/update/{assignId}")
+    public ResponseEntity<?> AssignUpdate(
+            @PathVariable Long assignId,
+            @ModelAttribute AssignSubmitInsertDto assignSubmitInsertDto,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) throws IOException {
+        try {
+            submitAsgmtService.assignmentUpdate(assignSubmitInsertDto, files);
+            return ResponseEntity.ok().build();
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+
+    }
+
+    @PutMapping("/assignupdate/{assignId}")
+    public ResponseEntity<?> AssignNoticeUpdate(
+            @PathVariable Long assignId,
+            @ModelAttribute AssignSubmitInsertDto assignSubmitInsertDto,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) throws IOException {
+        try {
+            assignmentService.updateAssignment(assignId, assignSubmitInsertDto, files);
+
+            return ResponseEntity.ok().build();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @DeleteMapping("/delete/{assignId}")
+    public ResponseEntity<?> DeleteAssign(
+            @PathVariable Long assignId
+    ) {
+        try {
+            assignmentService.deleteAssign(assignId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 
 }

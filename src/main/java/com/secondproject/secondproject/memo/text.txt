@@ -1,8 +1,0 @@
-this.name = name;
-        this.userName = userName;
-        this.credit = credit;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.majorName = majorName;
-        this.totalStudent = totalStudent;
-        this.status = status;
