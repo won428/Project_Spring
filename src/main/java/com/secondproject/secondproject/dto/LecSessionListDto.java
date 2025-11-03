@@ -20,4 +20,6 @@ public class LecSessionListDto {
     Integer periodEnd; // 종료교시
     LocalTime startTime; // 시작시간
     LocalTime endTime; // 종료시간
+
+    //테스트용 주석
 }
