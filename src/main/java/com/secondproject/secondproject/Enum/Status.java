@@ -8,6 +8,9 @@ public enum Status {
     APPROVED,  // 승인
     REJECTED,  // 거부
     INPROGRESS, // 수강중
-    COMPLETED // 종강
+    COMPLETED, // 종강
+    CANCELED, // 폐강
+    SUBMITTED // 신청완료
+
 
 }

@@ -9,24 +9,33 @@ import com.secondproject.secondproject.service.CollegeService;
 import com.secondproject.secondproject.service.LectureService;
 import com.secondproject.secondproject.service.MajorService;
 import com.secondproject.secondproject.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.ErrorResponse;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 
 import javax.swing.plaf.OptionPaneUI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.net.URI;
+import java.time.Instant;
+import java.util.*;
 
 @RestController
 @RequestMapping("/user")
@@ -107,7 +116,7 @@ public class UserController {
         return userList;
     }
 
-    // 유저코드로 유저 찾기(컨트롤러 부분 나중에 서비스로 이식할겁니다.)
+    // 유저코드로 유저 찾기
     @GetMapping("/selectUserCode/{id}")
     public UserUpdateDto findByUsercode(@PathVariable Long id){
 
@@ -156,7 +165,19 @@ public class UserController {
     }
 
     // 학생 일괄 저장(DB에 저장)
+    @PostMapping("/import")
+    public ResponseEntity<?> inserBatchUser(@RequestBody @Valid List<UserStBatchDto> users, HttpServletRequest request){
+        try {
+            userService.importUsers(users);
+            return ResponseEntity.ok().build();
 
-
+            // 서비스에서 명시적으로 던진 상태예외
+        } catch (ResponseStatusException ex) {
+            ProblemDetail pd = ex.getBody();
+            pd.setProperty("path", request.getRequestURI());
+            pd.setProperty("timestamp", Instant.now().toString());
+            return ResponseEntity.status(ex.getStatusCode()).body(pd);
+        }
+    }
 
 }

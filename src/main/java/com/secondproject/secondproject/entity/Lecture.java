@@ -1,6 +1,7 @@
 package com.secondproject.secondproject.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.secondproject.secondproject.Enum.CompletionDiv;
 import com.secondproject.secondproject.Enum.Status;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -54,6 +55,13 @@ public class Lecture {
     // 관리자가 강의를 직접 등록 할 수도 있게 기능 구상을 해놨습니다.
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    @Column(name = "level")
+    private int level;
+
+    @Column(nullable = false, name = "completion_div")
+    @Enumerated(EnumType.STRING)
+    private CompletionDiv completionDiv; // 이수구분
 
 
 }
