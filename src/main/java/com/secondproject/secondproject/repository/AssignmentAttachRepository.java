@@ -11,4 +11,6 @@ import java.util.List;
 
 public interface AssignmentAttachRepository extends JpaRepository<AssignmentAttach, Long> {
     List<AssignmentAttach> findByAssignment_Id(Long id);
+
+    void deleteByAssignment(Assignment assignment);
 }

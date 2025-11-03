@@ -125,4 +125,46 @@ public class AssignmentService {
         }
 
     }
+
+    public void updateAssignment(
+            Long assignId,
+            AssignSubmitInsertDto assignSubmitInsertDto,
+            List<MultipartFile> files) throws IOException {
+
+        User user = userRepository.findByEmail(assignSubmitInsertDto.getEmail())
+                .orElseThrow(() -> new EntityNotFoundException("유저 없음"));
+        Assignment assignment = assignmentRepository.findById(assignId)
+                .orElseThrow(() -> new EntityNotFoundException("과제 없음"));
+        assignment.setTitle(assignSubmitInsertDto.getTitle());
+        assignment.setContent(assignSubmitInsertDto.getContent());
+        assignmentRepository.save(assignment);
+
+
+        if (files != null && !files.isEmpty() && files.get(0).getSize() > 0) {
+            assignmentAttachRepository.deleteByAssignment(assignment);
+            for (MultipartFile file : files) {
+                Attachment attachment = attachmentService.save(file, user);
+                AssignmentAttach assignmentAttach = new AssignmentAttach();
+                assignmentAttach.setAssignment(assignment);
+                assignmentAttach.setAttachment(attachment);
+                assignmentAttachRepository.save(assignmentAttach);
+            }
+        }
+    }
+
+    @Transactional
+    public void deleteAssign(Long assignId) {
+        Assignment assignment = assignmentRepository.findById(assignId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 assignment"));
+
+        List<AssignmentAttach> attaches = assignmentAttachRepository.findByAssignment_Id(assignId);
+        for (AssignmentAttach nn : attaches) {
+            assignmentAttachRepository.deleteByAssignment(assignment);
+            attachmentService.deleteById(nn.getAttachment().getId());
+
+        }
+        assignmentRepository.deleteById(assignId);
+
+
+    }
 }

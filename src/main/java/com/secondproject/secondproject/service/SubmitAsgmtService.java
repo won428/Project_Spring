@@ -6,9 +6,11 @@ import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.entity.Mapping.SubmitAssignAttach;
 import com.secondproject.secondproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.math3.exception.NullArgumentException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +28,7 @@ public class SubmitAsgmtService {
     private final AttachmentService attachmentService;
     private final SubmitAssignAttachRepository submitAssignAttachRepository;
 
+    @Transactional
     public void assignmentSubmit(
             AssignSubmitInsertDto insertDto,
             List<MultipartFile> files) throws IOException {
@@ -49,6 +52,7 @@ public class SubmitAsgmtService {
         List<MultipartFile> safeFiles = (files == null)
                 ? java.util.Collections.emptyList()
                 : files.stream().filter(f -> f != null && !f.isEmpty()).toList();
+
         if (safeFiles.isEmpty()) {
             return;
         }
@@ -62,4 +66,41 @@ public class SubmitAsgmtService {
 
         }
     }
+
+    @Transactional
+    public void assignmentUpdate(AssignSubmitInsertDto assignSubmitInsertDto, List<MultipartFile> files) throws IOException {
+        User user = userRepository.findByEmail(assignSubmitInsertDto.getEmail())
+                .orElseThrow(() -> new EntityNotFoundException("유저 정보 없음"));
+
+        Long assignId = assignSubmitInsertDto.getAssignId();
+        Assignment assignment = assignmentRepository.findById(assignId)
+                .orElseThrow(() -> new EntityNotFoundException("과제가 존재하지 않는다."));
+
+        List<SubmitAsgmt> submitAsgmt = submitAsgmtRepository.findByAssignmentId(assignId);
+
+        SubmitAsgmt submitAsgmtOne = submitAsgmt.stream()
+                .filter(s -> s.getUser().getId().equals(user.getId()))
+                .findFirst()
+                .orElseThrow(() -> new NullPointerException("sd"));
+
+
+        submitAsgmtOne.setTitle(assignSubmitInsertDto.getTitle());
+        submitAsgmtOne.setContent(assignSubmitInsertDto.getContent());
+        submitAsgmtRepository.save(submitAsgmtOne);
+
+
+        if (files != null && !files.isEmpty()) {
+            submitAssignAttachRepository.deleteBySubmitAsgmt(submitAsgmtOne);
+            for (MultipartFile file : files) {
+                Attachment attachment = attachmentService.save(file, submitAsgmtOne.getUser());
+                SubmitAssignAttach saved = new SubmitAssignAttach();
+                saved.setSubmitAsgmt(submitAsgmtOne);
+                saved.setAssignment(assignment);
+                saved.setAttachment(attachment);
+                submitAssignAttachRepository.save(saved);
+            }
+        }
+    }
+
+
 }
