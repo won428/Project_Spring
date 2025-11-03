@@ -23,7 +23,7 @@ public class Grade {
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_grade_user"))
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "lecture_id", nullable = false, foreignKey = @ForeignKey(name = "fk_grade_lecture"))
     private Lecture lecture;
 

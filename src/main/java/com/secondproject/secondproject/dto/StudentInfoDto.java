@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.dto;
 
+import com.secondproject.secondproject.Enum.Gender;
 import com.secondproject.secondproject.entity.Major;
 import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.entity.User;
@@ -24,7 +25,7 @@ public class StudentInfoDto {
     private String name;      // 이름
     private String email;     // 이메일
     private String password; // 비밀번호
-    private String gender;    // 성별
+    private Gender gender;    // 성별
     private LocalDate birthDate; // 생일
     private String phone;     // 휴대전화
     private Major major; // 소속 학과명
