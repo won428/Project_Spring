@@ -1,6 +1,9 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.Status;
+import com.secondproject.secondproject.dto.LecSessionListDto;
+import com.secondproject.secondproject.dto.LecSessionRequestDto;
+import com.secondproject.secondproject.dto.LecSessionResponseDto;
 import com.secondproject.secondproject.dto.LectureDto;
 import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.repository.*;
@@ -14,10 +17,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -330,5 +335,35 @@ public class LectureService {
             this.lectureRepository.save(lecture);
         }
 
+    }
+
+    public List<LecSessionResponseDto> selectSessions(Long id, LecSessionRequestDto requestDto) {
+        List<LocalDate> base = datesByDays(requestDto.getStart(),requestDto.getEnd(),requestDto.getDays());
+
+        Set<LocalDate> set = new LinkedHashSet<>(base);
+
+        List<LecSessionListDto> sessions = set.stream()
+                .sorted()
+                .map(d -> new LecSessionListDto(
+
+                ))
+                .toList();
+        return null;
+    }
+
+    public static List<LocalDate> datesByDays(LocalDate start, LocalDate end, Set<DayOfWeek> days){
+        List<LocalDate> out = new ArrayList<>(); // 결과 날짜들을 담을 리스트 생성
+
+        for(DayOfWeek dow : days){ // 요청한 각 요일에 대해 반복
+            LocalDate first = start.with( // 시작일 이상에서
+                    TemporalAdjusters.nextOrSame(dow)); // 해당 요일의 첫번째 날짜를 계산
+            for (LocalDate d = first; // 첫번째 날짜가 d면서,
+            !d.isAfter(end); // 종료일을 초과하지 않으면서,
+            d = d.plusWeeks(1)){ // 1주(7일)씩 증가하여 매주 같은 요일로 증가
+                out.add(d); // 해당 날짜를 결과 리스트에 담기
+            }
+        }
+        out.sort(Comparator.naturalOrder()); // 요일별로 모은 리스트를 전체 오름차순으로 정렬
+        return out; // 최종리스트 반환
     }
 }

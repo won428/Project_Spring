@@ -1,5 +1,7 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.dto.LecSessionRequestDto;
+import com.secondproject.secondproject.dto.LecSessionResponseDto;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.repository.LectureRepository;
@@ -24,8 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/lecture")
@@ -170,6 +175,16 @@ public class LectureController {
 
 
         return ResponseEntity.ok(lectureListDto);
+    }
+
+    // 강의 회차 목록
+    public ResponseEntity<?> selectLectureSession(@PathVariable Long id, LecSessionRequestDto requestDto){
+        // 해당 강의 id
+        Lecture lecture = lectureRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        List<LecSessionResponseDto> responseDtos = lectureService.selectSessions(id, requestDto);
+
+        return ResponseEntity.ok(responseDtos);
     }
 
     @GetMapping("/spec")
