@@ -104,10 +104,21 @@ public class AssignmentController {
             return ResponseEntity.ok().build();
 
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
+    }
 
-
+    @DeleteMapping("/delete/{assignId}")
+    public ResponseEntity<?> DeleteAssign(
+            @PathVariable Long assignId
+    ) {
+        try {
+            assignmentService.deleteAssign(assignId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
 }
