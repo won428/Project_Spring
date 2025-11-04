@@ -44,13 +44,32 @@ public class LectureController {
     public ResponseEntity<?> lectureRegisterByAdmin(
             @RequestPart LectureDto lecture,
             @RequestPart List<LectureScheduleDto> schedule,
-            @RequestPart List<MultipartFile> files,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @RequestPart PercentDto percent
     ) {
 
-        this.lectureService.insertByAdmin(lecture, schedule, files, percent);
+        try {
+            this.lectureService.insertByAdmin(lecture, schedule, files, percent);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (ResponseStatusException ex) {
+            try {
 
-        return ResponseEntity.ok(200);
+                int status = ex.getStatusCode().value();
+                String error = HttpStatus.valueOf(status).name();
+
+                Map<String, Object> body = Map.of(
+                        "status", status,
+                        "error", error,
+                        "message", ex.getReason(),
+                        "timestamp", java.time.OffsetDateTime.now().toString()
+                );
+
+                return ResponseEntity.status(ex.getStatusCode()).body(body);
+            } catch (Exception otherEx) {
+                return ResponseEntity.status(500).body("알수없는 오류");
+            }
+        }
+
     }
 
     // 강의 목록
