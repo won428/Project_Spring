@@ -33,7 +33,7 @@ public class LectureScheduleDto {
 
     public static LectureScheduleDto fromEntity(LectureSchedule e) {
         return new LectureScheduleDto(
-                e.getId(), e.getLecture() != null ? e.getLecture() : null, e.getDay(), e.getStartTime(), e.getEndTime()
+                e.getId(), e.getLecture() != null ? e.getLecture().getId() : null, e.getDay(), e.getStartTime(), e.getEndTime()
         );
     }
 }

@@ -213,18 +213,20 @@ public class LectureController {
 
     // 강의 회차 목록 - 강의테이블에서 강의일, 요일, 교시 리스트로 받아오기
     @GetMapping("/{id}/sessions")
-    public ResponseEntity<List<LecSessionResponseDto>> selectLectureSession(@RequestParam Long id, @ModelAttribute LecSessionRequestDto requestDto){
+    public ResponseEntity<LecSessionResponseDto> selectLectureSession(
+            @PathVariable Long id,
+            @ModelAttribute LecSessionRequestDto requestDto){
         // 해당 강의 id
-        Lecture lecture = lectureRepository.findById(id)
+        lectureRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        List<LecSessionResponseDto> responseDtos = lectureService.selectSessions(id, requestDto);
+        LecSessionResponseDto responseDtos = lectureService.selectSessions(id, requestDto);
 
         return ResponseEntity.ok(responseDtos);
     }
 
     @GetMapping("/{id}/schedule")
-    public ResponseEntity<List<LectureScheduleDto>> findById(@PathVariable Long id){
+    public ResponseEntity<?> findById(@PathVariable Long id){
         return ResponseEntity.ok(lectureService.getSchedule(id));
     }
 
