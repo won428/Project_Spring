@@ -3,6 +3,7 @@ package com.secondproject.secondproject.service;
 import com.secondproject.secondproject.Enum.SubmitStatus;
 import com.secondproject.secondproject.dto.AssignSubmitInsertDto;
 import com.secondproject.secondproject.entity.*;
+import com.secondproject.secondproject.entity.Mapping.NoticeAttach;
 import com.secondproject.secondproject.entity.Mapping.SubmitAssignAttach;
 import com.secondproject.secondproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -68,11 +69,9 @@ public class SubmitAsgmtService {
     }
 
     @Transactional
-    public void assignmentUpdate(AssignSubmitInsertDto assignSubmitInsertDto, List<MultipartFile> files) throws IOException {
+    public void assignmentUpdate(Long assignId, AssignSubmitInsertDto assignSubmitInsertDto, List<MultipartFile> files, List<String> existingFileKeys) throws IOException {
         User user = userRepository.findByEmail(assignSubmitInsertDto.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("유저 정보 없음"));
-
-        Long assignId = assignSubmitInsertDto.getAssignId();
         Assignment assignment = assignmentRepository.findById(assignId)
                 .orElseThrow(() -> new EntityNotFoundException("과제가 존재하지 않는다."));
 
@@ -88,9 +87,12 @@ public class SubmitAsgmtService {
         submitAsgmtOne.setContent(assignSubmitInsertDto.getContent());
         submitAsgmtRepository.save(submitAsgmtOne);
 
+        List<SubmitAssignAttach> noticeAttach = submitAssignAttachRepository.findBySubmitAsgmt(submitAsgmtOne);
+        if (noticeAttach != null && !noticeAttach.isEmpty()) {
+            submitAssignAttachRepository.deleteAll(noticeAttach);
+        }
 
         if (files != null && !files.isEmpty()) {
-            submitAssignAttachRepository.deleteBySubmitAsgmt(submitAsgmtOne);
             for (MultipartFile file : files) {
                 Attachment attachment = attachmentService.save(file, submitAsgmtOne.getUser());
                 SubmitAssignAttach saved = new SubmitAssignAttach();
@@ -99,6 +101,18 @@ public class SubmitAsgmtService {
                 saved.setAttachment(attachment);
                 submitAssignAttachRepository.save(saved);
             }
+        }
+        if ((existingFileKeys != null && !existingFileKeys.isEmpty())) {
+            for (String storedKey : existingFileKeys) {
+                Attachment existingAttachment = attachmentService.findByStoredKey(storedKey)
+                        .orElseThrow(() -> new EntityNotFoundException("기존 파일 키를 찾을 수 없습니다: " + storedKey));
+                SubmitAssignAttach reSaved = new SubmitAssignAttach();
+                reSaved.setSubmitAsgmt(submitAsgmtOne);
+                reSaved.setAssignment(assignment);
+                reSaved.setAttachment(existingAttachment);
+                submitAssignAttachRepository.save(reSaved);
+            }
+
         }
     }
 
