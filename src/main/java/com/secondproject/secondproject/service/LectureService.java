@@ -1,6 +1,7 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.Status;
+import com.secondproject.secondproject.dto.AttachmentDto;
 import com.secondproject.secondproject.dto.LectureDto;
 import com.secondproject.secondproject.dto.LectureScheduleDto;
 import com.secondproject.secondproject.dto.PercentDto;
@@ -38,6 +39,7 @@ public class LectureService {
     private final LecRegAttachRepository lecRegAttachRepository;
     private final GradingWeightsRepository gradingWeightsRepository;
     private final CollegeRepository collegeRepository;
+    private final AttachmentRepository attachmentRepository;
 
     @Transactional
     public void insertByAdmin(LectureDto lectureDto, List<LectureScheduleDto> lectureScheduleDtos, List<MultipartFile> files, PercentDto percent) {
@@ -321,12 +323,38 @@ public class LectureService {
     }
 
     public LectureDto findByID(Long id) {
-        Lecture lecture = this.lectureRepository.findById(id)
+        Lecture lecture = this.lectureRepository.findById(id) // 해당 강의 객체
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
-        LectureDto lectureDto = new LectureDto();
-        Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
-        List<LectureSchedule> lectureSchedules = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
-        List<LectureScheduleDto> lectureScheduleDtoList = new ArrayList<>();
+
+        LectureDto lectureDto = new LectureDto(); // 스프링으로 보낼 강의 dto객체
+        Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED); // 해당 강의 현재 수강신청인원
+
+        List<LectureSchedule> lectureSchedules = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId()); // 해당 강의 시간표
+        List<LectureScheduleDto> lectureScheduleDtoList = new ArrayList<>(); // 해당 강의 시간표 dto 리스트
+
+        List<LecRegAttach> lecRegAttachList = this.lecRegAttachRepository.findByLecture_id(lecture.getId()); // 해당 강의가 가지고 있는 첨부파일 리스트
+        List<AttachmentDto> attachmentDtoList = new ArrayList<>(); // 해당강의 첨부파일 dto 리스트
+
+        // 첨부파일이 없을 수도 있으므로 if문으로 작성
+        if(lecRegAttachList != null || !lecRegAttachList.isEmpty()){
+            for(LecRegAttach lecRegAttach : lecRegAttachList){
+                Attachment attachment = this.attachmentRepository.findById(lecRegAttach.getAttachment().getId())
+                        .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"첨부파일이 존재하지 않습니다."));
+                AttachmentDto attachmentDto = new AttachmentDto();
+
+                attachmentDto.setContentType(attachment.getContentType());
+                attachmentDto.setName(attachment.getName());
+                attachmentDto.setId(attachment.getId());
+                attachmentDto.setSha256(attachment.getSha256());
+                attachmentDto.setStoredKey(attachment.getStoredKey());
+                attachmentDto.setSizeBytes(attachment.getSizeBytes());
+                attachmentDto.setUploadAt(attachment.getUploadAt());
+
+                attachmentDtoList.add(attachmentDto);
+
+            }
+        }
+
 
         for(LectureSchedule schedule : lectureSchedules){
             LectureScheduleDto scheduleDto = new LectureScheduleDto();
@@ -345,6 +373,8 @@ public class LectureService {
         lectureDto.setUserName(lecture.getUser().getName());
         lectureDto.setNowStudent(nowStudent);
         lectureDto.setLectureSchedules(lectureScheduleDtoList);
+        lectureDto.setDescription(lecture.getDescription());
+        lectureDto.setAttachmentDtos(attachmentDtoList);
 
         return lectureDto;
     }
