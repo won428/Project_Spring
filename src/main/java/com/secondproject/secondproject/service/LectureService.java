@@ -42,8 +42,6 @@ public class LectureService {
     @Transactional
     public void insertByAdmin(LectureDto lectureDto, List<LectureScheduleDto> lectureScheduleDtos, List<MultipartFile> files, PercentDto percent) {
 
-
-
             if(lectureDto.getMajor() == null){
                 throw new ResponseStatusException(HttpStatus.CONFLICT,"소속 대학과 학과를 선택해주세요");
             }
@@ -53,7 +51,11 @@ public class LectureService {
 
             LocalDate start = lectureDto.getStartDate();
             LocalDate end   = lectureDto.getEndDate();
+            LocalDate today = LocalDate.now();
 
+            if(!start.isAfter(today)){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"오늘 이후의 강의만 등록할 수 있습니다.");
+            }
 
             if (end.isBefore(start)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "종료일이 시작일보다 빠릅니다.");
@@ -100,7 +102,6 @@ public class LectureService {
                     throw new ResponseStatusException(HttpStatus.CONFLICT,"수업 요일과 교시를 모두 선택해주세요.");
                 }
             }
-
 
         Lecture lecture = new Lecture();
 
@@ -158,8 +159,6 @@ public class LectureService {
                 }catch (IOException ex){
                     throw new UncheckedIOException("파일 저장 실패", ex);
                 }
-
-
             }
         }
     }
