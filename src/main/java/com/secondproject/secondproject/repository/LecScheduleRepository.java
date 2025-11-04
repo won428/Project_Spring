@@ -9,6 +9,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
+import java.util.List;
+
 public interface LecScheduleRepository extends JpaRepository<LectureSchedule, Long> {
+    List<LectureSchedule> findAllByLecture_Id(Long id);
     List<LectureSchedule> findByLecture_Id(Long lectureId);
 }

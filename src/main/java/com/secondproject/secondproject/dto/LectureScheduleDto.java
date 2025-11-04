@@ -20,7 +20,7 @@ public class LectureScheduleDto {
 
     Long id;
 
-    Lecture lecture;
+    Long lecture;
 
     @Enumerated(EnumType.STRING)
     private DayOfWeek day;

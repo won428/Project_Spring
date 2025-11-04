@@ -3,10 +3,12 @@ package com.secondproject.secondproject.dto;
 import com.secondproject.secondproject.Enum.CompletionDiv;
 import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.entity.Lecture;
+import com.secondproject.secondproject.entity.LectureSchedule;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -49,6 +51,8 @@ public class LectureDto {
 
     @Enumerated(EnumType.STRING)
     private Status lecStatus;
+
+    private List<LectureScheduleDto> lectureSchedules;
 
     // 강의 등록용 생성자
     public LectureDto(String name, Long user, int credit, LocalDate startDate, LocalDate endDate, String description, Long major, int totalStudent, Status status) {
