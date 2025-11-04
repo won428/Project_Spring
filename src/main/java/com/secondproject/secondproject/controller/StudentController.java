@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -119,6 +120,7 @@ public class StudentController {
                 result.add(map);
             }
         }
+
 
         if (result.isEmpty()) {
             return ResponseEntity.ok(Map.of("message", "조건에 맞는 학생이 없습니다."));

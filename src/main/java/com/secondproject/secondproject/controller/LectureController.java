@@ -1,12 +1,11 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.repository.LectureRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import com.secondproject.secondproject.Enum.Status;
-import com.secondproject.secondproject.dto.LectureDto;
-import com.secondproject.secondproject.dto.UserDto;
 import com.secondproject.secondproject.service.LectureService;
 import com.secondproject.secondproject.service.MajorService;
 import com.secondproject.secondproject.service.UserService;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -39,11 +39,16 @@ public class LectureController {
 
     // 수강신청 관련해서 나중에 수강신청 컨트롤러로 이식할게요.
 
-    // 관리자용 강의 등록
-    @PostMapping("/admin/lectureRegister")
-    public ResponseEntity<?> lectureRegisterByAdmin(@RequestBody LectureDto lectureDto) {
+    // 강의 등록
+    @PostMapping("/lectureRegister")
+    public ResponseEntity<?> lectureRegisterByAdmin(
+            @RequestPart LectureDto lecture,
+            @RequestPart List<LectureScheduleDto> schedule,
+            @RequestPart List<MultipartFile> files,
+            @RequestPart PercentDto percent
+    ) {
 
-        this.lectureService.insertByAdmin(lectureDto);
+        this.lectureService.insertByAdmin(lecture, schedule, files, percent);
 
         return ResponseEntity.ok(200);
     }
@@ -188,7 +193,7 @@ public class LectureController {
         }
     }
 
-    // 관리자가 승인이 완료되고 정원이 모두 채워진 강의를 개강으로 전환합니다.
+    // 관리자가 승인이 완료되고 정원이 모두 채워진 강의 묶음을 개강으로 전환합니다.
     @PatchMapping("/inprogress")
     public ResponseEntity<?> lectureInprogress(@RequestBody List<Long> idList, @RequestParam Status status){
         try {
@@ -228,6 +233,31 @@ public class LectureController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("오류 발생");
         }
 
-
     }
+
+    @PatchMapping("/status/admin")
+    public ResponseEntity<?> lecturesChangeStatus(@RequestBody List<Long> idList, @RequestParam Status status){
+        try {
+            this.lectureService.lectureChangeStatus(idList, status);
+            return ResponseEntity.ok(200);
+        }catch (ResponseStatusException ex) {
+            try {
+
+                int errStatus = ex.getStatusCode().value();
+                String error = HttpStatus.valueOf(errStatus).name();
+
+                Map<String, Object> body = Map.of(
+                        "status", status,
+                        "error", error,
+                        "message", ex.getReason(),
+                        "timestamp", java.time.OffsetDateTime.now().toString()
+                );
+
+                return ResponseEntity.status(ex.getStatusCode()).body(body);
+            } catch (Exception otherEx) {
+                return ResponseEntity.status(500).body("알수없는 오류");
+            }
+        }
+    }
+
 }

@@ -31,7 +31,7 @@ public class AttachmentService {
     private final AttachmentRepository attachmentRepository;
 
     public Attachment save(MultipartFile file, User user) throws IOException {
-        String storedKey = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        String storedKey = UUID.randomUUID() + "_" + file.getOriginalFilename(); // 스토리지키 생성 + 뒤에 오리지널 이름 붙임
 
 
         Path savePath = Paths.get(uploadDir + storedKey);
