@@ -1,6 +1,7 @@
 package com.secondproject.secondproject.repository;
 
 import com.secondproject.secondproject.entity.Enrollment;
+import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.Enum.UserType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,9 +17,12 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @Query("SELECT e FROM Enrollment e WHERE e.lecture.id = :lectureId AND e.user.type = :userType")
     List<Enrollment> findByLectureIdAndType(@Param("lecture_id") Long id, @Param("u_Type") UserType type);
 
-
     List<Enrollment> findByUser(User user);
 
+    List<Enrollment> findByUser_Id(Long userId);
 
+    boolean existsByUserAndLecture(User user, Lecture lecture);
+
+    Enrollment findByUserIdAndLectureId(Long userId, Long lectureId);
 }
 

@@ -2,6 +2,8 @@ package com.secondproject.secondproject.dto;
 
 import com.secondproject.secondproject.Enum.AppealType;
 import com.secondproject.secondproject.Enum.Status;
+import com.secondproject.secondproject.entity.Enrollment;
+import com.secondproject.secondproject.entity.Appeal;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,11 +15,11 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppealDto {
-    private Long id;                // 이의제기 코드
-    private String sendingId;       // 보내는 유저 ID
-    private String receiverId;      // 받는 유저 ID
-    private Long enrollmentId;      // Enrollment FK (ID만 담음)
+public class CreditAppealDto {
+
+    private Long lectureId;
+    private Long sendingId;       // 보내는 유저 ID (학생)
+    private Long receiverId;      // 받는 유저 ID (교수)
     private String title;           // 이의제기 제목
     private String content;         // 이의제기 내용
     private LocalDate appealDate;   // 신청 날짜

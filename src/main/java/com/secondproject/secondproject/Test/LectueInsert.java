@@ -188,7 +188,7 @@ public class LectueInsert extends AbstractTestNGSpringContextTests {
     @Test
     public void insertLecture3() {
         Lecture lecture = new Lecture();
-        User user = userRepository.findByEmail("younghee.kim@example.com")
+        User user = userRepository.findByEmail("John.prof@univ.com")
                 .orElseThrow(() -> new RuntimeException());
 
         lecture.setName("화학");                     // 강의명
@@ -209,7 +209,7 @@ public class LectueInsert extends AbstractTestNGSpringContextTests {
     @Test
     public void insertLecture4() {
         Lecture lecture = new Lecture();
-        User user = userRepository.findByEmail("younghee.kim@example.com")
+        User user = userRepository.findByEmail("chulsoo.prof@univ.com")
                 .orElseThrow(() -> new RuntimeException());
 
         lecture.setName("생명");                     // 강의명
