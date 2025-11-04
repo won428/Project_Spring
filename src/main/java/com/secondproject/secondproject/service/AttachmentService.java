@@ -28,6 +28,9 @@ public class AttachmentService {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
+    @Value("${lectureVid.upload-dir}")
+    private String vidDir;
+
     private final AttachmentRepository attachmentRepository;
 
     public Attachment save(MultipartFile file, User user) throws IOException {
@@ -49,15 +52,26 @@ public class AttachmentService {
         return attachmentRepository.save(attachment);
     }
 
-    //
-//    public void fileSave(FileAttachmentDto dto) {
-//        dto.getFiles();
-//        dto.getId();
-//        dto.getFileType();
-//        dto.getUser();
-//
-//        attachmentRepository.save("");
-//    }
+
+    public Attachment saveVid(MultipartFile file, User user) throws IOException {
+        String storedKey = UUID.randomUUID() + "_" + file.getOriginalFilename(); // 스토리지키 생성 + 뒤에 오리지널 이름 붙임
+
+
+        Path savePath = Paths.get(vidDir + storedKey);
+        Files.copy(file.getInputStream(), savePath, StandardCopyOption.REPLACE_EXISTING);
+        //파일을 copy 해서 로컬에 저장
+        Attachment attachment = new Attachment();
+        attachment.setName(file.getOriginalFilename());
+        attachment.setUser(user);
+        attachment.setContentType(file.getContentType());
+        attachment.setSizeBytes(file.getSize());
+        attachment.setStoredKey(storedKey);
+        attachment.setSha256(sha256(file.getBytes()));
+
+
+        return attachmentRepository.save(attachment);
+    }
+
     public static String sha256(byte[] data) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
