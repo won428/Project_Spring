@@ -3,6 +3,7 @@ package com.secondproject.secondproject.controller;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
+import com.secondproject.secondproject.repository.LecScheduleRepository;
 import com.secondproject.secondproject.repository.LectureRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import com.secondproject.secondproject.Enum.Status;
@@ -41,6 +42,7 @@ public class LectureController {
     private final UserService userService;
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
+    private final LecScheduleRepository lecScheduleRepository;
 
     // 수강신청 관련해서 나중에 수강신청 컨트롤러로 이식할게요.
 
@@ -182,14 +184,21 @@ public class LectureController {
         return ResponseEntity.ok(lectureListDto);
     }
 
-    // 강의 회차 목록
-    public ResponseEntity<?> selectLectureSession(@PathVariable Long id, LecSessionRequestDto requestDto){
+    // 강의 회차 목록 - 강의테이블에서 강의일, 요일, 교시 리스트로 받아오기
+    @GetMapping("/{id}/sessions")
+    public ResponseEntity<List<LecSessionResponseDto>> selectLectureSession(@RequestParam Long id, @ModelAttribute LecSessionRequestDto requestDto){
         // 해당 강의 id
         Lecture lecture = lectureRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
         List<LecSessionResponseDto> responseDtos = lectureService.selectSessions(id, requestDto);
 
         return ResponseEntity.ok(responseDtos);
+    }
+
+    @GetMapping("/{id}/schedule")
+    public ResponseEntity<List<LectureScheduleDto>> findById(@PathVariable Long id){
+        return ResponseEntity.ok(lectureService.getSchedule(id));
     }
 
     @GetMapping("/spec")

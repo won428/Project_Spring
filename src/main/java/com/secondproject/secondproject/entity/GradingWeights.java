@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 @Getter @Setter
 @Entity
 @Table(name = "grading_weights")
-@Entity
 public class GradingWeights {
 
     @Id

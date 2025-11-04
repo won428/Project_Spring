@@ -14,13 +14,13 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LecSessionResponseDto {
-    Long lectureId;
-    LocalDate start; // 강의시작일
-    LocalDate end; // 강의종료일
-    Set<DayOfWeek> days;// 강의 요일
-    Integer periodStart;// 강의 시작교시
-    Integer periodEnd;// 강의 종료교시
-    Integer totalSessions; // 총 차시 수
-    List<LecSessionListDto> sessionLists; // 실제 차시 리스트
+    private Long lectureId;
+    private LocalDate start; // 강의시작일
+    private LocalDate end; // 강의종료일
+    private Set<DayOfWeek> days;// 강의 요일
+    private Integer periodStart;// 강의 시작교시
+    private Integer periodEnd;// 강의 종료교시
+    private Integer totalSessions; // 총 차시 수
+    private List<LecSessionListDto> sessionLists; // 실제 차시 리스트
 
 }

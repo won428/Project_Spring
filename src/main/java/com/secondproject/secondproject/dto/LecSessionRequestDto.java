@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,9 +14,12 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LecSessionRequestDto {
-    LocalDate start; // 강의 시작일
-    LocalDate end;// 강의 종료일
-    Set<DayOfWeek> days;// 강의 요일
-    Integer periodStart;// 시작 교시
-    Integer periodEnd;// 종료 교시
+    @JsonFormat(pattern="yyyy-MM-dd")
+    private LocalDate start; // 강의 시작일
+
+    @JsonFormat(pattern="yyyy-MM-dd")
+    private LocalDate end;// 강의 종료일
+    private Set<DayOfWeek> days;// 강의 요일
+    private Integer periodStart;// 시작 교시
+    private Integer periodEnd;// 종료 교시
 }

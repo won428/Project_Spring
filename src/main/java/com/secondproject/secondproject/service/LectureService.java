@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
@@ -265,6 +266,8 @@ public class LectureService {
         lectureDto.setTotalStudent(lecture.getTotalStudent());
         lectureDto.setUserName(lecture.getUser().getName());
         lectureDto.setNowStudent(nowStudent);
+        lectureDto.setStartDate(lecture.getStartDate());
+        lectureDto.setEndDate(lecture.getEndDate());
 
         return lectureDto;
     }
@@ -391,6 +394,22 @@ public class LectureService {
 
     }
 
+    public List<LectureScheduleDto> getSchedule(Long lectureId){
+        List<LectureSchedule> schedule = lecScheduleRepository.findByLecture_Id(lectureId);
+        List<LectureScheduleDto> lsDtos = new ArrayList<>();
+        for (LectureSchedule ls : schedule){
+            LectureScheduleDto scheduleDto = new LectureScheduleDto();
+            scheduleDto.setId(ls.getId());
+            scheduleDto.setLecture(ls.getLecture());
+            scheduleDto.setStartTime(ls.getStartTime());
+            scheduleDto.setEndTime(ls.getEndTime());
+
+            lsDtos.add(scheduleDto);
+        }
+
+        return lsDtos;
+    }
+
     public List<LecSessionResponseDto> selectSessions(Long id, LecSessionRequestDto requestDto) {
         List<LocalDate> base = datesByDays(requestDto.getStart(),requestDto.getEnd(),requestDto.getDays());
 
@@ -399,10 +418,41 @@ public class LectureService {
         List<LecSessionListDto> sessions = set.stream()
                 .sorted()
                 .map(d -> new LecSessionListDto(
-
+                d,
+                        d.getDayOfWeek(),
+                        computeWeekNo(requestDto.getStart(),d,DayOfWeek.MONDAY),
+                        requestDto.getPeriodStart(),
+                        requestDto.getPeriodEnd(),
+                        BellTimeRules.bellStart(requestDto.getPeriodStart()),        // 선택
+                        BellTimeRules.bellEnd(requestDto.getPeriodEnd())
                 ))
                 .toList();
-        return null;
+
+        LecSessionResponseDto responseDto = new LecSessionResponseDto();
+
+        responseDto.setLectureId(id);
+        responseDto.setStart(requestDto.getStart());
+        responseDto.setEnd(requestDto.getEnd());
+        responseDto.setDays(requestDto.getDays());
+        responseDto.setPeriodStart(requestDto.getPeriodStart());
+        responseDto.setPeriodEnd(requestDto.getPeriodEnd());
+        responseDto.setSessionLists(sessions);
+        return List.of(responseDto);
+    }
+
+    public static int computeWeekNo(LocalDate termStart, LocalDate date, DayOfWeek weekStartsOn){
+        // 학기 시작일을 해당 주의 시작요일로 맞춰줌
+        LocalDate startAncor = termStart.with(java.time.temporal.TemporalAdjusters.previousOrSame(weekStartsOn));
+
+        // date도 본인이 속한 해당 주의 시작요일로 맞춤
+        // -> 각각 해당 주의 첫날로 정렬되어 주 단위 차이를 셀 수 있음.
+        LocalDate dateAnchor = date.with(java.time.temporal.TemporalAdjusters.previousOrSame(weekStartsOn));
+
+        // 두 날짜 사이의 주 간격을 구함
+        int weeks = (int) java.time.temporal.ChronoUnit.WEEKS.between(startAncor,dateAnchor);
+
+        // 0base를 +1 함으로써 1base(1주차)로 시작함
+        return Math.max(1,weeks);
     }
 
     public static List<LocalDate> datesByDays(LocalDate start, LocalDate end, Set<DayOfWeek> days){

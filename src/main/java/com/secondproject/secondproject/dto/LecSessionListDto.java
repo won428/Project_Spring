@@ -13,13 +13,13 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LecSessionListDto {
-    LocalDate date; // 강의 일
-    DayOfWeek dayOfWeek; // 강의 요일
-    Integer weekNo; // 학기 n주차
-    Integer periodStart; // 시작교시
-    Integer periodEnd; // 종료교시
-    LocalTime startTime; // 시작시간
-    LocalTime endTime; // 종료시간
+    private LocalDate date; // 강의 일
+    private DayOfWeek dayOfWeek; // 강의 요일
+    private Integer weekNo; // 학기 n주차
+    private Integer periodStart; // 시작교시
+    private Integer periodEnd; // 종료교시
+    private LocalTime startTime; // 시작시간
+    private LocalTime endTime; // 종료시간
 
     //테스트용 주석
 }
