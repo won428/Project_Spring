@@ -22,10 +22,10 @@ public class Appeal {
     private Long id; // 이의제기 코드
 
     @Column(nullable = false)
-    private String sendingId; // 보내는 유저 아이디 입니다.
+    private Long sendingId; // 보내는 유저 아이디 입니다.
 
     @Column(nullable = false)
-    private String receiverId; // 받는 유저 아이디 입니다
+    private Long receiverId; // 받는 유저 아이디 입니다
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "enroll_Id", nullable = false,foreignKey = @ForeignKey(name = "fk_appeal_enroll"))
