@@ -164,12 +164,24 @@ public class LectureService {
     }
 
 
-
+    @Transactional
     public List<LectureDto> findAll() {
         List<Lecture> lectureList = this.lectureRepository.findAll();
         List<LectureDto> lectureDtoList = new ArrayList<>();
         for (Lecture lecture : lectureList) {
             Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
+            List<LectureSchedule> lectureScheduleList = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
+            List<LectureScheduleDto> lectureScheduleDtos = new ArrayList<>();
+            for(LectureSchedule lectureSchedule : lectureScheduleList){
+
+                LectureScheduleDto scheduleDto = new LectureScheduleDto();
+                scheduleDto.setLecture(lectureSchedule.getLecture().getId());
+                scheduleDto.setDay(lectureSchedule.getDay());
+                scheduleDto.setEndTime(lectureSchedule.getEndTime());
+                scheduleDto.setStartTime(lectureSchedule.getStartTime());
+
+                lectureScheduleDtos.add(scheduleDto);
+            }
 
             LectureDto lectureDto = new LectureDto();
             lectureDto.setId(lecture.getId());
@@ -185,6 +197,7 @@ public class LectureService {
             lectureDto.setNowStudent(nowStudent);
             lectureDto.setCompletionDiv(lecture.getCompletionDiv());
             lectureDto.setLevel(lecture.getLevel());
+            lectureDto.setLectureSchedules(lectureScheduleDtos);
 
             lectureDtoList.add(lectureDto);
         }
@@ -312,12 +325,26 @@ public class LectureService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
         LectureDto lectureDto = new LectureDto();
         Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
+        List<LectureSchedule> lectureSchedules = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
+        List<LectureScheduleDto> lectureScheduleDtoList = new ArrayList<>();
+
+        for(LectureSchedule schedule : lectureSchedules){
+            LectureScheduleDto scheduleDto = new LectureScheduleDto();
+
+            scheduleDto.setLecture(schedule.getLecture().getId());
+            scheduleDto.setDay(schedule.getDay());
+            scheduleDto.setStartTime(schedule.getStartTime());
+            scheduleDto.setEndTime(schedule.getEndTime());
+
+            lectureScheduleDtoList.add(scheduleDto);
+        }
 
         lectureDto.setName(lecture.getName());
         lectureDto.setMajorName(lecture.getMajor().getName());
         lectureDto.setTotalStudent(lecture.getTotalStudent());
         lectureDto.setUserName(lecture.getUser().getName());
         lectureDto.setNowStudent(nowStudent);
+        lectureDto.setLectureSchedules(lectureScheduleDtoList);
 
         return lectureDto;
     }

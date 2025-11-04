@@ -39,6 +39,14 @@ public class LectureController {
 
     // 수강신청 관련해서 나중에 수강신청 컨트롤러로 이식할게요.
 
+    //단일 강의정보
+    @GetMapping("/info")
+    public LectureDto getLectureInfo(@RequestParam Long modalId){
+        LectureDto lectureDto = this.lectureService.findByID(modalId);
+
+        return lectureDto;
+    }
+
     // 강의 등록
     @PostMapping("/lectureRegister")
     public ResponseEntity<?> lectureRegisterByAdmin(
@@ -278,5 +286,7 @@ public class LectureController {
             }
         }
     }
+
+
 
 }
