@@ -28,7 +28,7 @@ public class StudentInfoDto {
     private Gender gender;    // 성별
     private LocalDate birthDate; // 생일
     private String phone;     // 휴대전화
-    private Major major; // 소속 학과명
+    private String major; // 소속 학과명
     private UserType type; // 구분자
 
     // User 소속 학과 등 필요한 필드 추가
@@ -51,17 +51,19 @@ public class StudentInfoDto {
 
     public StudentInfoDto(User user, StatusRecords statusRecord) {
 
-            // User 기반 필드 세팅
-            this.id = user.getId();
-            this.userCode = user.getUserCode();
-            this.name = user.getName();
-            this.email = user.getEmail();
-            this.password = user.getPassword();
-            this.gender = user.getGender();
-            this.birthDate = user.getBirthDate();
-            this.phone = user.getPhone();
-            this.major = user.getMajor();
-            this.type = user.getType();
+            if(user != null) {
+                // User 기반 필드 세팅
+                this.id = user.getId();
+                this.userCode = user.getUserCode();
+                this.name = user.getName();
+                this.email = user.getEmail();
+                this.password = user.getPassword();
+                this.gender = user.getGender();
+                this.birthDate = user.getBirthDate();
+                this.phone = user.getPhone();
+                this.major = user.getMajor() != null ? user.getMajor().getName() : null;
+                this.type = user.getType();
+            }
 
             // StatusRecords 기반 필드 세팅 (null 안전)
             if (statusRecord != null) {

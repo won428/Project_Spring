@@ -2,6 +2,7 @@ package com.secondproject.secondproject.Test;
 
 
 import com.secondproject.secondproject.Enum.Gender;
+import com.secondproject.secondproject.entity.Major;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.repository.UserRepository;
@@ -80,5 +81,26 @@ public class UserLoginTest extends AbstractTestNGSpringContextTests {
         prof.setPhone("01012345456");                  // 연락처
         prof.setType(UserType.PROFESSOR);
         userRepository.save(prof);// 교수 권한
+    }
+
+    @Test
+    public void insertUser_TOM() {
+        // Major 객체 생성 (ID만 세팅)
+        Major major = new Major();
+        major.setId(5001L); // 이 숫자가 DB FK로 들어감
+        // given
+        User std3 = new User(); // userid: 2
+        std3.setEmail("tom@example.com");                  // UNIQUE, length 100
+        std3.setPassword(passwordEncoder.encode("tom123"));   // 인코딩된 비밀번호
+        std3.setName("TOM");                                       // u_name NOT NULL
+        std3.setGender(Gender.valueOf("MALE"));                                     // 문자열 컬럼(예: 'MALE' / 'FEMALE')
+        std3.setPhone("01012347777");                               // UNIQUE, length 20
+        std3.setType(UserType.STUDENT);                             // Enum: 학생
+        std3.setUserCode(202500051002L);
+        std3.setMajor(major);
+
+
+        // when
+        userRepository.save(std3);
     }
 }

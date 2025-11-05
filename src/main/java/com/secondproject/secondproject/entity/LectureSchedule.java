@@ -10,7 +10,6 @@ import java.time.LocalTime;
 
 @Getter @Setter @Entity
 @Table(name = "lectureSchedule")
-@Entity
 public class LectureSchedule {
 
     @Id
