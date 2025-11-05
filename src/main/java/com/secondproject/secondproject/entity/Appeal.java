@@ -10,7 +10,9 @@ import lombok.ToString;
 
 import java.time.LocalDate;
 
-@Getter @Setter @ToString
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "appeal")
 public class Appeal {
@@ -28,7 +30,7 @@ public class Appeal {
     private Long receiverId; // 받는 유저 아이디 입니다
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "enroll_Id", nullable = false,foreignKey = @ForeignKey(name = "fk_appeal_enroll"))
+    @JoinColumn(name = "enroll_Id", nullable = false, foreignKey = @ForeignKey(name = "fk_appeal_enroll"))
     private Enrollment enrollment;
 
     @Column(name = "appeal_title", nullable = false)

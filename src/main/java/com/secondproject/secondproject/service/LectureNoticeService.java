@@ -4,12 +4,9 @@ import com.secondproject.secondproject.dto.LectureNoticeListDto;
 import com.secondproject.secondproject.dto.AttachmentDto;
 import com.secondproject.secondproject.dto.LectureNoticeUploadDto;
 import com.secondproject.secondproject.dto.NoticeResponseDto;
-import com.secondproject.secondproject.entity.Attachment;
-import com.secondproject.secondproject.entity.LectureNotice;
+import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.entity.Mapping.NoticeAttach;
 import com.secondproject.secondproject.entity.Mapping.SubmitAssignAttach;
-import com.secondproject.secondproject.entity.OnlineLecture;
-import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -31,10 +28,10 @@ public class LectureNoticeService {
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
     private final AttachmentService attachmentService;
+    private final AttachmentRepository attachmentRepository;
     private final NoticeAttachRepository noticeAttachRepository;
     private final LectureNoticeRepository lectureNoticeRepository;
-    private final OnlineLectureRepository onlineLectureRepository;
-
+    private final LectureRepository lectureRepository;
 
     @Transactional // 데이터 변경이 있으므로 트랜잭션 처리
     public void createNotice(LectureNoticeUploadDto noticeDto, List<MultipartFile> files) throws IOException {
@@ -46,11 +43,13 @@ public class LectureNoticeService {
         User user = userRepository.findByEmail(noticeDto.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("해당 이메일의 사용자를 찾을 수 없습니다."));
 
-        OnlineLecture onlineLecture = onlineLectureRepository.findByLectureId(noticeDto.getId());
+
+        Lecture lecture = lectureRepository.findById(noticeDto.getId())
+                .orElseThrow(() -> new EntityNotFoundException("존재 x"));
         // 2. Notice 객체를 생성하고 값을 설정합니다.
         LectureNotice LN = new LectureNotice();
         LN.setUser(user);
-        LN.setOnlineLecture(onlineLecture);
+        LN.setLecture(lecture);
         LN.setLnTitle(noticeDto.getTitle());
         LN.setLnContent(noticeDto.getContent());
 
@@ -119,8 +118,9 @@ public class LectureNoticeService {
 
     public Page<LectureNoticeListDto> getPagedNotices(Long id, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by((Sort.Direction.DESC), "lnCreateAt"));
-        OnlineLecture onlineLecture = onlineLectureRepository.findByLectureId(id);
-        Page<LectureNotice> result = lectureNoticeRepository.findByOnlineLecture(onlineLecture, pageable);
+        Lecture lecture = lectureRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("없음"));
+        Page<LectureNotice> result = lectureNoticeRepository.findByLecture(lecture, pageable);
         return result.map(LectureNoticeListDto::fromEntity);
     }
 
@@ -139,18 +139,19 @@ public class LectureNoticeService {
     }
 
 
-    public void updateNotice(Long noticeId, LectureNoticeUploadDto noticeDto, List<MultipartFile> files) throws IOException {
+    public void updateNotice(Long noticeId, LectureNoticeUploadDto noticeDto, List<MultipartFile> files, List<String> existingFileKeys) throws IOException {
         LectureNotice lectureNotice = lectureNoticeRepository.findById(noticeId)
                 .orElseThrow(() -> new EntityNotFoundException("찾을 수 없습니다."));
         lectureNotice.setLnTitle(noticeDto.getTitle());
         lectureNotice.setLnContent(noticeDto.getContent());
         lectureNoticeRepository.save(lectureNotice);
 
-        List<NoticeAttach> noticeAttach = noticeAttachRepository.findByLectureNotice_Id(lectureNotice.getId());
+        List<NoticeAttach> noticeAttach = noticeAttachRepository.findByLectureNotice_Id(noticeId);
 
-
-        if (files != null && !files.isEmpty()) {
-            noticeAttachRepository.deleteById(lectureNotice.getId());
+        if (noticeAttach != null && !noticeAttach.isEmpty()) {
+            noticeAttachRepository.deleteAll(noticeAttach);
+        }
+        if ((files != null && !files.isEmpty())) {
             for (MultipartFile file : files) {
                 Attachment attachment = attachmentService.save(file, lectureNotice.getUser());
                 NoticeAttach saved = new NoticeAttach();
@@ -159,6 +160,17 @@ public class LectureNoticeService {
                 noticeAttachRepository.save(saved);
             }
         }
+        //기존에 있는 파일처리
+        if ((existingFileKeys != null && !existingFileKeys.isEmpty())) {
+            for (String storedKey : existingFileKeys) {
+                Attachment existingAttachment = attachmentService.findByStoredKey(storedKey)
+                        .orElseThrow(() -> new EntityNotFoundException("기존 파일 키를 찾을 수 없습니다: " + storedKey));
+                NoticeAttach reSaved = new NoticeAttach();
+                reSaved.setLectureNotice(lectureNotice);
+                reSaved.setAttachment(existingAttachment);
+                noticeAttachRepository.save(reSaved);
+            }
 
+        }
     }
 }

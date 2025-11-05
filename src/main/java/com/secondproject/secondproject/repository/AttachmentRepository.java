@@ -12,4 +12,5 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
     }
 
 
+    Optional<Attachment> findByStoredKey(String storedKey);
 }

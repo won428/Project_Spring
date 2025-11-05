@@ -11,4 +11,6 @@ public interface SubmitAssignAttachRepository extends JpaRepository<SubmitAssign
 
 
     void deleteBySubmitAsgmt(SubmitAsgmt submitAsgmtOne);
+
+    List<SubmitAssignAttach> findBySubmitAsgmt(SubmitAsgmt submitAsgmtOne);
 }

@@ -129,7 +129,8 @@ public class AssignmentService {
     public void updateAssignment(
             Long assignId,
             AssignSubmitInsertDto assignSubmitInsertDto,
-            List<MultipartFile> files) throws IOException {
+            List<MultipartFile> files,
+            List<String> existingFileKeys) throws IOException {
 
         User user = userRepository.findByEmail(assignSubmitInsertDto.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("유저 없음"));
@@ -140,8 +141,11 @@ public class AssignmentService {
         assignmentRepository.save(assignment);
 
 
+        List<AssignmentAttach> attaches = assignmentAttachRepository.findByAssignment_Id(assignId);
+        if (attaches != null && !attaches.isEmpty()) {
+            assignmentAttachRepository.deleteAll(attaches);
+        }
         if (files != null && !files.isEmpty() && files.get(0).getSize() > 0) {
-            assignmentAttachRepository.deleteByAssignment(assignment);
             for (MultipartFile file : files) {
                 Attachment attachment = attachmentService.save(file, user);
                 AssignmentAttach assignmentAttach = new AssignmentAttach();
@@ -149,6 +153,18 @@ public class AssignmentService {
                 assignmentAttach.setAttachment(attachment);
                 assignmentAttachRepository.save(assignmentAttach);
             }
+        }
+        if ((existingFileKeys != null && !existingFileKeys.isEmpty())) {
+            for (String storedKey : existingFileKeys) {
+                Attachment existingAttachment = attachmentService.findByStoredKey(storedKey)
+                        .orElseThrow(() -> new EntityNotFoundException("기존 파일 키를 찾을 수 없습니다: " + storedKey));
+                AssignmentAttach reSaved = new AssignmentAttach();
+                reSaved.setAssignment(assignment);
+                reSaved.setAttachment(existingAttachment);
+                assignmentAttachRepository.save(reSaved);
+
+            }
+
         }
     }
 
@@ -168,3 +184,4 @@ public class AssignmentService {
 
     }
 }
+
