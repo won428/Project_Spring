@@ -4,6 +4,7 @@ import com.secondproject.secondproject.entity.Attendance_records;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface AttendanceRecordsRepository extends JpaRepository<Attendance_records, Long> {
@@ -16,4 +17,6 @@ public interface AttendanceRecordsRepository extends JpaRepository<Attendance_re
 
     // 강의ID + 일자 기준 : 총 저장된 출결 건수
     long countByEnrollment_Lecture_IdAndAttendanceDate(Long lectureId, LocalDate attendanceDate);
+
+    List<Attendance_records> findByEnrollment_Lecture_IdAndAttendanceDate(Long lectureId, LocalDate attendanceDate);
 }

@@ -52,7 +52,6 @@ public class AttendanceStudentService {
         log.info("enrollmentsFound={} missing={}", enrollmentIds.size(), missing);
 
         if (!missing.isEmpty()) {
-            // ✅ 어떤 userId가 문제인지 바로 확인 가능
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "수강(enrollment) 없음: " + missing);
         }
@@ -102,5 +101,19 @@ public class AttendanceStudentService {
     // 학생 출결 저장 시 기존 데이터가 존재하는지 확인
     public boolean isFinalizedAny(Long lectureId, LocalDate date){
         return attendanceRecordsRepository.existsByEnrollment_Lecture_IdAndAttendanceDate(lectureId, date);
+    }
+
+    public List<AttendanceResponseDto> getAttendances(Long lectureId, LocalDate date) {
+        List<Attendance_records> list =
+                attendanceRecordsRepository.findByEnrollment_Lecture_IdAndAttendanceDate(lectureId, date);
+
+        return list.stream()
+                .map(a -> AttendanceResponseDto.builder()
+                        .userId(a.getUser().getId())
+                        .enrollmentId(a.getEnrollment().getId())
+                        .attendanceDate(a.getAttendanceDate())
+                        .attendStudent(a.getAttendStudent())
+                        .build())
+                .toList();
     }
 }

@@ -269,6 +269,17 @@ List<AttendanceResponseDto> responseDtos = attendanceStudentService.insertAttend
         return ResponseEntity.ok().body(Map.of("finalized", finalized));
     }
 
+    // 출결 목록 불러오기
+    @GetMapping("/{id}/attendance")
+    public ResponseEntity<List<AttendanceResponseDto>> getAttendances(
+            @PathVariable Long id,
+            @RequestParam("date")
+            @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
+            LocalDate sessionDate) {
+
+        return ResponseEntity.ok(attendanceStudentService.getAttendances(id, sessionDate));
+    }
+
     @GetMapping("/spec")
     public ResponseEntity<?> LectureSpec(@RequestParam Long id) {
         try {
