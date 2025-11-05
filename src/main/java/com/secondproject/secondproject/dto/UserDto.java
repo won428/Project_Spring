@@ -6,18 +6,18 @@ import com.secondproject.secondproject.Enum.UserType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Getter
 @Setter
 @ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserDto {
 
-    private Long userId;
+    private Long id;
 
     @NotBlank(message = "이름은 필수 입력 사항입니다.")
     private String name; // 이름
@@ -54,6 +54,5 @@ public class UserDto {
     private String college;
     private Long userCode;
 
-    public UserDto() {
-    }
+
 }

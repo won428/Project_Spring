@@ -15,8 +15,11 @@ import com.secondproject.secondproject.service.MajorService;
 import com.secondproject.secondproject.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,10 +44,10 @@ public class LectureController {
     private final MajorService majorService;
     private final LectureService lectureService;
     private final UserService userService;
+    private final AttachmentService attachmentService;
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
     private final LecScheduleRepository lecScheduleRepository;
-    private final AttendanceStudentService attendanceStudentService;
 
     // 수강신청 관련해서 나중에 수강신청 컨트롤러로 이식할게요.
 
@@ -237,7 +240,7 @@ public class LectureController {
     public ResponseEntity<List<AttendanceResponseDto>> insertAttendances(
             @PathVariable Long id,
             @RequestBody List<AttendanceRequestDto> requestDtos){
-List<AttendanceResponseDto> responseDtos = attendanceStudentService.insertAttendances(id, requestDtos);
+List<AttendanceResponseDto> responseDtos = attachmentService.insertAttendances(id, requestDtos);
 
         return ResponseEntity.ok(responseDtos);
     }
@@ -245,7 +248,7 @@ List<AttendanceResponseDto> responseDtos = attendanceStudentService.insertAttend
     // 학생 출결 저장 후 라디오 영구 비활성화를 위한 메소드
     @GetMapping("/{id}/attendance/finalized")
     public ResponseEntity<Map<String, Object>> isFinalized(@PathVariable Long id, LocalDate sessionDate){
-        boolean finalized = attendanceStudentService.isFinalizedAny(id, sessionDate);
+        boolean finalized = attachmentService.isFinalizedAny(id, sessionDate);
         return ResponseEntity.ok().body(Map.of("finalized", finalized));
     }
 
