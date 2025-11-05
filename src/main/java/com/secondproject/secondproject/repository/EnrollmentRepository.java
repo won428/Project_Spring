@@ -18,5 +18,12 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
 
     List<Enrollment> findByUser(User user);
+
+    List<Enrollment> findByLecture_IdAndUser_IdIn(Long id, List<Long> userIds);
+
+    List<Enrollment> findByLecture_Id(Long lectureId);
+
+    // 총 수강 인원 카운트 (학생 출결등록 및 중복 저장 방지용)
+    long countByLecture_Id(Long lectureId);
 }
 

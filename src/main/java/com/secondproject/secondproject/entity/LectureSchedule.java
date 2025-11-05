@@ -9,8 +9,8 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 @Getter @Setter
-@Table(name = "lectureSchedule")
 @Entity
+@Table(name = "lectureSchedule")
 public class LectureSchedule {
 
     @Id

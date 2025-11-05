@@ -18,11 +18,12 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -46,66 +47,66 @@ public class LectureService {
     @Transactional
     public void insertByAdmin(LectureDto lectureDto, List<LectureScheduleDto> lectureScheduleDtos, List<MultipartFile> files, PercentDto percent) {
 
-            if(lectureDto.getMajor() == null){
-                throw new ResponseStatusException(HttpStatus.CONFLICT,"소속 대학과 학과를 선택해주세요");
-            }
-            if(lectureDto.getStartDate() == null || lectureDto.getEndDate() == null){
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "강의 날짜를 선택해주세요");
-            }
+        if(lectureDto.getMajor() == null){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"소속 대학과 학과를 선택해주세요");
+        }
+        if(lectureDto.getStartDate() == null || lectureDto.getEndDate() == null){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "강의 날짜를 선택해주세요");
+        }
 
-            LocalDate start = lectureDto.getStartDate();
-            LocalDate end   = lectureDto.getEndDate();
-            LocalDate today = LocalDate.now();
+        LocalDate start = lectureDto.getStartDate();
+        LocalDate end   = lectureDto.getEndDate();
+        LocalDate today = LocalDate.now();
 
-            if(!start.isAfter(today)){
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"오늘 이후의 강의만 등록할 수 있습니다.");
-            }
+        if(!start.isAfter(today)){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"오늘 이후의 강의만 등록할 수 있습니다.");
+        }
 
-            if (end.isBefore(start)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "종료일이 시작일보다 빠릅니다.");
-            }
+        if (end.isBefore(start)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "종료일이 시작일보다 빠릅니다.");
+        }
 
-            LocalDate minEnd = start.plusMonths(2);
-            if (end.isBefore(minEnd)) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "강의 기간은 최소 2개월이어야 합니다. (가능한 최소 종료일: " + minEnd + ")"
-                );
-            }
-            if(lectureScheduleDtos == null || lectureScheduleDtos.isEmpty()){
-                throw new ResponseStatusException(HttpStatus.CONFLICT,"수업 일정을 하루 이상 선택해주세요.");
-            }
+        LocalDate minEnd = start.plusMonths(2);
+        if (end.isBefore(minEnd)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "강의 기간은 최소 2개월이어야 합니다. (가능한 최소 종료일: " + minEnd + ")"
+            );
+        }
+        if(lectureScheduleDtos == null || lectureScheduleDtos.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"수업 일정을 하루 이상 선택해주세요.");
+        }
 
-            if(lectureDto.getUser() == null){
-                throw new ResponseStatusException(HttpStatus.CONFLICT,"담당 교수를 선택해주세요.");
-            }
-            if(lectureDto.getCredit() == 0){
-                throw new ResponseStatusException(HttpStatus.CONFLICT,"이수 학점은 1점 이상이여야 합니다.");
-            }
-            if(lectureDto.getName().isBlank() || lectureDto.getName() == null){
-                throw new ResponseStatusException(HttpStatus.CONFLICT,"강의명을 입력해주세요.");
-            }
-            if(lectureDto.getLevel() == 0){
-                throw new ResponseStatusException(HttpStatus.CONFLICT,"학년을 선택해주세요.");
-            }
-            if(lectureDto.getTotalStudent() < 10){
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"수강인원은 10명 이상이여야 합니다.");
-            }
+        if(lectureDto.getUser() == null){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"담당 교수를 선택해주세요.");
+        }
+        if(lectureDto.getCredit() == 0){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"이수 학점은 1점 이상이여야 합니다.");
+        }
+        if(lectureDto.getName().isBlank() || lectureDto.getName() == null){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"강의명을 입력해주세요.");
+        }
+        if(lectureDto.getLevel() == 0){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"학년을 선택해주세요.");
+        }
+        if(lectureDto.getTotalStudent() < 10){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"수강인원은 10명 이상이여야 합니다.");
+        }
 
-            BigDecimal totalPercent = percent.getAssignment()
-                    .add(percent.getAttendance())
-                    .add(percent.getMidtermExam())
-                    .add(percent.getFinalExam());
-            BigDecimal overPercent = new BigDecimal("100.00");
-            if (totalPercent.compareTo(overPercent) > 0){
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"비율은 100을 넘을 수 없습니다.");
-            }
+        BigDecimal totalPercent = percent.getAssignment()
+                .add(percent.getAttendance())
+                .add(percent.getMidtermExam())
+                .add(percent.getFinalExam());
+        BigDecimal overPercent = new BigDecimal("100.00");
+        if (totalPercent.compareTo(overPercent) > 0){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"비율은 100을 넘을 수 없습니다.");
+        }
 
-            for(LectureScheduleDto lectureScheduleDto : lectureScheduleDtos){
-                if(lectureScheduleDto.getDay() == null || lectureScheduleDto.getStartTime() == null || lectureScheduleDto.getEndTime() == null){
-                    throw new ResponseStatusException(HttpStatus.CONFLICT,"수업 요일과 교시를 모두 선택해주세요.");
-                }
+        for(LectureScheduleDto lectureScheduleDto : lectureScheduleDtos){
+            if(lectureScheduleDto.getDay() == null || lectureScheduleDto.getStartTime() == null || lectureScheduleDto.getEndTime() == null){
+                throw new ResponseStatusException(HttpStatus.CONFLICT,"수업 요일과 교시를 모두 선택해주세요.");
             }
+        }
 
         Lecture lecture = new Lecture();
 
@@ -214,10 +215,10 @@ public class LectureService {
         Lecture lecture = lectureOpt
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, id + " 해당 강의가 존재하지 않습니다."));
-        if(status.equals(Status.INPROGRESS)){
+        if (status.equals(Status.INPROGRESS)) {
             List<CourseRegistration> courseRegistrationList = this.courseRegRepository.findAllByLecture_IdAndStatus(id, Status.SUBMITTED);
-            if(courseRegistrationList == null || courseRegistrationList.isEmpty()){
-                throw new ResponseStatusException(HttpStatus.CONFLICT,"신청 인원이 없습니다.");
+            if (courseRegistrationList == null || courseRegistrationList.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "신청 인원이 없습니다.");
             }
 
             lecture.setStatus(status);
@@ -249,23 +250,22 @@ public class LectureService {
 
                 this.enrollmentRepository.save(enrollment);
             }
-        }else if(status.equals(Status.COMPLETED)){
+        } else if (status.equals(Status.COMPLETED)) {
             List<Grade> gradeList = this.gradeRepository.findAllByLecture_Id(id);
-            if(gradeList.isEmpty() || gradeList == null){
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND,"점수 정보가 없는 강의는 종강 할 수 없습니다.");
+            if (gradeList.isEmpty() || gradeList == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "점수 정보가 없는 강의는 종강 할 수 없습니다.");
             }
-            for(Grade grade : gradeList){
-                if(grade.getLectureGrade() == null || grade.getAScore() == null || grade.getAsScore() == null || grade.getFtScore() == null || grade.getTScore() == null){
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"아직 점수가 전부 입력되지 않은 강의는 종강 할 수 없습니다.");
+            for (Grade grade : gradeList) {
+                if (grade.getLectureGrade() == null || grade.getAScore() == null || grade.getAsScore() == null || grade.getFtScore() == null || grade.getTScore() == null) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "아직 점수가 전부 입력되지 않은 강의는 종강 할 수 없습니다.");
                 }
             }
             lecture.setStatus(status);
             this.lectureRepository.save(lecture);
-        }else {
+        } else {
             lecture.setStatus(status);
             this.lectureRepository.save(lecture);
         }
-
     }
 
     // 일괄 수강신청
@@ -581,6 +581,114 @@ public class LectureService {
 
     }
 
+    /// ///////////////
+    public LectureDto findBylectureID(Long id) {
+        Lecture lecture = this.lectureRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
+        LectureDto lectureDto = new LectureDto();
+        Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
+        List<LectureSchedule> lectureSchedules = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
+        List<LectureScheduleDto> lectureScheduleDtoList = new ArrayList<>();
+
+        for(LectureSchedule schedule : lectureSchedules){
+            LectureScheduleDto scheduleDto = new LectureScheduleDto();
+
+            scheduleDto.setLecture(schedule.getLecture().getId());
+            scheduleDto.setDay(schedule.getDay());
+            scheduleDto.setStartTime(schedule.getStartTime());
+            scheduleDto.setEndTime(schedule.getEndTime());
+
+            lectureScheduleDtoList.add(scheduleDto);
+        }
+
+        lectureDto.setName(lecture.getName());
+        lectureDto.setMajorName(lecture.getMajor().getName());
+        lectureDto.setTotalStudent(lecture.getTotalStudent());
+        lectureDto.setUserName(lecture.getUser().getName());
+        lectureDto.setNowStudent(nowStudent);
+        lectureDto.setLectureSchedules(lectureScheduleDtoList);
+        lectureDto.setStartDate(lecture.getStartDate());
+        lectureDto.setEndDate(lecture.getEndDate());
+
+        return lectureDto;
+    }
+
+    public List<LectureScheduleDto> getSchedule(Long lectureId){
+        return lecScheduleRepository.findByLecture_Id(lectureId).stream() .map(e -> LectureScheduleDto.fromEntity(e)).toList();
+    }
+
+    public LecSessionResponseDto selectSessions(Long id, LecSessionRequestDto requestDto) {
+        if (requestDto.getDays() == null || requestDto.getDays().isEmpty()) {
+            // 필요하면 여기서 400 던지거나 빈 리스트 반환
+            return new LecSessionResponseDto(id, requestDto.getStart(), requestDto.getEnd(), requestDto.getDays(),
+                    requestDto.getPeriodStart(), requestDto.getPeriodEnd(), 0, Collections.emptyList());
+        }
+
+        List<LocalDate> base = datesByDays(requestDto.getStart(),requestDto.getEnd(),requestDto.getDays());
+
+        Set<LocalDate> set = new LinkedHashSet<>(base);
+
+        List<LecSessionListDto> sessions = set.stream()
+                .sorted()
+                .map(d -> new LecSessionListDto(
+                d,
+                        d.getDayOfWeek(),
+                        computeWeekNo(requestDto.getStart(),d,DayOfWeek.MONDAY),
+                        requestDto.getPeriodStart(),
+                        requestDto.getPeriodEnd(),
+                        BellTimeRules.bellStart(requestDto.getPeriodStart()),        // 선택
+                        BellTimeRules.bellEnd(requestDto.getPeriodEnd())
+                ))
+                .toList();
+
+        LecSessionResponseDto responseDto = new LecSessionResponseDto();
+
+        responseDto.setLectureId(id);
+        responseDto.setStart(requestDto.getStart());
+        responseDto.setEnd(requestDto.getEnd());
+        responseDto.setDays(requestDto.getDays());
+        responseDto.setPeriodStart(requestDto.getPeriodStart());
+        responseDto.setPeriodEnd(requestDto.getPeriodEnd());
+        responseDto.setSessionLists(sessions);
+        return responseDto;
+    }
+
+    public static int computeWeekNo(LocalDate termStart, LocalDate date, DayOfWeek weekStartsOn){
+        // 학기 시작일을 해당 주의 시작요일로 맞춰줌
+        LocalDate startAncor = termStart.with(java.time.temporal.TemporalAdjusters.previousOrSame(weekStartsOn));
+
+        // date도 본인이 속한 해당 주의 시작요일로 맞춤
+        // -> 각각 해당 주의 첫날로 정렬되어 주 단위 차이를 셀 수 있음.
+        LocalDate dateAnchor = date.with(java.time.temporal.TemporalAdjusters.previousOrSame(weekStartsOn));
+
+        // 두 날짜 사이의 주 간격을 구함
+        int weeks = (int) java.time.temporal.ChronoUnit.WEEKS.between(startAncor,dateAnchor);
+
+        // 0base를 +1 함으로써 1base(1주차)로 시작함
+        return Math.max(1,weeks + 1);
+    }
+
+    public static List<LocalDate> datesByDays(LocalDate start, LocalDate end, Set<DayOfWeek> days){
+        List<LocalDate> out = new ArrayList<>(); // 결과 날짜들을 담을 리스트 생성
+
+        for(DayOfWeek dow : days){ // 요청한 각 요일에 대해 반복
+            LocalDate first = start.with( // 시작일 이상에서
+                    TemporalAdjusters.nextOrSame(dow)); // 해당 요일의 첫번째 날짜를 계산
+            for (LocalDate d = first; // 첫번째 날짜가 d면서,
+                 !d.isAfter(end); // 종료일을 초과하지 않으면서,
+                 d = d.plusWeeks(1)){ // 1주(7일)씩 증가하여 매주 같은 요일로 증가
+                out.add(d); // 해당 날짜를 결과 리스트에 담기
+            }
+        }
+        out.sort(Comparator.naturalOrder()); // 요일별로 모은 리스트를 전체 오름차순으로 정렬
+        return out; // 최종리스트 반환
+
+
+
+
+
+
+
     @Transactional
     public void updateLecture(LectureDto lectureDto, List<LectureScheduleDto> lectureScheduleDtos, List<MultipartFile> files, PercentDto percent) {
 
@@ -731,5 +839,10 @@ public class LectureService {
             }
         }
     }
+    }
+    }
 
-}
+
+
+
+
