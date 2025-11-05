@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.service;
 
+import com.secondproject.secondproject.dto.DownloadFile;
 import com.secondproject.secondproject.entity.Attachment;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.publicMethod.DownloadForProject;
