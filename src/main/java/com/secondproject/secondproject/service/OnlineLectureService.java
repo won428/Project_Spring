@@ -1,6 +1,7 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.dto.OnlineLectureDto;
+import com.secondproject.secondproject.dto.OnlineLectureResDto;
 import com.secondproject.secondproject.entity.Attachment;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.Mapping.BoardAttach;
@@ -13,6 +14,10 @@ import com.secondproject.secondproject.repository.OnlineLectureRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -62,6 +67,30 @@ public class OnlineLectureService {
             onlineLectureAttachRepository.save(boardAttach);
         }
 
+
+    }
+
+    public Page<OnlineLectureDto> getPage(Long id, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by((Sort.Direction.DESC), "endDate"));
+        Page<OnlineLecture> lectures = onlineLectureRepository.findByLectureId(id, pageable);
+        return lectures.map(OnlineLectureDto::fromEntity);
+
+
+    }
+
+    public OnlineLectureResDto findById(Long id) {
+        OnlineLecture onlineLecture = onlineLectureRepository
+                .findById(id).orElseThrow(() -> new EntityNotFoundException("없음"));
+
+
+        List<OnlineLectureAttach> onlineLectureAttaches = onlineLectureAttachRepository.findByOnlineLecture(onlineLecture);
+
+
+        List<Attachment> attachments = onlineLectureAttaches.stream()
+                .map(OnlineLectureAttach::getAttachment)
+                .toList();
+
+        return OnlineLectureResDto.fromEntity(onlineLecture, attachments);
 
     }
 }

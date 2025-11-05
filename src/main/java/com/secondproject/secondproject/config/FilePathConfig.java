@@ -20,8 +20,6 @@ public class FilePathConfig implements WebMvcConfigurer {
                 .addResourceHandler("/media/**")
                 .addResourceLocations(uploadDir);
 
-        registry.addResourceHandler("/vid/**")
-                .addResourceLocations(vidDir);
     }
 
 }
