@@ -17,7 +17,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class CreditAppealDto {
 
-    private Long lectureId;
+    private Long lectureId;       //
     private Long sendingId;       // 보내는 유저 ID (학생)
     private Long receiverId;      // 받는 유저 ID (교수)
     private String title;           // 이의제기 제목

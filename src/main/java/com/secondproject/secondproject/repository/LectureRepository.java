@@ -23,4 +23,6 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
          )
         """)
     List<Lecture> findAllNotRegisteredByUser(@Param("userId") Long userId);
+
+
 }

@@ -30,6 +30,21 @@ public class CreditAppealService {
 
     }
 
+    public List<AppealListDto> getAppealsByStudentId(Long studentId) {
+        List<Appeal> appeals = appealRepository.findBySendingId(studentId); // ✅ 인스턴스로 호출
+
+        return appeals.stream()
+                .map(a -> new AppealListDto(
+                        a.getId(),
+                        a.getEnrollment().getLecture().getName(), // 강의명
+                        a.getTitle(),
+                        a.getContent(),
+                        a.getAppealDate(),
+                        a.getStatus()
+                ))
+                .toList();
+    }
+
     @Transactional(readOnly = true)
     public List<EnrollmentInfoDto> findEnrollmentsByUserId(Long userId) {
         List<Enrollment> enrollments = enrollmentRepository.findByUser_Id(userId);

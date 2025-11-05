@@ -1,6 +1,7 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.Status;
+import com.secondproject.secondproject.dto.LectureBasicInfoDto;
 import com.secondproject.secondproject.dto.LectureDto;
 import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.repository.*;
@@ -332,5 +333,15 @@ public class LectureService {
             this.lectureRepository.save(lecture);
         }
 
+    }
+
+    public LectureBasicInfoDto getLectureBasicInfo(Long lectureId) {
+        return lectureRepository.findById(lectureId)
+                .map(lecture -> new LectureBasicInfoDto(
+                        lecture.getName(),
+                        lecture.getUser().getId(),
+                        lecture.getUser().getName()
+                ))
+                .orElseThrow(() -> new RuntimeException("강의를 찾을 수 없습니다."));
     }
 }

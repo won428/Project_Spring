@@ -2,11 +2,7 @@ package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.Gender;
 import com.secondproject.secondproject.Enum.UserType;
-import com.secondproject.secondproject.dto.UserDto;
-import com.secondproject.secondproject.dto.UserListDto;
-import com.secondproject.secondproject.dto.UserStBatchDto;
-import com.secondproject.secondproject.dto.UserListSearchDto;
-import com.secondproject.secondproject.dto.UserUpdateDto;
+import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.repository.*;
@@ -607,5 +603,12 @@ public class UserService {
     // email 소문자로 변환
     private String normalizeEmail(String s) {
         return s == null ? null : s.trim().toLowerCase();
+    }
+
+    // 교수 이름 가져오기
+    public UserNameDto getUserNameById(Long id) {
+        return userRepository.findById(id)
+                .map(user -> new UserNameDto(user.getId(), user.getName()))
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
     }
 }

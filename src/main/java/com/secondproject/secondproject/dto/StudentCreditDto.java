@@ -21,7 +21,7 @@ public class StudentCreditDto {
     // Grade 사항
     private Long id; // 개별 성적 id
 
-    private Long userId; // 교수 id
+    private Long userId; // 학생 id
 
     private Long lectureId;
 

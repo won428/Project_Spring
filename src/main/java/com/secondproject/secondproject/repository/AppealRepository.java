@@ -10,4 +10,5 @@ import java.util.List;
 public interface AppealRepository extends JpaRepository<Appeal, Long> {
 
 
+    List<Appeal> findBySendingId(Long sendingId);
 }
