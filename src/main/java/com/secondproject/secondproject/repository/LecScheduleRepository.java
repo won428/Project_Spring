@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface LecScheduleRepository extends JpaRepository<LectureSchedule, Long> {
     List<LectureSchedule> findAllByLecture_Id(Long id);
+
+    void deleteAllByLecture_Id(Long id);
 }

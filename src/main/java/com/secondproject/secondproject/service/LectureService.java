@@ -1,15 +1,13 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.Status;
-import com.secondproject.secondproject.dto.AttachmentDto;
-import com.secondproject.secondproject.dto.LectureDto;
-import com.secondproject.secondproject.dto.LectureScheduleDto;
-import com.secondproject.secondproject.dto.PercentDto;
+import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.entity.Mapping.LecRegAttach;
 import com.secondproject.secondproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,6 +27,9 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class LectureService {
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
     private final LectureRepository lectureRepository;
     private final UserRepository userRepository;
     private final MajorRepository majorRepository;
@@ -375,6 +377,8 @@ public class LectureService {
     public LectureDto findByID(Long id) {
         Lecture lecture = this.lectureRepository.findById(id) // 해당 강의 객체
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
+        Major major = this.majorRepository.findById(lecture.getMajor().getId())
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"존재하지 않는 학과입니다.")); // 소속 단과대학 & 학과 얻기위한 객체
 
         LectureDto lectureDto = new LectureDto(); // 스프링으로 보낼 강의 dto객체
         Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED); // 해당 강의 현재 수강신청인원
@@ -405,10 +409,18 @@ public class LectureService {
             }
         }
 
+        GradingWeights gradingWeights = this.gradingWeightsRepository.findByLecture_Id(lecture.getId());
+        GradingWeightsDto weightsDto = new GradingWeightsDto();
+        weightsDto.setAssignment(gradingWeights.getAssignmentScore());
+        weightsDto.setFinalExam(gradingWeights.getFinalExam());
+        weightsDto.setMidtermExam(gradingWeights.getMidtermExam());
+        weightsDto.setAttendance(gradingWeights.getAttendanceScore());
+
 
         for(LectureSchedule schedule : lectureSchedules){
             LectureScheduleDto scheduleDto = new LectureScheduleDto();
 
+            scheduleDto.setId(schedule.getId());
             scheduleDto.setLecture(schedule.getLecture().getId());
             scheduleDto.setDay(schedule.getDay());
             scheduleDto.setStartTime(schedule.getStartTime());
@@ -425,6 +437,17 @@ public class LectureService {
         lectureDto.setLectureSchedules(lectureScheduleDtoList);
         lectureDto.setDescription(lecture.getDescription());
         lectureDto.setAttachmentDtos(attachmentDtoList);
+        lectureDto.setCredit(lecture.getCredit());
+        lectureDto.setCollege(major.getCollege().getId());
+        lectureDto.setCompletionDiv(lecture.getCompletionDiv());
+        lectureDto.setId(lecture.getId());
+        lectureDto.setStartDate(lecture.getStartDate());
+        lectureDto.setEndDate(lecture.getEndDate());
+        lectureDto.setMajor(major.getId());
+        lectureDto.setLevel(lecture.getLevel());
+        lectureDto.setStatus(lecture.getStatus());
+        lectureDto.setUser(lecture.getUser().getId());
+        lectureDto.setWeightsDto(weightsDto);
 
         return lectureDto;
     }
@@ -557,4 +580,156 @@ public class LectureService {
         }
 
     }
+
+    @Transactional
+    public void updateLecture(LectureDto lectureDto, List<LectureScheduleDto> lectureScheduleDtos, List<MultipartFile> files, PercentDto percent) {
+
+        if(lectureDto.getMajor() == null){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"소속 대학과 학과를 선택해주세요");
+        }
+        if(lectureDto.getStartDate() == null || lectureDto.getEndDate() == null){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "강의 날짜를 선택해주세요");
+        }
+
+        LocalDate start = lectureDto.getStartDate();
+        LocalDate end   = lectureDto.getEndDate();
+        LocalDate today = LocalDate.now();
+
+        if(!start.isAfter(today)){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"오늘 이후의 강의만 등록할 수 있습니다.");
+        }
+
+        if (end.isBefore(start)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "종료일이 시작일보다 빠릅니다.");
+        }
+
+        LocalDate minEnd = start.plusMonths(2);
+        if (end.isBefore(minEnd)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "강의 기간은 최소 2개월이어야 합니다. (가능한 최소 종료일: " + minEnd + ")"
+            );
+        }
+        if(lectureScheduleDtos == null || lectureScheduleDtos.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"수업 일정을 하루 이상 선택해주세요.");
+        }
+
+        if(lectureDto.getUser() == null){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"담당 교수를 선택해주세요.");
+        }
+        if(lectureDto.getCredit() == 0){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"이수 학점은 1점 이상이여야 합니다.");
+        }
+        if(lectureDto.getName().isBlank() || lectureDto.getName() == null){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"강의명을 입력해주세요.");
+        }
+        if(lectureDto.getLevel() == 0){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"학년을 선택해주세요.");
+        }
+        if(lectureDto.getTotalStudent() < 10){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"수강인원은 10명 이상이여야 합니다.");
+        }
+
+        BigDecimal totalPercent = percent.getAssignment()
+                .add(percent.getAttendance())
+                .add(percent.getMidtermExam())
+                .add(percent.getFinalExam());
+        BigDecimal overPercent = new BigDecimal("100.00");
+        if (totalPercent.compareTo(overPercent) > 0){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"비율은 100을 넘을 수 없습니다.");
+        }
+
+        for(LectureScheduleDto lectureScheduleDto : lectureScheduleDtos){
+            if(lectureScheduleDto.getDay() == null || lectureScheduleDto.getStartTime() == null || lectureScheduleDto.getEndTime() == null){
+                throw new ResponseStatusException(HttpStatus.CONFLICT,"수업 요일과 교시를 모두 선택해주세요.");
+            }
+        }
+
+        Lecture lecture = this.lectureRepository.findById(lectureDto.getId())
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 강의 입니다."));
+
+
+        List<LecRegAttach> lecRegAttachList = this.lecRegAttachRepository.findByLecture_id(lecture.getId());
+
+
+        if(!lecRegAttachList.isEmpty() || lecRegAttachList != null){
+            for(LecRegAttach lecRegAttach : lecRegAttachList){
+                Long attachId = lecRegAttach.getAttachment().getId();
+                Attachment attachment = this.attachmentRepository.findById(attachId)
+                        .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"존재하지 않는 파일입니다."));
+
+                Path base = Path.of(uploadDir).toAbsolutePath().normalize();
+                Path file = base.resolve(attachment.getStoredKey()).normalize();
+
+                // 경로 탈출(../ 등) 방지
+                if (!file.startsWith(base)) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "허용되지 않은 경로 요청");
+                }
+                this.attachmentService.deleteFile(file);
+
+                this.lecRegAttachRepository.deleteById(lecRegAttach.getId());
+                this.attachmentRepository.deleteById(attachId);
+
+
+            }
+        }
+
+        this.lecScheduleRepository.deleteAllByLecture_Id(lecture.getId());
+
+        for(LectureScheduleDto scheduleDto : lectureScheduleDtos){
+            LectureSchedule lectureSchedule = new LectureSchedule();
+            lectureSchedule.setLecture(lecture);
+            lectureSchedule.setDay(scheduleDto.getDay());
+            lectureSchedule.setStartTime(scheduleDto.getStartTime());
+            lectureSchedule.setEndTime(scheduleDto.getEndTime());
+
+            this.lecScheduleRepository.save(lectureSchedule);
+        }
+
+        Major major = this.majorRepository.findById(lectureDto.getMajor())
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 학과 입니다."));
+        User user = this.userRepository.findById(lectureDto.getUser())
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 교수 입니다."));
+
+        lecture.setDescription((lectureDto.getDescription()));
+        lecture.setMajor(major);
+        lecture.setStatus(lectureDto.getStatus());
+        lecture.setUser(user);
+        lecture.setLevel(lectureDto.getLevel());
+        lecture.setCompletionDiv(lectureDto.getCompletionDiv());
+        lecture.setTotalStudent(lectureDto.getTotalStudent());
+        lecture.setStartDate(lectureDto.getStartDate());
+        lecture.setEndDate(lectureDto.getEndDate());
+        lecture.setName(lectureDto.getName());
+        lecture.setCredit(lectureDto.getCredit());
+
+        Lecture saveLecture = this.lectureRepository.save(lecture);
+
+        GradingWeights gradingWeights = this.gradingWeightsRepository.findByLecture_Id(saveLecture.getId());
+
+        gradingWeights.setAttendanceScore(percent.getAttendance());
+        gradingWeights.setAssignmentScore(percent.getAssignment());
+        gradingWeights.setMidtermExam(percent.getMidtermExam());
+        gradingWeights.setFinalExam(percent.getFinalExam());
+
+        this.gradingWeightsRepository.save(gradingWeights);
+
+        if(files != null && !files.isEmpty()){
+            for (MultipartFile file : files){
+                try {
+                    Attachment attachment = attachmentService.save(file,user);
+
+                    LecRegAttach lecRegAttach = new LecRegAttach();
+                    lecRegAttach.setAttachment(attachment);
+                    lecRegAttach.setLecture(saveLecture);
+
+                    this.lecRegAttachRepository.save(lecRegAttach);
+
+                }catch (IOException ex){
+                    throw new UncheckedIOException("파일 저장 실패", ex);
+                }
+            }
+        }
+    }
+
 }
