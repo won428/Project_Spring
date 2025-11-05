@@ -1,19 +1,22 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.repository.LectureRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import com.secondproject.secondproject.Enum.Status;
-import com.secondproject.secondproject.dto.LectureDto;
-import com.secondproject.secondproject.dto.UserDto;
+import com.secondproject.secondproject.service.AttachmentService;
 import com.secondproject.secondproject.service.LectureService;
 import com.secondproject.secondproject.service.MajorService;
 import com.secondproject.secondproject.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -34,18 +38,49 @@ public class LectureController {
     private final MajorService majorService;
     private final LectureService lectureService;
     private final UserService userService;
-    private final UserRepository userRepository;
-    private final LectureRepository lectureRepository;
+    private final AttachmentService attachmentService;
 
     // 수강신청 관련해서 나중에 수강신청 컨트롤러로 이식할게요.
 
-    // 관리자용 강의 등록
-    @PostMapping("/admin/lectureRegister")
-    public ResponseEntity<?> lectureRegisterByAdmin(@RequestBody LectureDto lectureDto) {
+    //단일 강의정보
+    @GetMapping("/info")
+    public LectureDto getLectureInfo(@RequestParam Long modalId){
+        LectureDto lectureDto = this.lectureService.findByID(modalId);
 
-        this.lectureService.insertByAdmin(lectureDto);
+        return lectureDto;
+    }
 
-        return ResponseEntity.ok(200);
+    // 강의 등록
+    @PostMapping("/lectureRegister")
+    public ResponseEntity<?> lectureRegisterByAdmin(
+            @RequestPart LectureDto lecture,
+            @RequestPart List<LectureScheduleDto> schedule,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            @RequestPart PercentDto percent
+    ) {
+
+        try {
+            this.lectureService.insertByAdmin(lecture, schedule, files, percent);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (ResponseStatusException ex) {
+            try {
+
+                int status = ex.getStatusCode().value();
+                String error = HttpStatus.valueOf(status).name();
+
+                Map<String, Object> body = Map.of(
+                        "status", status,
+                        "error", error,
+                        "message", ex.getReason(),
+                        "timestamp", java.time.OffsetDateTime.now().toString()
+                );
+
+                return ResponseEntity.status(ex.getStatusCode()).body(body);
+            } catch (Exception otherEx) {
+                return ResponseEntity.status(500).body("알수없는 오류");
+            }
+        }
+
     }
 
     // 강의 목록
@@ -254,5 +289,9 @@ public class LectureController {
             }
         }
     }
+
+
+
+
 
 }

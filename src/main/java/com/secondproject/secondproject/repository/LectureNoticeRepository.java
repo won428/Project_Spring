@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.repository;
 
+import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.LectureNotice;
 import com.secondproject.secondproject.entity.OnlineLecture;
 import com.secondproject.secondproject.entity.User;
@@ -14,5 +15,6 @@ public interface LectureNoticeRepository extends JpaRepository<LectureNotice, Lo
 
     Page<LectureNotice> findByUser(User user, Pageable pageable);
 
-    Page<LectureNotice> findByOnlineLecture(OnlineLecture onlineLecture, Pageable pageable);
+
+    Page<LectureNotice> findByLecture(Lecture lecture, Pageable pageable);
 }

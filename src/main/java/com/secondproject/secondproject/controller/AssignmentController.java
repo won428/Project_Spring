@@ -81,9 +81,10 @@ public class AssignmentController {
     public ResponseEntity<?> AssignUpdate(
             @PathVariable Long assignId,
             @ModelAttribute AssignSubmitInsertDto assignSubmitInsertDto,
-            @RequestPart(value = "files", required = false) List<MultipartFile> files) throws IOException {
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            @RequestParam(value = "existingFileKeys", required = false) List<String> existingFileKeys) throws IOException {
         try {
-            submitAsgmtService.assignmentUpdate(assignSubmitInsertDto, files);
+            submitAsgmtService.assignmentUpdate(assignId, assignSubmitInsertDto, files, existingFileKeys);
             return ResponseEntity.ok().build();
 
         } catch (Exception e) {
@@ -97,9 +98,10 @@ public class AssignmentController {
     public ResponseEntity<?> AssignNoticeUpdate(
             @PathVariable Long assignId,
             @ModelAttribute AssignSubmitInsertDto assignSubmitInsertDto,
-            @RequestPart(value = "files", required = false) List<MultipartFile> files) throws IOException {
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            @RequestParam(value = "existingFileKeys", required = false) List<String> existingFileKeys) throws IOException {
         try {
-            assignmentService.updateAssignment(assignId, assignSubmitInsertDto, files);
+            assignmentService.updateAssignment(assignId, assignSubmitInsertDto, files, existingFileKeys);
 
             return ResponseEntity.ok().build();
 

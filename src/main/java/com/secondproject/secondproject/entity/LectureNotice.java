@@ -12,12 +12,12 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "lecNotice")
+@Table(name = "lec_notice")
 public class LectureNotice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "lecNotice_id")
+    @Column(name = "lec_notice_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
@@ -37,8 +37,8 @@ public class LectureNotice {
     private LocalDateTime lnUpdateAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ol_id")
-    private OnlineLecture onlineLecture;
+    @JoinColumn(name = "lecture_id")
+    private Lecture lecture;
 
 
     @PrePersist

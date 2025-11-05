@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,9 +63,9 @@ public class LectueInsert extends AbstractTestNGSpringContextTests {
         for (Lecture lec : lecture) {
             OnlineLecture onlineLecture = new OnlineLecture();
             onlineLecture.setLecture(lec);
-            onlineLecture.setName(lec.getName());
+            onlineLecture.setTitle(lec.getName());
             onlineLecture.setDisable(true);
-            onlineLecture.setUpdatedDate(LocalDate.now());
+            onlineLecture.setUpdatedDate(LocalDateTime.now());
             onlineLecture.setPath("....");
             onlineLectureRepository.save(onlineLecture);
         }
