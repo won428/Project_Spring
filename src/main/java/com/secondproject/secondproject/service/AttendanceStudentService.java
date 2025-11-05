@@ -13,6 +13,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AttendanceStudentService {
@@ -36,12 +38,24 @@ public class AttendanceStudentService {
                 .map(r -> r.getUserId())
                 .distinct()
                 .toList();
+        log.info("POST /lecture/{}/insertAttendances userIds={}", id, userIds);
 
         // 해당 강의에서 수강엔터티만 뽑아온 것(userId -> Enrollment로 매핑)
         List<Enrollment> enrollmentIds = enrollmentRepository.findByLecture_IdAndUser_IdIn(id, userIds);
 
         Map<Long, Enrollment> byUserId = enrollmentIds.stream()
                 .collect(Collectors.toMap(enrollment -> enrollment.getUser().getId(), Function.identity()));
+
+        List<Long> missing = userIds.stream()
+                .filter(uid -> !byUserId.containsKey(uid))
+                .toList();
+        log.info("enrollmentsFound={} missing={}", enrollmentIds.size(), missing);
+
+        if (!missing.isEmpty()) {
+            // ✅ 어떤 userId가 문제인지 바로 확인 가능
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "수강(enrollment) 없음: " + missing);
+        }
 
         // requestDtos 사이즈의 List 생성
         List<AttendanceResponseDto> responseDtoList = new ArrayList<>(requestDtos.size());

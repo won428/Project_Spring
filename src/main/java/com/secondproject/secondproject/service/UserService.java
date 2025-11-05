@@ -225,7 +225,7 @@ public class UserService {
                     .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 유저"));
             UserDto userDto = new UserDto();
 
-            userDto.setUserId(user.getId());
+            userDto.setId(user.getId());
             userDto.setUserCode(user.getUserCode());
             userDto.setName(user.getName());
             userDto.setMajorName(user.getMajor().getName());
@@ -608,5 +608,23 @@ public class UserService {
     // email 소문자로 변환
     private String normalizeEmail(String s) {
         return s == null ? null : s.trim().toLowerCase();
+    }
+
+    public List<UserDto> findEnrolledUserLectureDetail(Long lectureId) {
+        List<Enrollment> enrollments = enrollmentRepository.findByLecture_Id(lectureId);
+        return enrollments.stream()
+                .map(Enrollment::getUser)
+                .map(u -> {
+                    UserDto dto = new UserDto();
+
+                    dto.setId(u.getId());
+                    dto.setUserCode(u.getUserCode());
+                    dto.setMajorName(u.getMajor().getName());
+                    dto.setName(u.getName());
+                    dto.setEmail(u.getEmail());
+                    dto.setPhone(u.getPhone());
+                    return dto;
+                })
+                .toList();
     }
 }

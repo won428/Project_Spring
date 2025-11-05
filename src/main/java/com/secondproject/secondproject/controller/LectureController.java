@@ -9,14 +9,13 @@ import com.secondproject.secondproject.repository.UserRepository;
 import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.dto.LectureDto;
 import com.secondproject.secondproject.dto.UserDto;
-import com.secondproject.secondproject.service.AttendanceStudentService;
-import com.secondproject.secondproject.service.LectureService;
-import com.secondproject.secondproject.service.MajorService;
-import com.secondproject.secondproject.service.UserService;
+import com.secondproject.secondproject.service.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -37,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@Slf4j
 @RestController
 @RequestMapping("/lecture")
 @RequiredArgsConstructor
@@ -44,7 +44,7 @@ public class LectureController {
     private final MajorService majorService;
     private final LectureService lectureService;
     private final UserService userService;
-    private final AttachmentService attachmentService;
+    private final AttendanceStudentService attendanceStudentService;
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
     private final LecScheduleRepository lecScheduleRepository;
@@ -194,6 +194,13 @@ public class LectureController {
         return lectureDto;
     }
 
+    @GetMapping("/detailLecture/{id}")
+    public LectureDto lectureDetail(@PathVariable Long id) {
+        LectureDto lectureDto = lectureService.findBylectureID(id);
+
+        return lectureDto;
+    }
+
     // 강의 상세정보 학생 목록
     @GetMapping("/detail/studentList/{id}")
     public List<UserDto> detailStudentList(@PathVariable Long id) {
@@ -235,20 +242,30 @@ public class LectureController {
         return ResponseEntity.ok(lectureService.getSchedule(id));
     }
 
+    // 강의 상세정보 '수강 중인' 학생 목록 (Enrollment 기준)
+    @GetMapping("/detail/enrolledStudentList/{id}")
+    public List<UserDto> detailEnrolledStudentList(@PathVariable Long id) {
+        return this.userService.findEnrolledUserLectureDetail(id);
+    }
+
     // 해당 강의 수강중인 학생리스트 출결 등록
     @PostMapping("/{id}/insertAttendances")
     public ResponseEntity<List<AttendanceResponseDto>> insertAttendances(
             @PathVariable Long id,
             @RequestBody List<AttendanceRequestDto> requestDtos){
-List<AttendanceResponseDto> responseDtos = attachmentService.insertAttendances(id, requestDtos);
+
+        log.info(">>> HIT insertAttendances id={}, bodySize={}", id, (requestDtos==null?0:requestDtos.size()));
+
+List<AttendanceResponseDto> responseDtos = attendanceStudentService.insertAttendances(id, requestDtos);
 
         return ResponseEntity.ok(responseDtos);
     }
 
     // 학생 출결 저장 후 라디오 영구 비활성화를 위한 메소드
     @GetMapping("/{id}/attendance/finalized")
-    public ResponseEntity<Map<String, Object>> isFinalized(@PathVariable Long id, LocalDate sessionDate){
-        boolean finalized = attachmentService.isFinalizedAny(id, sessionDate);
+    public ResponseEntity<Map<String, Object>> isFinalized(@PathVariable Long id, @RequestParam("date") @org.springframework.format.annotation.DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    LocalDate sessionDate){
+        boolean finalized = attendanceStudentService.isFinalizedAny(id, sessionDate);
         return ResponseEntity.ok().body(Map.of("finalized", finalized));
     }
 

@@ -210,10 +210,10 @@ public class LectureService {
         Lecture lecture = lectureOpt
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, id + " 해당 강의가 존재하지 않습니다."));
-        if(status.equals(Status.INPROGRESS)){
+        if (status.equals(Status.INPROGRESS)) {
             List<CourseRegistration> courseRegistrationList = this.courseRegRepository.findAllByLecture_IdAndStatus(id, Status.SUBMITTED);
-            if(courseRegistrationList == null || courseRegistrationList.isEmpty()){
-                throw new ResponseStatusException(HttpStatus.CONFLICT,"신청 인원이 없습니다.");
+            if (courseRegistrationList == null || courseRegistrationList.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "신청 인원이 없습니다.");
             }
 
             lecture.setStatus(status);
@@ -230,7 +230,6 @@ public class LectureService {
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."));
 
 
-
                 Grade grade = new Grade();
                 grade.setLecture(lecture);
                 grade.setUser(user);
@@ -245,22 +244,23 @@ public class LectureService {
 
                 this.enrollmentRepository.save(enrollment);
             }
-        }else if(status.equals(Status.COMPLETED)){
+        } else if (status.equals(Status.COMPLETED)) {
             List<Grade> gradeList = this.gradeRepository.findAllByLecture_Id(id);
-            if(gradeList.isEmpty() || gradeList == null){
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND,"점수 정보가 없는 강의는 종강 할 수 없습니다.");
+            if (gradeList.isEmpty() || gradeList == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "점수 정보가 없는 강의는 종강 할 수 없습니다.");
             }
-            for(Grade grade : gradeList){
-                if(grade.getLectureGrade() == null || grade.getAScore() == null || grade.getAsScore() == null || grade.getFtScore() == null || grade.getTScore() == null){
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"아직 점수가 전부 입력되지 않은 강의는 종강 할 수 없습니다.");
+            for (Grade grade : gradeList) {
+                if (grade.getLectureGrade() == null || grade.getAScore() == null || grade.getAsScore() == null || grade.getFtScore() == null || grade.getTScore() == null) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "아직 점수가 전부 입력되지 않은 강의는 종강 할 수 없습니다.");
                 }
             }
             lecture.setStatus(status);
             this.lectureRepository.save(lecture);
-        }else {
+        } else {
             lecture.setStatus(status);
             this.lectureRepository.save(lecture);
         }
+    }
 
     // 일괄 수강신청
     public void applyLecture(List<Long> idList, Long userId) {
@@ -552,6 +552,38 @@ public class LectureService {
             this.lectureRepository.save(lecture);
         }
 
+    }
+
+    /// ///////////////
+    public LectureDto findBylectureID(Long id) {
+        Lecture lecture = this.lectureRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
+        LectureDto lectureDto = new LectureDto();
+        Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
+        List<LectureSchedule> lectureSchedules = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
+        List<LectureScheduleDto> lectureScheduleDtoList = new ArrayList<>();
+
+        for(LectureSchedule schedule : lectureSchedules){
+            LectureScheduleDto scheduleDto = new LectureScheduleDto();
+
+            scheduleDto.setLecture(schedule.getLecture().getId());
+            scheduleDto.setDay(schedule.getDay());
+            scheduleDto.setStartTime(schedule.getStartTime());
+            scheduleDto.setEndTime(schedule.getEndTime());
+
+            lectureScheduleDtoList.add(scheduleDto);
+        }
+
+        lectureDto.setName(lecture.getName());
+        lectureDto.setMajorName(lecture.getMajor().getName());
+        lectureDto.setTotalStudent(lecture.getTotalStudent());
+        lectureDto.setUserName(lecture.getUser().getName());
+        lectureDto.setNowStudent(nowStudent);
+        lectureDto.setLectureSchedules(lectureScheduleDtoList);
+        lectureDto.setStartDate(lecture.getStartDate());
+        lectureDto.setEndDate(lecture.getEndDate());
+
+        return lectureDto;
     }
 
     public List<LectureScheduleDto> getSchedule(Long lectureId){

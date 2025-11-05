@@ -17,7 +17,7 @@ import java.time.LocalDate;
 public class AttendanceRequestDto {
 
     @NotNull
-    private long userId;
+    private Long userId;
 
     @NotNull
     private Long enrollmentId;

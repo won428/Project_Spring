@@ -3,6 +3,7 @@ package com.secondproject.secondproject.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.secondproject.secondproject.Enum.Gender;
 import com.secondproject.secondproject.Enum.UserType;
+import com.secondproject.secondproject.entity.User;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
@@ -53,6 +54,7 @@ public class UserDto {
     private String majorName;
     private String college;
     private Long userCode;
+
 
 
 }
