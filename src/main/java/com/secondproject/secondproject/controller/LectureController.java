@@ -3,6 +3,7 @@ package com.secondproject.secondproject.controller;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
+import com.secondproject.secondproject.entity.Appeal;
 import com.secondproject.secondproject.repository.LectureRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import com.secondproject.secondproject.Enum.Status;
@@ -290,8 +291,21 @@ public class LectureController {
         }
     }
 
+    // 출결 이의제기 (학생)
+    @PostMapping("/attendanceAppeal")
+    public ResponseEntity<String> submitAttendanceAppeal(
+            @ModelAttribute AttendanceAppealDto attendanceAppealDto
+    ) {
+        try {
+            // 서비스 호출: DTO를 엔티티로 변환 후 DB 저장
+            lectureService.submitAttendanceAppeal(attendanceAppealDto);
 
-
+            return ResponseEntity.ok("출결 이의제기 신청이 완료되었습니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("출결 이의제기 신청 중 오류가 발생했습니다.");
+        }
+    }
 
 
 }

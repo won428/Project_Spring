@@ -1,0 +1,20 @@
+package com.secondproject.secondproject.dto;
+
+import com.secondproject.secondproject.Enum.AppealType;
+import com.secondproject.secondproject.Enum.Status;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDate;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class AttendanceAppealDto extends CreditAppealDto {
+
+    private MultipartFile file;  // 증빙 파일 첨부
+}
