@@ -346,7 +346,7 @@ public class LectureService {
     }
 
     public List<LectureDto> myLectureList(Long userId) {
-        List<CourseRegistration> courseRegistrations = this.courseRegRepository.findByUser_Id(userId);
+        List<CourseRegistration> courseRegistrations = this.courseRegRepository.findByUser_IdAndLecture_Status(userId,Status.APPROVED);
         List<LectureDto> myLectureList = new ArrayList<>();
 
         for (CourseRegistration courseReg : courseRegistrations) {
