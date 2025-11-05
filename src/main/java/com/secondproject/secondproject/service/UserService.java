@@ -225,6 +225,7 @@ public class UserService {
                     .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 유저"));
             UserDto userDto = new UserDto();
 
+            userDto.setUserId(user.getId());
             userDto.setUserCode(user.getUserCode());
             userDto.setName(user.getName());
             userDto.setMajorName(user.getMajor().getName());

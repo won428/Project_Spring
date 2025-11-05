@@ -17,6 +17,8 @@ import java.time.LocalDate;
 @ToString
 public class UserDto {
 
+    private Long userId;
+
     @NotBlank(message = "이름은 필수 입력 사항입니다.")
     private String name; // 이름
     @Size(max = 255, message = "비밀번호는 255자 이하로 입력하세요.")
@@ -51,31 +53,6 @@ public class UserDto {
     private String majorName;
     private String college;
     private Long userCode;
-
-
-
-    public UserDto(String name, String password, LocalDate birthdate, String email, String phone, Gender gender, Long major, UserType type) {
-        this.name = name;
-        this.password = password;
-        this.birthdate = birthdate;
-        this.email = email;
-        this.phone = phone;
-        this.gender = gender;
-        this.major = major;
-        this.type = type;
-    }
-
-    public UserDto(String name, String password, LocalDate birthdate, String email, String phone, Gender gender, String college, Long major, UserType type) {
-        this.name = name;
-        this.password = password;
-        this.birthdate = birthdate;
-        this.email = email;
-        this.phone = phone;
-        this.gender = gender;
-        this.college = college;
-        this.major = major;
-        this.type = type;
-    }
 
     public UserDto() {
     }

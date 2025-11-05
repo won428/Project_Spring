@@ -9,6 +9,7 @@ import com.secondproject.secondproject.repository.UserRepository;
 import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.dto.LectureDto;
 import com.secondproject.secondproject.dto.UserDto;
+import com.secondproject.secondproject.service.AttendanceStudentService;
 import com.secondproject.secondproject.service.LectureService;
 import com.secondproject.secondproject.service.MajorService;
 import com.secondproject.secondproject.service.UserService;
@@ -43,6 +44,7 @@ public class LectureController {
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
     private final LecScheduleRepository lecScheduleRepository;
+    private final AttendanceStudentService attendanceStudentService;
 
     // 수강신청 관련해서 나중에 수강신청 컨트롤러로 이식할게요.
 
@@ -228,6 +230,23 @@ public class LectureController {
     @GetMapping("/{id}/schedule")
     public ResponseEntity<?> findById(@PathVariable Long id){
         return ResponseEntity.ok(lectureService.getSchedule(id));
+    }
+
+    // 해당 강의 수강중인 학생리스트 출결 등록
+    @PostMapping("/{id}/insertAttendances")
+    public ResponseEntity<List<AttendanceResponseDto>> insertAttendances(
+            @PathVariable Long id,
+            @RequestBody List<AttendanceRequestDto> requestDtos){
+List<AttendanceResponseDto> responseDtos = attendanceStudentService.insertAttendances(id, requestDtos);
+
+        return ResponseEntity.ok(responseDtos);
+    }
+
+    // 학생 출결 저장 후 라디오 영구 비활성화를 위한 메소드
+    @GetMapping("/{id}/attendance/finalized")
+    public ResponseEntity<Map<String, Object>> isFinalized(@PathVariable Long id, LocalDate sessionDate){
+        boolean finalized = attendanceStudentService.isFinalizedAny(id, sessionDate);
+        return ResponseEntity.ok().body(Map.of("finalized", finalized));
     }
 
     @GetMapping("/spec")

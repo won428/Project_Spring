@@ -1,16 +1,21 @@
 package com.secondproject.secondproject.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.secondproject.secondproject.Enum.AttendStudent;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
 
 @Getter @Setter @ToString
 @Entity
-@Table(name = "attendance_records")
+@Table(name = "attendance_records",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_attendance_enrollment_date",
+                columnNames = {"enrollment_id","attendance_date"}))
 public class Attendance_records {
 
     @Id
@@ -31,6 +36,7 @@ public class Attendance_records {
     private LocalDate attendanceDate; //출결일
 
     @Column(name = "attendance_status", nullable = false)
-    private String attendanceStatus; // 츨결상태
+    @Enumerated(EnumType.STRING)
+    private AttendStudent attendStudent = AttendStudent.PRESENT; // 츨결상태
     // 일단 String인데 ENUM으로 관리하실거면 수정 필요합니다.
 }
