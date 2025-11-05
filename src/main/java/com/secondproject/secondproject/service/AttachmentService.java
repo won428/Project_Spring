@@ -1,14 +1,18 @@
 package com.secondproject.secondproject.service;
 
+import com.secondproject.secondproject.dto.DownloadFile;
 import com.secondproject.secondproject.entity.Attachment;
 import com.secondproject.secondproject.entity.User;
+import com.secondproject.secondproject.publicMethod.DownloadForProject;
 import com.secondproject.secondproject.repository.AttachmentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -82,5 +86,14 @@ public class AttachmentService {
 
     public void deleteById(Long id) {
         attachmentRepository.deleteById(id);
+    }
+
+    // 파일 다운로드(매개변수 파일 id)
+    public DownloadFile downloadFile(Long id){
+        Attachment attachment = this.attachmentRepository.findById(id)
+                        .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        DownloadFile downloadFile = DownloadForProject.download(attachment, uploadDir);
+
+        return downloadFile;
     }
 }

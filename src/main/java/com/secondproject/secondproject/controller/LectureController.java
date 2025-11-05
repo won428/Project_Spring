@@ -6,13 +6,17 @@ import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.repository.LectureRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import com.secondproject.secondproject.Enum.Status;
+import com.secondproject.secondproject.service.AttachmentService;
 import com.secondproject.secondproject.service.LectureService;
 import com.secondproject.secondproject.service.MajorService;
 import com.secondproject.secondproject.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,8 +38,7 @@ public class LectureController {
     private final MajorService majorService;
     private final LectureService lectureService;
     private final UserService userService;
-    private final UserRepository userRepository;
-    private final LectureRepository lectureRepository;
+    private final AttachmentService attachmentService;
 
     // 수강신청 관련해서 나중에 수강신청 컨트롤러로 이식할게요.
 
@@ -286,6 +289,8 @@ public class LectureController {
             }
         }
     }
+
+
 
 
 
