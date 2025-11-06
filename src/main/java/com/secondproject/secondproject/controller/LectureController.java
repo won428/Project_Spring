@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.Enum.AppealType;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
@@ -7,10 +8,7 @@ import com.secondproject.secondproject.entity.Appeal;
 import com.secondproject.secondproject.repository.LectureRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import com.secondproject.secondproject.Enum.Status;
-import com.secondproject.secondproject.service.AttachmentService;
-import com.secondproject.secondproject.service.LectureService;
-import com.secondproject.secondproject.service.MajorService;
-import com.secondproject.secondproject.service.UserService;
+import com.secondproject.secondproject.service.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -29,8 +27,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/lecture")
@@ -40,6 +40,7 @@ public class LectureController {
     private final LectureService lectureService;
     private final UserService userService;
     private final AttachmentService attachmentService;
+    private final AttendanceAppealService attendanceAppealService;
 
     // 수강신청 관련해서 나중에 수강신청 컨트롤러로 이식할게요.
 
@@ -291,21 +292,37 @@ public class LectureController {
         }
     }
 
-    // 출결 이의제기 (학생)
-    @PostMapping("/attendanceAppeal")
-    public ResponseEntity<String> submitAttendanceAppeal(
-            @ModelAttribute AttendanceAppealDto attendanceAppealDto
-    ) {
-        try {
-            // 서비스 호출: DTO를 엔티티로 변환 후 DB 저장
-            lectureService.submitAttendanceAppeal(attendanceAppealDto);
-
-            return ResponseEntity.ok("출결 이의제기 신청이 완료되었습니다.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("출결 이의제기 신청 중 오류가 발생했습니다.");
-        }
+    // 1️⃣ 학생 수강 강의 조회
+    @GetMapping("/enrollments")
+    public ResponseEntity<List<EnrollmentInfoDto>> getEnrollments(@RequestParam Long userId) {
+        List<EnrollmentInfoDto> enrollments = attendanceAppealService.findEnrollmentsByUserId(userId);
+        return ResponseEntity.ok(enrollments);
     }
 
+    // 2️⃣ 특정 강의 담당 교수 정보 조회
+    @GetMapping("/{lectureId}")
+    public ResponseEntity<LectureBasicInfoDto> getProfessorByLecture(@PathVariable Long lectureId) {
+        LectureBasicInfoDto professor = attendanceAppealService.findProfessorByLectureId(lectureId);
+        return ResponseEntity.ok(professor);
+    }
 
+    // 3️⃣ 출결 이의제기 제출 (첨부파일 포함)
+    @PostMapping("/attendanceAppeal")
+    public ResponseEntity<String> submitAttendanceAppeal(
+            AttendanceAppealDto dto,
+            @RequestParam(required = false) MultipartFile file) {
+
+        String attendanceDetail = dto.getAttendanceDetail();
+
+        if (attendanceDetail != null && !attendanceDetail.isEmpty()) {
+            dto.setContent("[" + attendanceDetail + "] " + dto.getContent());
+        }
+
+        dto.setStatus(Status.PENDING);
+        dto.setAppealDate(LocalDate.now());
+
+        attendanceAppealService.createAppealWithFile(dto, file);
+
+        return ResponseEntity.ok("출결 이의제기 신청이 완료되었습니다.");
+    }
 }

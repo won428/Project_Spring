@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
@@ -24,5 +25,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     boolean existsByUserAndLecture(User user, Lecture lecture);
 
     Enrollment findByUserIdAndLectureId(Long userId, Long lectureId);
+
+    ;
+
 }
 

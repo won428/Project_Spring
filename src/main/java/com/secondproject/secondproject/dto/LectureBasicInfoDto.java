@@ -12,7 +12,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LectureBasicInfoDto {
+    private Long lectureId;
     private String lecName;   // 강의명
     private Long userId;      // 교수 id
     private String userName;  // 교수 이름
+    
 }

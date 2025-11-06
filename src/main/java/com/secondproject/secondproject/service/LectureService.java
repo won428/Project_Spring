@@ -566,6 +566,7 @@ public class LectureService {
     public LectureBasicInfoDto getLectureBasicInfo(Long lectureId) {
         return lectureRepository.findById(lectureId)
                 .map(lecture -> new LectureBasicInfoDto(
+                        lecture.getId(),
                         lecture.getName(),
                         lecture.getUser().getId(),
                         lecture.getUser().getName()
@@ -573,37 +574,5 @@ public class LectureService {
                 .orElseThrow(() -> new RuntimeException("강의를 찾을 수 없습니다."));
     }
 
-    // 출결 이의신청
-    public void submitAttendanceAppeal(AttendanceAppealDto dto) throws IOException {
 
-        Appeal appeal = new Appeal();
-        appeal.setLectureId(dto.getLectureId());
-        appeal.setSendingId(dto.getSendingId());
-        appeal.setReceiverId(dto.getReceiverId());
-        appeal.setTitle(dto.getTitle());
-        appeal.setContent(dto.getContent());
-        appeal.setAppealType(dto.getAppealType());
-        appeal.setStatus(Status.PENDING);
-        appeal.setAppealDate(LocalDate.now());
-
-        // 파일 저장
-        MultipartFile file = dto.getFile();
-        if (file != null && !file.isEmpty()) {
-            String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
-            String savedFilename = UUID.randomUUID() + "_" + originalFilename;
-
-            // 저장 경로 지정 (예: 프로젝트 내 uploads 폴더)
-            String uploadDir = "uploads/";
-            File uploadFile = new File(uploadDir);
-            if (!uploadFile.exists()) uploadFile.mkdirs();
-
-            file.transferTo(new File(uploadDir + savedFilename));
-
-            // 엔티티에 파일명 저장
-            appeal.setFilePath(savedFilename);
-        }
-
-        // DB 저장
-        appealRepository.save(appeal);
-    }
 }

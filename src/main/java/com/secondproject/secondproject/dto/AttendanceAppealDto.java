@@ -16,5 +16,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class AttendanceAppealDto extends CreditAppealDto {
 
-    private MultipartFile file;  // 증빙 파일 첨부
+
+    private String attendanceDetail; // 프론트 세부선택지 저장용
 }

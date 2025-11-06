@@ -11,4 +11,5 @@ public interface AppealRepository extends JpaRepository<Appeal, Long> {
 
 
     List<Appeal> findBySendingId(Long sendingId);
+    List<Appeal> findByEnrollment_Lecture_Id(Long lectureId);
 }
