@@ -35,6 +35,7 @@ public class StudentInfoDto {
     // 예) 전공명 majorName; 필요시 추가
 
     // 학적 정보 (StatusRecords 필드)
+    private Long statusId;
     private Student_status student_status;
     private LocalDate admissionDate;
     private LocalDate leaveDate;
@@ -42,25 +43,44 @@ public class StudentInfoDto {
     private LocalDate graduationDate;
     private LocalDate retentionDate;
     private LocalDate expelledDate;
+    private int majorCredit;
+    private int generalCredit;
+    private int totalCredit;
+    private double currentCredit;
+    private String studentImage;
 
     public StudentInfoDto(User user, StatusRecords statusRecord) {
-        this.u_name = user.getName();
-        this.birthdate = user.getBirthDate();
-        this.email = user.getEmail();
-        this.college = user.getMajor().getCollege().getType();
-        this.major = user.getMajor();
-        this.gender = user.getGender();
-        this.usercode = user.getUserCode();
 
+            if(user != null) {
+                // User 기반 필드 세팅
+                this.id = user.getId();
+                this.userCode = user.getUserCode();
+                this.name = user.getName();
+                this.email = user.getEmail();
+                this.password = user.getPassword();
+                this.gender = user.getGender();
+                this.birthDate = user.getBirthDate();
+                this.phone = user.getPhone();
+                this.major = user.getMajor() != null ? user.getMajor().getName() : null;
+                this.type = user.getType();
+            }
 
-        this.admissionDate = statusRecord.getAdmissionDate();
-        this.student_status = statusRecord.getStudentStatus();
-        this.admissionDate = statusRecord.getAdmissionDate();
-        this.leaveDate = statusRecord.getLeaveDate();
-        this.returnDate = statusRecord.getReturnDate();
-        this.graduationDate = statusRecord.getGraduationDate();
-        this.retentionDate = statusRecord.getRetentionDate();
-        this.expelledDate = statusRecord.getExpelledDate();
+            // StatusRecords 기반 필드 세팅 (null 안전)
+            if (statusRecord != null) {
+                this.statusId = statusRecord.getId();
+                this.student_status = statusRecord.getStudentStatus(); // Enum
+                this.admissionDate = statusRecord.getAdmissionDate();
+                this.leaveDate = statusRecord.getLeaveDate();
+                this.returnDate = statusRecord.getReturnDate();
+                this.graduationDate = statusRecord.getGraduationDate();
+                this.retentionDate = statusRecord.getRetentionDate();
+                this.expelledDate = statusRecord.getExpelledDate();
+                this.majorCredit = statusRecord.getMajorCredit();
+                this.generalCredit = statusRecord.getGeneralCredit();
+                this.totalCredit = statusRecord.getTotalCredit();
+                this.currentCredit = statusRecord.getCurrentCredit();
+                this.studentImage = statusRecord.getStudentImage();
+            }
+        }
     }
 
-}

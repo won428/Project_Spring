@@ -678,4 +678,14 @@ public class LectureService {
         out.sort(Comparator.naturalOrder()); // 요일별로 모은 리스트를 전체 오름차순으로 정렬
         return out; // 최종리스트 반환
     }
+
+    public LectureBasicInfoDto getLectureBasicInfo(Long lectureId) {
+        return lectureRepository.findById(lectureId)
+                .map(lecture -> new LectureBasicInfoDto(
+                        lecture.getName(),
+                        lecture.getUser().getId(),
+                        lecture.getUser().getName()
+                ))
+                .orElseThrow(() -> new RuntimeException("강의를 찾을 수 없습니다."));
+    }
 }

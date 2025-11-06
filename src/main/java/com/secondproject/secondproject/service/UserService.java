@@ -2,12 +2,9 @@ package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.Gender;
 import com.secondproject.secondproject.Enum.UserType;
-import com.secondproject.secondproject.dto.UserDto;
-import com.secondproject.secondproject.dto.UserListDto;
-import com.secondproject.secondproject.dto.UserStBatchDto;
-import com.secondproject.secondproject.dto.UserListSearchDto;
-import com.secondproject.secondproject.dto.UserUpdateDto;
+import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.*;
+import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.repository.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -225,7 +222,6 @@ public class UserService {
             User user = this.userRepository.findById(courseRegistration.getUser().getId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 유저"));
             UserDto userDto = new UserDto();
-
             userDto.setId(user.getId());
             userDto.setUserCode(user.getUserCode());
             userDto.setName(user.getName());
@@ -285,8 +281,6 @@ public class UserService {
             userdto.setPhone(user.getPhone());
             userdto.setMajor(user.getMajor() != null ? user.getMajor().getName() : null);
             userdto.setU_type(user.getType());
-            System.out.println(user.getMajor());
-            System.out.println(user.getMajor().getCollege());
             userdto.setCollege(user.getMajor().getCollege().getType());
 
             return userdto;
@@ -630,5 +624,12 @@ public class UserService {
                     return dto;
                 })
                 .toList();
+    }
+
+    // 교수 이름 가져오기
+    public UserNameDto getUserNameById(Long id) {
+        return userRepository.findById(id)
+                .map(user -> new UserNameDto(user.getId(), user.getName()))
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
     }
 }
