@@ -57,10 +57,11 @@ public class LectureController {
             @RequestPart LectureDto lecture,
             @RequestPart List<LectureScheduleDto> schedule,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
-            @RequestPart PercentDto percent
+            @RequestPart PercentDto percent,
+            @RequestPart List<AttachmentDto> existingDtos
     ){
         try {
-            this.lectureService.updateLecture(lecture, schedule, files, percent);
+            this.lectureService.updateLecture(lecture, schedule, files, percent,existingDtos);
             return ResponseEntity.ok(Map.of("success", true));
         } catch (ResponseStatusException ex) {
             try {
