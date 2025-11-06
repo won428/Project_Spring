@@ -261,6 +261,7 @@ public class LectureService {
                 enrollment.setGrade(newGrade);
                 enrollment.setLecture(lecture);
                 enrollment.setStatus(Status.INPROGRESS);
+                enrollment.setCompletionDiv(lecture.getCompletionDiv());
 
                 this.enrollmentRepository.save(enrollment);
             }
@@ -622,6 +623,17 @@ public class LectureService {
             this.lectureRepository.save(lecture);
         }
 
+    }
+
+    public LectureBasicInfoDto getLectureBasicInfo(Long lectureId) {
+        return lectureRepository.findById(lectureId)
+                .map(lecture -> new LectureBasicInfoDto(
+                        lecture.getId(),
+                        lecture.getName(),
+                        lecture.getUser().getId(),
+                        lecture.getUser().getName()
+                ))
+                .orElseThrow(() -> new RuntimeException("강의를 찾을 수 없습니다."));
     }
 
     /// ///////////////

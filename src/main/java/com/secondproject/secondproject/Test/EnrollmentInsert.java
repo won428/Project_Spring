@@ -81,4 +81,34 @@ public class EnrollmentInsert extends AbstractTestNGSpringContextTests {
             enrollmentRepository.save(enrollment);
         }
     }
+
+    @Test
+    public void insertEnrollmentFromExistingData3() {
+
+        Long userId = 8L; // 수강 데이터 생성해줄 학생 ID
+        User user = userRepository.findById(userId).orElseThrow();
+
+        // 성적 기록이 존재하는 과목 = 이미 수강 완료된 강의라고 간주
+        List<Grade> grades = gradeRepository.findByUserId(userId);
+
+        for (Grade grade : grades) {
+
+            Lecture lecture = grade.getLecture(); // 성적과 연결된 강의 가져옴
+
+            // 이미 enrollment 테이블에 해당 유저 + 강의 데이터가 존재하는지 확인
+            boolean exists = enrollmentRepository.existsByUserAndLecture(user, lecture);
+            if (exists) continue; // 중복 방지
+
+            Enrollment enrollment = new Enrollment();
+            enrollment.setUser(user);
+            enrollment.setLecture(lecture);
+            enrollment.setGrade(grade);
+            enrollment.setCompletionDiv(lecture.getCompletionDiv());
+
+            // 종강 상태로 처리
+            enrollment.setStatus(Status.COMPLETED);
+
+            enrollmentRepository.save(enrollment);
+        }
+    }
 }

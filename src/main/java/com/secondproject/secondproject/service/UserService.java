@@ -47,6 +47,7 @@ public class UserService {
     private final MajorRepository majorRepository;
     private final CollegeRepository collegeRepository;
     private final CourseRegRepository courseRegRepository;
+    private final EnrollmentRepository enrollmentRepository;
     private final DataFormatter formatter = new DataFormatter();
     private final Validator validator;
     private final PasswordEncoder passwordEncoder;
