@@ -40,7 +40,7 @@ public class StudentController {
 
         // Service에서 userId 기반 조회
         StudentInfoDto dto = studentService.getStudentInfoById(userId);
-
+        System.out.println(dto);
         if (dto == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "학생 정보만 조회할 수 있습니다."));
