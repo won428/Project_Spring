@@ -255,4 +255,48 @@ public class BoardService {
 
         this.answerOnInquiryRepo.save(answerOnInquiry);
     }
+
+    public List<CommentDto> inquiryCommentList(Long id) {
+        List<AnswerOnInquiry> answerOnInquiryList = this.answerOnInquiryRepo.findAllByInquiry_id(id);
+        List<CommentDto> commentDtoList = new ArrayList<>();
+
+        for(AnswerOnInquiry answer : answerOnInquiryList){
+            CommentDto comment = new CommentDto();
+            comment.setContent(answer.getContent());
+            comment.setUserId(answer.getUser().getId());
+            comment.setPostId(answer.getId());
+            comment.setUserName(answer.getUser().getName());
+            comment.setUpdatedAt(answer.getUpdatedAt());
+            comment.setCreatedAt(answer.getCreatedAt());
+
+            commentDtoList.add(comment);
+        }
+
+        return commentDtoList;
+    }
+
+    public List<InquiryDto> findAll() {
+        List<Inquiry> inquiryList = this.inquiryRepository.findAll();
+        List<InquiryDto> inquiryDtoList = new ArrayList<>();
+
+        for(Inquiry inquiry : inquiryList){
+            InquiryDto inquiryDto = new InquiryDto();
+            User user = this.userRepository.findById(inquiry.getUser().getId())
+                    .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 유저 입니다."));
+
+            inquiryDto.setTag(inquiry.getTag());
+            inquiryDto.setIsPrivate(inquiry.isPrivate());
+            inquiryDto.setContent(inquiry.getContent());
+            inquiryDto.setTitle(inquiry.getTitle());
+            inquiryDto.setUserName(user.getName());
+            inquiryDto.setPostNumber(inquiry.getId());
+            inquiryDto.setStatus(inquiry.getInquiryStatus());
+            inquiryDto.setCreatedAt(inquiry.getCreatedAt());
+            inquiryDto.setViewCount(inquiry.getViewCount());
+
+            inquiryDtoList.add(inquiryDto);
+        }
+
+        return inquiryDtoList;
+    }
 }

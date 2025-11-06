@@ -58,6 +58,14 @@ public class InquiryController {
         return inquiryDtoList;
     }
 
+    @GetMapping("/List")
+    public List<InquiryDto> inquiryList(){
+
+        List<InquiryDto> inquiryDtoList = this.boardService.findAll();
+
+        return inquiryDtoList;
+    }
+
     @GetMapping("/page/{id}")
     public InquiryDto inquiryPage(@PathVariable Long id){
         InquiryDto inquiryDto = this.boardService.getInquiryPage(id);
@@ -113,6 +121,13 @@ public class InquiryController {
                 return ResponseEntity.status(500).body("알수없는 오류");
             }
         }
+    }
+
+    @GetMapping("/comment/list/{id}")
+    public List<CommentDto> commentDtoList(@PathVariable Long id){
+        List<CommentDto> commentDtoList = this.boardService.inquiryCommentList(id);
+
+        return commentDtoList;
     }
 
 }
