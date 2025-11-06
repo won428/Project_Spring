@@ -9,8 +9,8 @@ import org.hibernate.annotations.ColumnDefault;
 import java.math.BigDecimal;
 
 @Getter @Setter
-@Table(name = "grading_weights")
 @Entity
+@Table(name = "grading_weights")
 public class GradingWeights {
 
     @Id

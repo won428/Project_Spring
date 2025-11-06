@@ -5,14 +5,20 @@ import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.entity.Appeal;
+import com.secondproject.secondproject.repository.LecScheduleRepository;
 import com.secondproject.secondproject.repository.LectureRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.service.*;
+import com.secondproject.secondproject.dto.LectureDto;
+import com.secondproject.secondproject.dto.UserDto;
+import com.secondproject.secondproject.service.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,10 +34,14 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Set;
 
+@Slf4j
 @RestController
 @RequestMapping("/lecture")
 @RequiredArgsConstructor
@@ -41,10 +51,54 @@ public class LectureController {
     private final UserService userService;
     private final AttachmentService attachmentService;
     private final AttendanceAppealService attendanceAppealService;
+    private final AttendanceStudentService attendanceStudentService;
+    private final UserRepository userRepository;
+    private final LectureRepository lectureRepository;
+    private final LecScheduleRepository lecScheduleRepository;
 
     // 수강신청 관련해서 나중에 수강신청 컨트롤러로 이식할게요.
 
-    //단일 강의정보
+
+    @PatchMapping("/lectureUpdate")
+    public ResponseEntity<?> updateLecture(
+            @RequestPart LectureDto lecture,
+            @RequestPart List<LectureScheduleDto> schedule,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            @RequestPart PercentDto percent,
+            @RequestPart List<AttachmentDto> existingDtos
+    ){
+        try {
+            this.lectureService.updateLecture(lecture, schedule, files, percent,existingDtos);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (ResponseStatusException ex) {
+            try {
+
+                int status = ex.getStatusCode().value();
+                String error = HttpStatus.valueOf(status).name();
+
+                Map<String, Object> body = Map.of(
+                        "status", status,
+                        "error", error,
+                        "message", ex.getReason(),
+                        "timestamp", java.time.OffsetDateTime.now().toString()
+                );
+
+                return ResponseEntity.status(ex.getStatusCode()).body(body);
+            } catch (Exception otherEx) {
+                return ResponseEntity.status(500).body("알수없는 오류");
+            }
+        }
+    }
+
+    //업데이트용 단일 강의 정보
+    @GetMapping("/findOne/{id}")
+    public LectureDto findLectureForUpdate(@PathVariable Long id){
+        LectureDto lectureDto = this.lectureService.findByID(id);
+
+        return lectureDto;
+    }
+
+    //모달 단일 강의정보
     @GetMapping("/info")
     public LectureDto getLectureInfo(@RequestParam Long modalId){
         LectureDto lectureDto = this.lectureService.findByID(modalId);
@@ -179,10 +233,25 @@ public class LectureController {
         return lectureList;
     }
 
+    // 수강신청 후 개강, 종강, 거부된 목록
+    @GetMapping("/mylist/completed")
+    public List<LectureDto> applyLectureListEnd(@RequestParam Long userId){
+        List <LectureDto> lectureList = this.lectureService.applyLecturListEnd(userId);
+
+        return lectureList;
+    }
+
     // 교수 개설된 강의 상세정보
     @GetMapping("/detail/{id}")
     public LectureDto lectureDetailForPro(@PathVariable Long id) {
         LectureDto lectureDto = lectureService.findByID(id);
+
+        return lectureDto;
+    }
+
+    @GetMapping("/detailLecture/{id}")
+    public LectureDto lectureDetail(@PathVariable Long id) {
+        LectureDto lectureDto = lectureService.findBylectureID(id);
 
         return lectureDto;
     }
@@ -207,6 +276,63 @@ public class LectureController {
 
 
         return ResponseEntity.ok(lectureListDto);
+    }
+
+    // 강의 회차 목록 - 강의테이블에서 강의일, 요일, 교시 리스트로 받아오기
+    @GetMapping("/{id}/sessions")
+    public ResponseEntity<LecSessionResponseDto> selectLectureSession(
+            @PathVariable Long id,
+            @ModelAttribute LecSessionRequestDto requestDto){
+        // 해당 강의 id
+        lectureRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        LecSessionResponseDto responseDtos = lectureService.selectSessions(id, requestDto);
+
+        return ResponseEntity.ok(responseDtos);
+    }
+
+    @GetMapping("/{id}/schedule")
+    public ResponseEntity<?> findById(@PathVariable Long id){
+        return ResponseEntity.ok(lectureService.getSchedule(id));
+    }
+
+    // 강의 상세정보 '수강 중인' 학생 목록 (Enrollment 기준)
+    @GetMapping("/detail/enrolledStudentList/{id}")
+    public List<UserDto> detailEnrolledStudentList(@PathVariable Long id) {
+        return this.userService.findEnrolledUserLectureDetail(id);
+    }
+
+    // 해당 강의 수강중인 학생리스트 출결 등록
+    @PostMapping("/{id}/insertAttendances")
+    public ResponseEntity<List<AttendanceResponseDto>> insertAttendances(
+            @PathVariable Long id,
+            @RequestBody List<AttendanceRequestDto> requestDtos){
+
+        log.info(">>> HIT insertAttendances id={}, bodySize={}", id, (requestDtos==null?0:requestDtos.size()));
+
+List<AttendanceResponseDto> responseDtos = attendanceStudentService.insertAttendances(id, requestDtos);
+
+        return ResponseEntity.ok(responseDtos);
+    }
+
+    // 학생 출결 저장 후 라디오 영구 비활성화를 위한 메소드
+    @GetMapping("/{id}/attendance/finalized")
+    public ResponseEntity<Map<String, Object>> isFinalized(@PathVariable Long id, @RequestParam("date") @org.springframework.format.annotation.DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    LocalDate sessionDate){
+        boolean finalized = attendanceStudentService.isFinalizedAny(id, sessionDate);
+        return ResponseEntity.ok().body(Map.of("finalized", finalized));
+    }
+
+    // 출결 목록 불러오기
+    @GetMapping("/{id}/attendance")
+    public ResponseEntity<List<AttendanceResponseDto>> getAttendances(
+            @PathVariable Long id,
+            @RequestParam("date")
+            @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
+            LocalDate sessionDate) {
+
+        return ResponseEntity.ok(attendanceStudentService.getAttendances(id, sessionDate));
     }
 
     @GetMapping("/spec")
