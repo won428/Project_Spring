@@ -352,6 +352,22 @@ public class LectureService {
         for (CourseRegistration courseReg : courseRegistrations) {
             Lecture lecture = this.lectureRepository.findById(courseReg.getLecture().getId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 강의"));
+
+            Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
+
+            List<LectureSchedule> lectureScheduleList = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
+            List<LectureScheduleDto> lectureScheduleDtos = new ArrayList<>();
+            for(LectureSchedule schedule : lectureScheduleList){
+                LectureScheduleDto scheduleDto = new LectureScheduleDto();
+                scheduleDto.setId(schedule.getId());
+                scheduleDto.setLecture(schedule.getLecture().getId());
+                scheduleDto.setDay(schedule.getDay());
+                scheduleDto.setStartTime(schedule.getStartTime());
+                scheduleDto.setEndTime(schedule.getEndTime());
+
+                lectureScheduleDtos.add(scheduleDto);
+            }
+
             LectureDto lectureDto = new LectureDto();
 
             lectureDto.setId(lecture.getId());
@@ -362,11 +378,12 @@ public class LectureService {
             lectureDto.setEndDate(lecture.getEndDate());
             lectureDto.setTotalStudent(lecture.getTotalStudent());
             lectureDto.setCredit(lecture.getCredit());
-            lectureDto.setStatus(lecture.getStatus());
             lectureDto.setLevel(lecture.getLevel());
             lectureDto.setCompletionDiv(lecture.getCompletionDiv());
-            lectureDto.setStatus(courseReg.getStatus());
-            lectureDto.setLecStatus(lecture.getStatus());
+            lectureDto.setStatus(courseReg.getStatus()); // 내 수강신청 상태(신청 확정, 장바구니 등)
+            lectureDto.setLecStatus(lecture.getStatus()); // 강의 상태(개강,종강,대기 등)
+            lectureDto.setLectureSchedules(lectureScheduleDtos);
+            lectureDto.setNowStudent(nowStudent);
 
             myLectureList.add(lectureDto);
         }
@@ -474,6 +491,19 @@ public class LectureService {
         for (Lecture lecture : lectureList) {
             LectureDto lectureDto = new LectureDto();
 
+            List<LectureSchedule> lectureScheduleList = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
+            List<LectureScheduleDto> lectureScheduleDtos = new ArrayList<>();
+            for(LectureSchedule schedule : lectureScheduleList){
+                LectureScheduleDto scheduleDto = new LectureScheduleDto();
+                scheduleDto.setId(schedule.getId());
+                scheduleDto.setLecture(schedule.getLecture().getId());
+                scheduleDto.setDay(schedule.getDay());
+                scheduleDto.setStartTime(schedule.getStartTime());
+                scheduleDto.setEndTime(schedule.getEndTime());
+
+                lectureScheduleDtos.add(scheduleDto);
+            }
+
             lectureDto.setName(lecture.getName());
             lectureDto.setStatus(lecture.getStatus());
             lectureDto.setCredit(lecture.getCredit());
@@ -488,6 +518,7 @@ public class LectureService {
             lectureDto.setMajorName(lecture.getMajor().getName());
             lectureDto.setUserName(lecture.getUser().getName());
             lectureDto.setMajor(lecture.getMajor().getId());
+            lectureDto.setLectureSchedules(lectureScheduleDtos);
 
             lectureDtoList.add(lectureDto);
         }
@@ -849,7 +880,54 @@ public class LectureService {
         }
 
     }
+
+    public List<LectureDto> applyLecturListEnd(Long id) {
+        List<CourseRegistration> courseRegistrationList = this.courseRegRepository.findAllByUser_Id(id);
+        List<LectureDto> lectureDtoList = new ArrayList<>();
+        for(CourseRegistration courseReg : courseRegistrationList){
+            Lecture lecture = this.lectureRepository.findById(courseReg.getLecture().getId())
+                    .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"존재 하지 않는 강의입니다."));
+
+            Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
+
+            List<LectureSchedule> lectureScheduleList = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
+            List<LectureScheduleDto> lectureScheduleDtos = new ArrayList<>();
+            for(LectureSchedule schedule : lectureScheduleList){
+                LectureScheduleDto scheduleDto = new LectureScheduleDto();
+                scheduleDto.setId(schedule.getId());
+                scheduleDto.setLecture(schedule.getLecture().getId());
+                scheduleDto.setDay(schedule.getDay());
+                scheduleDto.setStartTime(schedule.getStartTime());
+                scheduleDto.setEndTime(schedule.getEndTime());
+
+                lectureScheduleDtos.add(scheduleDto);
+            }
+
+            LectureDto lectureDto = new LectureDto();
+
+            lectureDto.setId(lecture.getId());
+            lectureDto.setLectureSchedules(lectureScheduleDtos);
+            lectureDto.setUser(lecture.getUser().getId());
+            lectureDto.setLevel(lecture.getLevel());
+            lectureDto.setStatus(courseReg.getStatus());
+            lectureDto.setLecStatus(lecture.getStatus());
+            lectureDto.setEndDate(lecture.getEndDate());
+            lectureDto.setStartDate(lecture.getStartDate());
+            lectureDto.setNowStudent(nowStudent);
+            lectureDto.setTotalStudent(lecture.getTotalStudent());
+            lectureDto.setMajor(lecture.getMajor().getId());
+            lectureDto.setCredit(lecture.getCredit());
+            lectureDto.setCompletionDiv(lecture.getCompletionDiv());
+            lectureDto.setName(lecture.getName());
+            lectureDto.setMajorName(lecture.getMajor().getName());
+            lectureDto.setUserName(lecture.getUser().getName());
+
+            lectureDtoList.add(lectureDto);
+        }
+
+        return lectureDtoList;
     }
+}
 
 
 

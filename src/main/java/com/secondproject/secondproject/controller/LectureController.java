@@ -226,6 +226,14 @@ public class LectureController {
         return lectureList;
     }
 
+    // 수강신청 후 개강, 종강, 거부된 목록
+    @GetMapping("/mylist/completed")
+    public List<LectureDto> applyLectureListEnd(@RequestParam Long userId){
+        List <LectureDto> lectureList = this.lectureService.applyLecturListEnd(userId);
+
+        return lectureList;
+    }
+
     // 교수 개설된 강의 상세정보
     @GetMapping("/detail/{id}")
     public LectureDto lectureDetailForPro(@PathVariable Long id) {
