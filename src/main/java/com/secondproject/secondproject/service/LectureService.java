@@ -558,7 +558,9 @@ public class LectureService {
     public LectureDto findBylectureID(Long id) {
         Lecture lecture = this.lectureRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
+
         LectureDto lectureDto = new LectureDto();
+
         Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
         List<LectureSchedule> lectureSchedules = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
         List<LectureScheduleDto> lectureScheduleDtoList = new ArrayList<>();
@@ -582,6 +584,15 @@ public class LectureService {
         lectureDto.setLectureSchedules(lectureScheduleDtoList);
         lectureDto.setStartDate(lecture.getStartDate());
         lectureDto.setEndDate(lecture.getEndDate());
+
+        gradingWeightsRepository.findByLecture_Id(id).ifPresent(gw ->
+        {lectureDto.setGradingWeightsDto(new GradingWeightsDto(
+                gw.getAttendanceScore(),
+                gw.getAssignmentScore(),
+                gw.getMidtermExam(),
+                gw.getFinalExam()
+        ));
+        });
 
         return lectureDto;
     }

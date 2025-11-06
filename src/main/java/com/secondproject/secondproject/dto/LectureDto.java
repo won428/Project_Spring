@@ -4,6 +4,7 @@ import com.secondproject.secondproject.Enum.CompletionDiv;
 import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.LectureSchedule;
+import com.secondproject.secondproject.service.GradingWeightsDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -55,6 +56,8 @@ public class LectureDto {
     private List<LectureScheduleDto> lectureSchedules;
 
     private List<AttachmentDto> attachmentDtos;
+
+    private GradingWeightsDto gradingWeightsDto;
 
     // 강의 등록용 생성자
     public LectureDto(String name, Long user, int credit, LocalDate startDate, LocalDate endDate, String description, Long major, int totalStudent, Status status) {
