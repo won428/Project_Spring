@@ -1,6 +1,8 @@
 package com.secondproject.secondproject.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.secondproject.secondproject.Enum.Gender;
+import com.secondproject.secondproject.entity.Major;
 import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.Enum.Student_status;
@@ -20,14 +22,13 @@ public class StudentInfoDto {
 
     // User 주요 필드
     private String u_name; // 이름
-    private String password; // 비밀번호
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthdate; // 생년월일 (date 타입)
     private String email; // 이메일
     private String phone; // 휴대전화
-    private String gender;
+    private Gender gender;
     private String college;
-    private Long major; // 소속학과ID (number, FK)
+    private Major major; // 소속학과ID (number, FK)
     private Long usercode; // 구분: 학생, 교수, 관리자 (enum)
 
     // User 소속 학과 등 필요한 필드 추가
@@ -43,5 +44,23 @@ public class StudentInfoDto {
     private LocalDate expelledDate;
 
     public StudentInfoDto(User user, StatusRecords statusRecord) {
+        this.u_name = user.getName();
+        this.birthdate = user.getBirthDate();
+        this.email = user.getEmail();
+        this.college = user.getMajor().getCollege().getType();
+        this.major = user.getMajor();
+        this.gender = user.getGender();
+        this.usercode = user.getUserCode();
+
+
+        this.admissionDate = statusRecord.getAdmissionDate();
+        this.student_status = statusRecord.getStudentStatus();
+        this.admissionDate = statusRecord.getAdmissionDate();
+        this.leaveDate = statusRecord.getLeaveDate();
+        this.returnDate = statusRecord.getReturnDate();
+        this.graduationDate = statusRecord.getGraduationDate();
+        this.retentionDate = statusRecord.getRetentionDate();
+        this.expelledDate = statusRecord.getExpelledDate();
     }
+
 }

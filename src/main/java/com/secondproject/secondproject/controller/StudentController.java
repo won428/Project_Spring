@@ -29,8 +29,9 @@ public class StudentController {
     }
 
     // 학생 정보 + 학적 정보 조회
-    @GetMapping("/{user_id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getStudentInfo(@PathVariable Long id) {
+        System.out.println("React에서 들어온 아이디 :" + id);
         User user = studentService.getStudentById(id);
 
         if (user == null || user.getType() != STUDENT) {
@@ -40,6 +41,7 @@ public class StudentController {
 
         StatusRecords statusRecord = studentService.getStatusRecordById(user.getId());
         StudentInfoDto dto = new StudentInfoDto(user, statusRecord);
+
         return ResponseEntity.ok(dto);
     }
 
