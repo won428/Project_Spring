@@ -265,7 +265,7 @@ public class LectueInsert extends AbstractTestNGSpringContextTests {
 
         lecture.setMajor(user.getMajor());              // 담당 전공
         lecture.setTotalStudent(30);                     // 총 수강생 수
-        lecture.setStatus(Status.INPROGRESS);             // 강의 상태 (예: COMPLETED, ONGOING 등)
+        lecture.setStatus(Status.IN_PROGRESS);             // 강의 상태 (예: COMPLETED, ONGOING 등)
 
         // 반드시 null 불가 컬럼인 completionDiv 설정 추가
         lecture.setCompletionDiv(CompletionDiv.LIBERAL_ELECTIVE);

@@ -9,11 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.time.DayOfWeek;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
 import static com.secondproject.secondproject.Enum.UserType.*;
@@ -40,7 +39,7 @@ public class StudentController {
 
         // Service에서 userId 기반 조회
         StudentInfoDto dto = studentService.getStudentInfoById(userId);
-        System.out.println(dto);
+
         if (dto == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "학생 정보만 조회할 수 있습니다."));
@@ -50,6 +49,38 @@ public class StudentController {
         Map<String, Object> response = studentService.mapToResponse(dto);
 
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 학생 증명사진 업로드
+     */
+    @PostMapping("/status/upload-image")
+    public ResponseEntity<?> uploadStudentImage(
+            @RequestParam("userId") Long userId,
+            @RequestParam("file") MultipartFile file
+    ) {
+        if (userId == null || file == null || file.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "사용자 ID 또는 파일이 필요합니다."));
+        }
+
+        try {
+            StatusRecords updatedStatus = studentService.updateStudentImage(userId, file);
+
+            if (updatedStatus == null) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(Map.of("error", "이미지 업로드 실패"));
+            }
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "이미지 업로드 성공",
+                    "studentImage", updatedStatus.getStudentImage()
+            ));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "이미지 업로드 중 오류 발생"));
+        }
     }
 }
 

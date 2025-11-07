@@ -259,7 +259,7 @@ public class LectureService {
                 enrollment.setUser(user);
                 enrollment.setGrade(newGrade);
                 enrollment.setLecture(lecture);
-                enrollment.setStatus(Status.INPROGRESS);
+                enrollment.setStatus(Status.IN_PROGRESS);
                 enrollment.setCompletionDiv(lecture.getCompletionDiv());
 
                 this.enrollmentRepository.save(enrollment);
@@ -622,7 +622,7 @@ public class LectureService {
                 enrollment.setUser(user);
                 enrollment.setGrade(newGrade);
                 enrollment.setLecture(lecture);
-                enrollment.setStatus(Status.INPROGRESS);
+                enrollment.setStatus(Status.IN_PROGRESS);
 
                 this.enrollmentRepository.save(enrollment);
             }

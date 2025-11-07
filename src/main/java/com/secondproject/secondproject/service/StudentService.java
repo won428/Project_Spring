@@ -6,8 +6,12 @@ import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.repository.UserRepository;
 import com.secondproject.secondproject.repository.RecordStatusRepository;
-import org.springframework.stereotype.Service;
 
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Value;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,6 +21,9 @@ import static com.secondproject.secondproject.Enum.UserType.STUDENT;
 public class StudentService {
     private final UserRepository userRepository;
     private final RecordStatusRepository recordStatusRepository;
+
+    @Value("${image.upload-dir}")
+    private String imageUploadDir;
 
     public StudentService(UserRepository userRepository, RecordStatusRepository recordStatusRepository) {
         this.userRepository = userRepository;
@@ -58,18 +65,47 @@ public class StudentService {
         studentMap.put("userid", dto.getId());
         studentMap.put("userCode", dto.getUserCode());
         studentMap.put("name", dto.getName());
-        studentMap.put("type", dto.getUserType());
-        studentMap.put("birthDate", dto.getBirthdate());
+        studentMap.put("password", dto.getPassword());
+        studentMap.put("birthDate", dto.getBirthDate());
         studentMap.put("email", dto.getEmail());
         studentMap.put("phone", dto.getPhone());
         studentMap.put("gender", dto.getGender());
-        studentMap.put("major", dto.getMajorname()); // null 안전 처리 완료
+        studentMap.put("major", dto.getMajor()); // null 안전 처리 완료
+        studentMap.put("type", dto.getType());
 
         Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("type", dto.getType());
         responseBody.put("studentInfo", studentMap);
         responseBody.put("statusRecords", statusMap);
 
         return responseBody;
     }
+
+    // ====================== 학생 이미지 업로드 ======================
+    /**
+     * 학생 이미지 업로드
+     * @param userId 학생 ID
+     * @param file 업로드할 MultipartFile (이미지)
+     * @return 업데이트된 StatusRecords
+     * @throws IOException 파일 저장 중 에러
+     */
+    public StatusRecords updateStudentImage(Long userId, MultipartFile file) throws IOException {
+        StatusRecords statusRecord = recordStatusRepository.findByUserId(userId).orElse(null);
+        if (statusRecord == null) return null;
+
+        // 프로퍼티에서 경로 가져오기
+        File dir = new File(imageUploadDir);
+        if (!dir.exists()) dir.mkdirs();
+
+        String fileName = userId + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        File dest = new File(dir, fileName);
+
+        file.transferTo(dest);
+
+        // DB에는 상대 경로 저장 (웹에서 접근 가능한 경로)
+        statusRecord.setStudentImage("/uploads/Image/" + fileName); // 필요에 따라 경로 맞춤
+        return recordStatusRepository.save(statusRecord);
+    }
+
 }
 
