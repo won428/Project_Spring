@@ -85,7 +85,7 @@ public class StatusService {
     public List<StatusChangeListDto> findMyList(Long id) {
         List<StudentRecord> studentRecords = this.statusChangeRepository.findAllByUser_Id(id);
         List<StatusChangeListDto> statusChangeListDtos = new ArrayList<>();
-        for(StudentRecord studentRecord : studentRecords){
+        for (StudentRecord studentRecord : studentRecords) {
             StatusChangeListDto statusChangeListDto = new StatusChangeListDto();
 
             statusChangeListDto.setRecordId(studentRecord.getId());
@@ -137,5 +137,6 @@ public class StatusService {
         resultDto.setStatus(savedRecord.getStatus());
         return resultDto;
     }
+
 
 }

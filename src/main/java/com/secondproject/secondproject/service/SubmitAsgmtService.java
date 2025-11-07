@@ -12,10 +12,14 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.math3.exception.NullArgumentException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -40,6 +44,10 @@ public class SubmitAsgmtService {
 
         Assignment assignment = assignmentRepository.findById(insertDto.getAssignId())
                 .orElseThrow(() -> new EntityNotFoundException("자료 없음."));
+
+        if (LocalDate.now().isAfter(assignment.getDueAt())) {
+            throw new BusinessLogicException("제출 기한이 지났습니다.");
+        }//마감일이 지났는가?
 
         SubmitAsgmt submitAsgmt = new SubmitAsgmt();
         submitAsgmt.setUser(user);
@@ -114,6 +122,15 @@ public class SubmitAsgmtService {
             }
 
         }
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST) // 400 Bad Request를 기본값으로 설정
+    public class BusinessLogicException extends RuntimeException {
+
+        public BusinessLogicException(String message) {
+            super(message); // Controller가 사용할 오류 메시지
+        }
+
     }
 
 

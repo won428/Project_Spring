@@ -4,6 +4,7 @@ import com.secondproject.secondproject.Enum.Gender;
 import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.*;
+import com.secondproject.secondproject.entity.Mapping.UserAttach;
 import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.repository.*;
 import jakarta.validation.Valid;
@@ -28,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.ConstraintViolation;
 
 import jakarta.validation.Validator;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -43,39 +45,42 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserAttachRepository userAttachRepository;
+    private final AttachmentService attachmentService;
     private final StatusRecordsRepository statusRecordsRepository;
     private final MajorRepository majorRepository;
     private final CollegeRepository collegeRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final EnrollmentRepository enrollmentRepository;
     private final CourseRegRepository courseRegRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final DataFormatter formatter = new DataFormatter();
     private final Validator validator;
-    private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public void insertUser(UserDto userinfo) {
+    public void insertUser(UserDto userinfo, MultipartFile file) throws IOException {
         System.out.println(userinfo);
 
-        if(userinfo.getEmail() == null || userinfo.getEmail().isBlank()){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"이메일은 필수 입력 사항입니다..");
-        }else if(userinfo.getBirthdate() == null){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"생년월일은 필수 입력 사항입니다..");
-        }else if(userinfo.getPhone() == null || userinfo.getPhone().isBlank()){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"휴대폰 번호는 필수 입력 사항입니다.");
-        }else if(userinfo.getMajor() == null){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"학과는 필수 입력 사항입니다.");
+        if (userinfo.getEmail() == null || userinfo.getEmail().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이메일은 필수 입력 사항입니다..");
+        } else if (userinfo.getBirthdate() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "생년월일은 필수 입력 사항입니다..");
+        } else if (userinfo.getPhone() == null || userinfo.getPhone().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "휴대폰 번호는 필수 입력 사항입니다.");
+        } else if (userinfo.getMajor() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "학과는 필수 입력 사항입니다.");
         }
 
         User user = new User();
         Major major = this.majorRepository.findById(userinfo.getMajor())
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        String encodePassWord  = passwordEncoder.encode(userinfo.getPhone());
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        String encodePassWord = passwordEncoder.encode(userinfo.getPhone());
 
-        if(this.userRepository.existsByPhone(userinfo.getPhone())){
+        if (this.userRepository.existsByPhone(userinfo.getPhone())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 휴대폰 번호입니다.");
         }
-        if(this.userRepository.existsByEmail(userinfo.getEmail())){
-            throw new ResponseStatusException(HttpStatus.CONFLICT,"이미 존재하는 이메일 입니다.");
+        if (this.userRepository.existsByEmail(userinfo.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 이메일 입니다.");
         }
 
         user.setName(userinfo.getName());
@@ -87,6 +92,7 @@ public class UserService {
         user.setPhone(userinfo.getPhone());
         user.setType(userinfo.getType());
 
+
         User saved = this.userRepository.save(user);
         StatusRecords userStatus = new StatusRecords();
 
@@ -95,15 +101,22 @@ public class UserService {
 
         StatusRecords savedRecords = statusRecordsRepository.save(userStatus);
 
+        //사진 저장
+        Attachment attachment = attachmentService.savedImage(file, saved);
+        UserAttach userAttach = new UserAttach();
+        userAttach.setUser(saved);
+        userAttach.setAttachment(attachment);
+        userAttachRepository.save(userAttach);
+
         int year = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).getYear();     // 1997-04-28
         Long id = saved.getId();
         Long majors = saved.getMajor().getId(); // 학과 코드
 
-        if (id == null || majors == null){
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"학번 생성 데이터 누락.");
+        if (id == null || majors == null) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "학번 생성 데이터 누락.");
         }
 
-        String userCode = String.format("%04d%04d%03d",year,id,majors);
+        String userCode = String.format("%04d%03d%02d", year, id, majors);
 
         Long studentId = Long.parseLong(userCode);
 
@@ -217,11 +230,10 @@ public class UserService {
         List<CourseRegistration> courseRegistrations = this.courseRegRepository.findAllByLecture_Id(lectureId);
         List<UserDto> userDtoList = new ArrayList<>();
 
-        for (CourseRegistration courseRegistration: courseRegistrations){
+        for (CourseRegistration courseRegistration : courseRegistrations) {
             User user = this.userRepository.findById(courseRegistration.getUser().getId())
-                    .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 유저"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 유저"));
             UserDto userDto = new UserDto();
-
             userDto.setId(user.getId());
             userDto.setUserCode(user.getUserCode());
             userDto.setName(user.getName());
@@ -240,34 +252,34 @@ public class UserService {
         Specification<User> spec = (root, query, cb) -> cb.conjunction();
 
 
-        if(userListSearchDto.getSearchMajor() != null){
+        if (userListSearchDto.getSearchMajor() != null) {
             spec = spec.and(PublicSpecification.hasMajor(userListSearchDto.getSearchMajor()));
         }
 
-        if(userListSearchDto.getSearchUserType() != null){
+        if (userListSearchDto.getSearchUserType() != null) {
             spec = spec.and(PublicSpecification.hasUserType(userListSearchDto.getSearchUserType()));
         }
 
-        if(userListSearchDto.getSearchGender() != null || !userListSearchDto.getSearchGender().isBlank()){
+        if (userListSearchDto.getSearchGender() != null || !userListSearchDto.getSearchGender().isBlank()) {
             spec = spec.and(PublicSpecification.hasGender(userListSearchDto.getSearchGender()));
         }
 
         String searchMode = userListSearchDto.getSearchMode();
         String searchKeyword = userListSearchDto.getSearchKeyword();
 
-        if(searchMode != null && searchKeyword != null){
-            if(searchMode.equals("name")){
+        if (searchMode != null && searchKeyword != null) {
+            if (searchMode.equals("name")) {
                 spec = spec.and(PublicSpecification.hasName(searchKeyword));
-            }else if(searchMode.equals("email")){
+            } else if (searchMode.equals("email")) {
                 spec = spec.and(PublicSpecification.hasEmail(searchKeyword));
-            }else if(searchMode.equals("phone")){
+            } else if (searchMode.equals("phone")) {
                 spec = spec.and(PublicSpecification.hasPhone(searchKeyword));
             }
         }
 
 
         Sort sort = Sort.by(Sort.Order.desc("id"));
-        Pageable pageable = PageRequest.of(pageNumber,pageSize,sort);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
         Page<User> userList = this.userRepository.findAll(spec, pageable);
         Page<UserListDto> userListDtos = userList.map(user -> {
@@ -293,7 +305,7 @@ public class UserService {
     //MultipartFile : HTTP요청에서 온 파일파트를 추상화한 인터페이스, html에서 보낸 파일이 이 타입으로 매핑
     public List<UserStBatchDto> parse(MultipartFile file) {
         try (InputStream is = file.getInputStream();
-             Workbook wb = WorkbookFactory.create(is)){
+             Workbook wb = WorkbookFactory.create(is)) {
             FormulaEvaluator evaluator = wb.getCreationHelper().createFormulaEvaluator();
 
             // Workbook의 첫번째 시트를 가져오라는 뜻
@@ -331,7 +343,7 @@ public class UserService {
                         Gender gender = mapGender(genderRaw);
                         dto.setGender(gender);
                     } catch (Exception e) {
-                        errors.add("gender : "+e.getMessage());
+                        errors.add("gender : " + e.getMessage());
                         dto.setGender(null);
                     }
 
@@ -492,7 +504,8 @@ public class UserService {
                         .replaceAll("\\s*/\\s*", "/")
                         .replaceAll("\\s*-\\s*", "-"), f);
                 if (d.getYear() <= 3000) return d;
-            } catch (Exception ignore) {}
+            } catch (Exception ignore) {
+            }
         }
         return null; // 못 읽으면 null
     }
@@ -501,13 +514,13 @@ public class UserService {
     public void importUsers(@Valid List<UserStBatchDto> users) {
         // 이메일 정규화(공백제거+소문자)
         List<String> emailNorm = users.stream()
-                .map(r->normalizeEmail(r.getEmail()))
+                .map(r -> normalizeEmail(r.getEmail()))
                 .filter(o -> o != null)
                 .toList();
 
         // 업로드 파일 내부 중복 탐지
-        Map<String,Long> inFileCounts = emailNorm.stream() // 정규화한 이메일 리스트를 스트림으로
-                .collect(Collectors.groupingBy(e -> e,Collectors.counting()));
+        Map<String, Long> inFileCounts = emailNorm.stream() // 정규화한 이메일 리스트를 스트림으로
+                .collect(Collectors.groupingBy(e -> e, Collectors.counting()));
         // groupingBy(e -> e, ...) :같은 이메일끼리 묶기 / Collectors.counting() : 각 그룹의 개수 Long으로 카운팅
 
         Set<String> dupInFile = inFileCounts.entrySet().stream() // 위에서 Map(키, 값) 페어를 담은 스트림
@@ -516,9 +529,9 @@ public class UserService {
                 .collect(Collectors.toSet()); // 중복 이메일을 Set집합으로 수집
 
         // 중복 이메일이 존재하면 에러 반영
-        if (!dupInFile.isEmpty()){
+        if (!dupInFile.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST
-                    ,"업로드 파일 내부에 중복된 이메일이 있습니다.\n중복된 이메일 : "+String.join(", ",dupInFile));
+                    , "업로드 파일 내부에 중복된 이메일이 있습니다.\n중복된 이메일 : " + String.join(", ", dupInFile));
         }
 
         // DB에 존재하는 데이터인지 중복 확인
@@ -527,8 +540,8 @@ public class UserService {
                 .map(u -> normalizeEmail(u.getEmail()))
                 .filter(e -> e != null)
                 .collect(Collectors.toSet());
-        if (!existedSet.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 이메일 : "+String.join(", ", existedSet));
+        if (!existedSet.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 이메일 : " + String.join(", ", existedSet));
         }
 
         // users리스트에서 중복 제거한 MajorId 컬렉션으로 묶기
@@ -547,9 +560,9 @@ public class UserService {
         UserType type = UserType.STUDENT;
 
         // user 생성(학번은 nullable)
-        for (UserStBatchDto u : users){
+        for (UserStBatchDto u : users) {
             Major major = Optional.ofNullable(
-                    majorById.get(u.getMajorId()))
+                            majorById.get(u.getMajorId()))
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
             User user = new User();
@@ -572,18 +585,18 @@ public class UserService {
         // 학적정보도 함께 생성
         List<StatusRecords> statusRecords = new ArrayList<>(userList.size());
 
-        for (User u : userList){
+        for (User u : userList) {
             // 유저id 불러오기(학번생성 2단계)
             Long userId = u.getId();
             Long majorId = u.getMajor().getId();
 
             // 유저Id, 학과Id 없을 경우 예외처리
             if (userId == null || majorId == null) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"학번 생성 데이터가 누락되었습니다.");
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "학번 생성 데이터가 누락되었습니다.");
             }
 
             // 연도4자리+유저번호 0포함 4자리+학과코드
-            String userNum = String.format("%04d%04d%03d",year,userId,majorId);
+            String userNum = String.format("%04d%04d%03d", year, userId, majorId);
 
             // Long으로 타입변환
             Long userCode = Long.parseLong(userNum);

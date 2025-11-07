@@ -14,6 +14,7 @@ import com.secondproject.secondproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,7 +56,6 @@ public class LectureService {
     private final GradingWeightsRepository gradingWeightsRepository;
     private final CollegeRepository collegeRepository;
     private final AttachmentRepository attachmentRepository;
-    private final AppealRepository appealRepository;
 
     @Transactional
     public void insertByAdmin(LectureDto lectureDto, List<LectureScheduleDto> lectureScheduleDtos, List<MultipartFile> files, PercentDto percent) {
@@ -229,7 +229,7 @@ public class LectureService {
         Lecture lecture = lectureOpt
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, id + " 해당 강의가 존재하지 않습니다."));
-        if (status.equals(Status.INPROGRESS)) {
+        if (status.equals(Status.IN_PROGRESS)) {
             List<CourseRegistration> courseRegistrationList = this.courseRegRepository.findAllByLecture_IdAndStatus(id, Status.SUBMITTED);
             if (courseRegistrationList == null || courseRegistrationList.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "신청 인원이 없습니다.");
@@ -247,7 +247,6 @@ public class LectureService {
             for (CourseRegistration courseReg : courseRegistrationList) {
                 User user = this.userRepository.findById(courseReg.getUser().getId())
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."));
-
 
 
                 Grade grade = new Grade();
@@ -422,7 +421,7 @@ public class LectureService {
         List<AttachmentDto> attachmentDtoList = new ArrayList<>(); // 해당강의 첨부파일 dto 리스트
 
         // 첨부파일이 없을 수도 있으므로 if문으로 작성
-        if (lecRegAttachList != null && !lecRegAttachList.isEmpty()) {
+        if (lecRegAttachList != null || !lecRegAttachList.isEmpty()) {
             for (LecRegAttach lecRegAttach : lecRegAttachList) {
                 Attachment attachment = this.attachmentRepository.findById(lecRegAttach.getAttachment().getId())
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "첨부파일이 존재하지 않습니다."));
@@ -484,13 +483,54 @@ public class LectureService {
         return lectureDto;
     }
 
-    public List<LectureDto> findByUser(User user) {
+    public List<LectureDto> findByUser(User user, String sortKey) {
         List<Lecture> lectures = lectureRepository.findByUser(user);
-        List<LectureDto> lectureListDto = new ArrayList<>();
-        for (Lecture lecture : lectures) {
-            lectureListDto.add(LectureDto.fromEntity(lecture));
-        }
-        return lectureListDto;
+        String[] sort = sortKey.split("-");
+        int targetYear = Integer.parseInt(sort[0]);
+        int termKey = Integer.parseInt(sort[1]);
+        int targetMonth = termKey * 3;
+
+        List<Lecture> filteredLecture = lectures.stream()
+                .filter(
+                        lecture -> {
+                            LocalDate startDate = lecture.getStartDate();
+                            boolean yearMatches = startDate.getYear() == targetYear;
+
+                            boolean monthMatches = startDate.getMonthValue() == targetMonth;
+
+                            return yearMatches && monthMatches;
+                        }
+                )
+                .toList();
+        return filteredLecture.stream()
+                .map(LectureDto::fromEntity)
+                .toList();
+    }
+
+    public List<LectureDto> findByStudent(User user, String sortKey) {
+        List<Enrollment> enrollments = enrollmentRepository.findByUser(user);
+        String[] sort = sortKey.split("-");
+        int targetYear = Integer.parseInt(sort[0]);
+        int termKey = Integer.parseInt(sort[1]);
+        int targetMonth = termKey * 3;
+
+        List<Lecture> filteredLecture = enrollments.stream()
+                .map(Enrollment::getLecture)
+                .filter(
+                        lecture -> {
+                            LocalDate startDate = lecture.getStartDate();
+                            boolean yearMatches = startDate.getYear() == targetYear;
+
+                            boolean monthMatches = startDate.getMonthValue() == targetMonth;
+
+                            return yearMatches && monthMatches;
+                        }
+                )
+                .toList();
+
+        return filteredLecture.stream()
+                .map(LectureDto::fromEntity)
+                .toList();
     }
 
     public LectureDto LectureSpec(Long id) {
@@ -571,6 +611,7 @@ public class LectureService {
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."));
 
 
+
                 Grade grade = new Grade();
                 grade.setLecture(lecture);
                 grade.setUser(user);
@@ -588,26 +629,6 @@ public class LectureService {
         }
     }
 
-    public List<LectureDto> findByStudent(User user) {
-        List<Enrollment> enrollments = enrollmentRepository.findByUser(user);
-
-        List<Long> lectureId = enrollments.stream()
-                .map(Enrollment::getLecture)
-                .map(Lecture::getId)
-                .toList();
-
-        List<Lecture> lectures = lectureRepository.findAllById(lectureId);
-
-//        for(Long lec : lectureId){
-//            Lecture lectures = lectureRepository.findAllById(lec)
-//                    .orElseThrow(()->new EntityNotFoundException("sdsd"));
-//            lectureDtoList.add(lectures);
-//        }
-
-        return lectures.stream()
-                .map(LectureDto::fromEntity)
-                .toList();
-    }
 
     public void lectureChangeStatus(List<Long> idList, Status status) {
 
@@ -737,7 +758,6 @@ public class LectureService {
         }
         out.sort(Comparator.naturalOrder()); // 요일별로 모은 리스트를 전체 오름차순으로 정렬
         return out; // 최종리스트 반환
-
     }
         @Transactional
         public void updateLecture (LectureDto

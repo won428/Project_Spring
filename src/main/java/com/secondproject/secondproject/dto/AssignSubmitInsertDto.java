@@ -24,6 +24,7 @@ public class AssignSubmitInsertDto {
 
     private String content; // 공지 본문
 
+    private LocalDate DueAt;
 //    private User user; // user 주입용 제출자
 //
 //    private Lecture lecture; // Lecture(강의) 테이블 FK참조

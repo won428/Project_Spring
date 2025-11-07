@@ -58,16 +58,14 @@ public class StudentService {
         studentMap.put("userid", dto.getId());
         studentMap.put("userCode", dto.getUserCode());
         studentMap.put("name", dto.getName());
-        studentMap.put("password", dto.getPassword());
-        studentMap.put("birthDate", dto.getBirthDate());
+        studentMap.put("type", dto.getUserType());
+        studentMap.put("birthDate", dto.getBirthdate());
         studentMap.put("email", dto.getEmail());
         studentMap.put("phone", dto.getPhone());
         studentMap.put("gender", dto.getGender());
-        studentMap.put("major", dto.getMajor()); // null 안전 처리 완료
-        studentMap.put("type", dto.getType());
+        studentMap.put("major", dto.getMajorname()); // null 안전 처리 완료
 
         Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("type", dto.getType());
         responseBody.put("studentInfo", studentMap);
         responseBody.put("statusRecords", statusMap);
 

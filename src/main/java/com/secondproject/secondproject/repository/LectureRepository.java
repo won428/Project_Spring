@@ -13,15 +13,15 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
     List<Lecture> findByUser(User user);
 
     @Query("""
-        select l
-          from Lecture l
-         where not exists (
-               select 1
-                 from CourseRegistration cr
-                where cr.lecture = l
-                  and cr.user.id = :userId
-         )
-        """)
+            select l
+              from Lecture l
+             where not exists (
+                   select 1
+                     from CourseRegistration cr
+                    where cr.lecture = l
+                      and cr.user.id = :userId
+             )
+            """)
     List<Lecture> findAllNotRegisteredByUser(@Param("userId") Long userId);
 
     @Query("SELECT l FROM Lecture l JOIN FETCH l.user WHERE l.id = :lectureId")
