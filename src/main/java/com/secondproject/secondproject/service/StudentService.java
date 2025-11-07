@@ -103,7 +103,7 @@ public class StudentService {
         file.transferTo(dest);
 
         // DB에는 상대 경로 저장 (웹에서 접근 가능한 경로)
-        statusRecord.setStudentImage("/uploads/Image/" + fileName); // 필요에 따라 경로 맞춤
+        statusRecord.setStudentImage("/images/" + fileName); // 필요에 따라 경로 맞춤
         return recordStatusRepository.save(statusRecord);
     }
 

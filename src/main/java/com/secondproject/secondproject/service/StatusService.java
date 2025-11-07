@@ -1,11 +1,16 @@
 package com.secondproject.secondproject.service;
 
+import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.dto.StatusChangeListDto;
+import com.secondproject.secondproject.dto.UpdateStatusDto;
+import com.secondproject.secondproject.dto.UserDto;
+import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.entity.StudentRecord;
 import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.dto.StatusChangeRequestDto;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.repository.StatusChangeRepository;
+import com.secondproject.secondproject.repository.StatusRecordsRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +27,7 @@ public class StatusService {
 
     private final UserRepository userRepository;
     private final StatusChangeRepository statusChangeRepository;
+    private final StatusRecordsRepository statusRecordsRepository;
 
     // 1) 생성
     @Transactional
@@ -138,5 +144,78 @@ public class StatusService {
         return resultDto;
     }
 
+    /*관리자 학생 학적 변경용*/
+    public List<UserDto> getStudentsForManagement() {
+        List<User> students = userRepository.findAllByType(UserType.STUDENT);
 
+        return students.stream()
+                .map(u -> {
+                    UserDto dto = new UserDto();
+                    dto.setId(u.getId());
+                    dto.setName(u.getName());
+                    dto.setMajorName(u.getMajor() != null ? u.getMajor().getName() : "");
+                    dto.setType(u.getType());
+                    return dto;
+                })
+                .toList();
+    }
+
+    /*관리자 학생 학적 변경용*/
+    /** 학적 정보 조회 */
+    public UpdateStatusDto getStudentStatus(Long userId) {
+        Optional<StatusRecords> statusOpt = statusRecordsRepository.findByUserId(userId);
+        if (statusOpt.isEmpty()) return null;
+
+        StatusRecords status = statusOpt.get();
+        UpdateStatusDto dto = new UpdateStatusDto();
+        dto.setStudentStatus(status.getStudentStatus());
+        dto.setLeaveDate(status.getLeaveDate());
+        dto.setRetentionDate(status.getRetentionDate());
+        dto.setReturnDate(status.getReturnDate());
+        dto.setGraduationDate(status.getGraduationDate());
+
+        return dto;
+    }
+
+    /** 학적 정보 신규 생성 */
+    public UpdateStatusDto createStudentStatus(Long userId, UpdateStatusDto dto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        StatusRecords status = new StatusRecords();
+        status.setUser(user);
+        status.setStudentStatus(dto.getStudentStatus());
+        status.setLeaveDate(dto.getLeaveDate());
+        status.setRetentionDate(dto.getRetentionDate());
+        status.setReturnDate(dto.getReturnDate());
+        status.setGraduationDate(dto.getGraduationDate());
+
+        statusRecordsRepository.save(status);
+        return dto;
+    }
+
+    /** 학적 정보 수정 */
+    public UpdateStatusDto updateStudentStatus(Long userId, UpdateStatusDto dto) {
+        StatusRecords status = statusRecordsRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("학적 정보가 존재하지 않습니다."));
+
+        // DTO에 있는 필드만 업데이트
+        if (dto.getStudentStatus() != null) {
+            status.setStudentStatus(dto.getStudentStatus());
+        }
+        status.setLeaveDate(dto.getLeaveDate());
+        status.setRetentionDate(dto.getRetentionDate());
+        status.setReturnDate(dto.getReturnDate());
+        status.setGraduationDate(dto.getGraduationDate());
+
+        statusRecordsRepository.save(status);
+        return dto;
+    }
+
+    /** 학적 정보 삭제 */
+    public void deleteStudentStatus(Long userId) {
+        StatusRecords status = statusRecordsRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("학적 정보가 존재하지 않습니다."));
+        statusRecordsRepository.delete(status);
+    }
 }

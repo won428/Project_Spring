@@ -5,10 +5,12 @@ import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.College;
 import com.secondproject.secondproject.entity.Major;
 import com.secondproject.secondproject.entity.User;
+import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.service.CollegeService;
 import com.secondproject.secondproject.service.LectureService;
 import com.secondproject.secondproject.service.MajorService;
 import com.secondproject.secondproject.service.UserService;
+import com.secondproject.secondproject.service.StatusService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +61,7 @@ public class UserController {
     private final UserService userService;
     private final MajorService majorService;
     private final CollegeService collegeService;
+    private final StatusService statusService;
     private final PasswordEncoder passwordEncoder;
     private final StudentService studentService;
     private final LectureService lectureService;
@@ -67,7 +70,7 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<?> insertUser(
             @ModelAttribute UserDto userinfo,
-            @RequestParam MultipartFile file
+            @RequestParam(required = false) MultipartFile file
     ) {
 
 
@@ -183,7 +186,36 @@ public class UserController {
         return userService.parse(file);
     }
 
+    /** 학적 정보 조회 */
+    @GetMapping("/{userId}/status")
+    public UpdateStatusDto getStatus(@PathVariable Long userId) {
+        return statusService.getStudentStatus(userId);
+    }
 
+    /** 학적 정보 신규 생성 */
+    @PostMapping("/{userId}/status")
+    public UpdateStatusDto createStatus(@PathVariable Long userId,
+                                        @RequestBody UpdateStatusDto dto) {
+        return statusService.createStudentStatus(userId, dto);
+    }
+
+    /** 학적 정보 수정 */
+    @PutMapping("/{userId}/status")
+    public UpdateStatusDto updateStatus(@PathVariable Long userId,
+                                        @RequestBody UpdateStatusDto dto) {
+        return statusService.updateStudentStatus(userId, dto);
+    }
+
+    /** 학적 정보 삭제 */
+    @DeleteMapping("/{userId}/status")
+    public void deleteStatus(@PathVariable Long userId) {
+        statusService.deleteStudentStatus(userId);
+    }
+
+    @GetMapping("/manageList")
+    public List<UserDto> getStudentList() {
+        return statusService.getStudentsForManagement();
+    }
 //        // 4) 학적 상태 조회 (최종적으로 이 형태로 바뀌어야 함)
 //        StatusRecords statusRecord = studentService.getStatusRecordByUserId(user.getId());
 //        // 학생 일괄 저장(DB에 저장)
