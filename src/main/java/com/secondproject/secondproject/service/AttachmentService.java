@@ -5,11 +5,9 @@ import com.secondproject.secondproject.entity.Attachment;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.publicMethod.DownloadForProject;
 import com.secondproject.secondproject.repository.AttachmentRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,7 +19,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -135,5 +132,15 @@ public class AttachmentService {
         DownloadFile downloadFile = DownloadForProject.download(attachment, uploadDir);
 
         return downloadFile;
+    }
+
+    // 단일 파일 삭제
+    public void deleteFile(Path file){
+        try {
+            Files.deleteIfExists(file);
+        } catch (IOException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "파일 삭제 실패 " );
+        }
     }
 }

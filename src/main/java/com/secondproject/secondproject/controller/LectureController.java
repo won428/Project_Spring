@@ -51,7 +51,47 @@ public class LectureController {
 
     // 수강신청 관련해서 나중에 수강신청 컨트롤러로 이식할게요.
 
-    //단일 강의정보
+
+    @PatchMapping("/lectureUpdate")
+    public ResponseEntity<?> updateLecture(
+            @RequestPart LectureDto lecture,
+            @RequestPart List<LectureScheduleDto> schedule,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            @RequestPart PercentDto percent,
+            @RequestPart List<AttachmentDto> existingDtos
+    ){
+        try {
+            this.lectureService.updateLecture(lecture, schedule, files, percent,existingDtos);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (ResponseStatusException ex) {
+            try {
+
+                int status = ex.getStatusCode().value();
+                String error = HttpStatus.valueOf(status).name();
+
+                Map<String, Object> body = Map.of(
+                        "status", status,
+                        "error", error,
+                        "message", ex.getReason(),
+                        "timestamp", java.time.OffsetDateTime.now().toString()
+                );
+
+                return ResponseEntity.status(ex.getStatusCode()).body(body);
+            } catch (Exception otherEx) {
+                return ResponseEntity.status(500).body("알수없는 오류");
+            }
+        }
+    }
+
+    //업데이트용 단일 강의 정보
+    @GetMapping("/findOne/{id}")
+    public LectureDto findLectureForUpdate(@PathVariable Long id){
+        LectureDto lectureDto = this.lectureService.findByID(id);
+
+        return lectureDto;
+    }
+
+    //모달 단일 강의정보
     @GetMapping("/info")
     public LectureDto getLectureInfo(@RequestParam Long modalId) {
         LectureDto lectureDto = this.lectureService.findByID(modalId);
@@ -181,6 +221,14 @@ public class LectureController {
     @GetMapping("/apply/list")
     public List<LectureDto> applyLectureList(@RequestParam Long id) {
         List<LectureDto> lectureList = this.lectureService.applyLecturList(id);
+
+        return lectureList;
+    }
+
+    // 수강신청 후 개강, 종강, 거부된 목록
+    @GetMapping("/mylist/completed")
+    public List<LectureDto> applyLectureListEnd(@RequestParam Long userId){
+        List <LectureDto> lectureList = this.lectureService.applyLecturListEnd(userId);
 
         return lectureList;
     }
