@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.swing.plaf.OptionPaneUI;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,11 +65,14 @@ public class UserController {
 
     // 유저 등록
     @PostMapping("/signup")
-    public ResponseEntity<?> insertUser(@RequestBody UserDto userinfo) {
+    public ResponseEntity<?> insertUser(
+            @ModelAttribute UserDto userinfo,
+            @RequestParam MultipartFile file
+    ) {
 
 
         try {
-            this.userService.insertUser(userinfo);
+            this.userService.insertUser(userinfo, file);
             return ResponseEntity.ok(Map.of("success", true));
         } catch (ResponseStatusException ex) {
             try {
@@ -87,6 +91,8 @@ public class UserController {
             } catch (Exception otherEx) {
                 return ResponseEntity.status(500).body("네트워크 오류");
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -178,7 +184,6 @@ public class UserController {
     }
 
 
-
 //        // 4) 학적 상태 조회 (최종적으로 이 형태로 바뀌어야 함)
 //        StatusRecords statusRecord = studentService.getStatusRecordByUserId(user.getId());
 //        // 학생 일괄 저장(DB에 저장)
@@ -198,5 +203,5 @@ public class UserController {
 //            }
 //        }
 
-    }
+}
 

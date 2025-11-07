@@ -35,6 +35,9 @@ public class AttachmentService {
     @Value("${lectureVid.upload-dir}")
     private String vidDir;
 
+    @Value("${image.upload-dir}")
+    private String imageDir;
+
     private final AttachmentRepository attachmentRepository;
 
     public Attachment save(MultipartFile file, User user) throws IOException {
@@ -62,6 +65,25 @@ public class AttachmentService {
 
 
         Path savePath = Paths.get(vidDir + storedKey);
+        Files.copy(file.getInputStream(), savePath, StandardCopyOption.REPLACE_EXISTING);
+        //파일을 copy 해서 로컬에 저장
+        Attachment attachment = new Attachment();
+        attachment.setName(file.getOriginalFilename());
+        attachment.setUser(user);
+        attachment.setContentType(file.getContentType());
+        attachment.setSizeBytes(file.getSize());
+        attachment.setStoredKey(storedKey);
+        attachment.setSha256(sha256(file.getBytes()));
+
+
+        return attachmentRepository.save(attachment);
+    }
+
+    public Attachment savedImage(MultipartFile file, User user) throws IOException {
+        String storedKey = UUID.randomUUID() + "_" + file.getOriginalFilename(); // 스토리지키 생성 + 뒤에 오리지널 이름 붙임
+
+
+        Path savePath = Paths.get(imageDir + storedKey);
         Files.copy(file.getInputStream(), savePath, StandardCopyOption.REPLACE_EXISTING);
         //파일을 copy 해서 로컬에 저장
         Attachment attachment = new Attachment();
@@ -107,9 +129,9 @@ public class AttachmentService {
     }
 
     // 파일 다운로드(매개변수 파일 id)
-    public DownloadFile downloadFile(Long id){
+    public DownloadFile downloadFile(Long id) {
         Attachment attachment = this.attachmentRepository.findById(id)
-                        .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         DownloadFile downloadFile = DownloadForProject.download(attachment, uploadDir);
 
         return downloadFile;

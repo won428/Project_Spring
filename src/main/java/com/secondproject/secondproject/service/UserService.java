@@ -4,6 +4,7 @@ import com.secondproject.secondproject.Enum.Gender;
 import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.*;
+import com.secondproject.secondproject.entity.Mapping.UserAttach;
 import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.repository.*;
 import jakarta.validation.Valid;
@@ -44,6 +45,8 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserAttachRepository userAttachRepository;
+    private final AttachmentService attachmentService;
     private final StatusRecordsRepository statusRecordsRepository;
     private final MajorRepository majorRepository;
     private final CollegeRepository collegeRepository;
@@ -54,7 +57,7 @@ public class UserService {
     private final Validator validator;
 
     @Transactional
-    public void insertUser(UserDto userinfo) {
+    public void insertUser(UserDto userinfo, MultipartFile file) throws IOException {
         System.out.println(userinfo);
 
         if (userinfo.getEmail() == null || userinfo.getEmail().isBlank()) {
@@ -88,6 +91,7 @@ public class UserService {
         user.setPhone(userinfo.getPhone());
         user.setType(userinfo.getType());
 
+
         User saved = this.userRepository.save(user);
         StatusRecords userStatus = new StatusRecords();
 
@@ -95,6 +99,13 @@ public class UserService {
         userStatus.setAdmissionDate(LocalDate.now());
 
         StatusRecords savedRecords = statusRecordsRepository.save(userStatus);
+
+        //사진 저장
+        Attachment attachment = attachmentService.savedImage(file, saved);
+        UserAttach userAttach = new UserAttach();
+        userAttach.setUser(saved);
+        userAttach.setAttachment(attachment);
+        userAttachRepository.save(userAttach);
 
         int year = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).getYear();     // 1997-04-28
         Long id = saved.getId();

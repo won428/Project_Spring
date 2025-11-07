@@ -7,11 +7,13 @@ import com.secondproject.secondproject.service.AssignmentService;
 import com.secondproject.secondproject.service.SubmitAsgmtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -64,15 +66,15 @@ public class AssignmentController {
     }
 
     @PostMapping("/submit")
-    public ResponseEntity<?> AssignSubmit(
+    public ResponseEntity<String> AssignSubmit(
             @ModelAttribute AssignSubmitInsertDto assignSubmitInsertDto,
             @RequestPart(value = "files", required = false) List<MultipartFile> files) {
         try {
             submitAsgmtService.assignmentSubmit(assignSubmitInsertDto, files);
 
             return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
 
     }
@@ -84,11 +86,15 @@ public class AssignmentController {
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @RequestParam(value = "existingFileKeys", required = false) List<String> existingFileKeys) throws IOException {
         try {
+            if (LocalDate.now().isAfter(assignSubmitInsertDto.getDueAt())) {
+                return ResponseEntity.badRequest().body("제출 기한이 지났습니다.");
+            }
+
             submitAsgmtService.assignmentUpdate(assignId, assignSubmitInsertDto, files, existingFileKeys);
             return ResponseEntity.ok().build();
 
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
 
 
@@ -122,5 +128,6 @@ public class AssignmentController {
             return ResponseEntity.badRequest().build();
         }
     }
+
 
 }
