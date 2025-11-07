@@ -47,6 +47,9 @@ public class OnlineLecture {
     @Column(name = "ol_date")
     private LocalDateTime updatedDate; // 강의 등록일
 
+    @Column(name = "ol_vidlength")
+    private int vidLength = 0;
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(name = "ol_end")
     private LocalDateTime endDate;

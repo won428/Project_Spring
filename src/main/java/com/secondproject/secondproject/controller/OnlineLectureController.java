@@ -22,13 +22,13 @@ public class OnlineLectureController {
     @PostMapping("/insert")
     public ResponseEntity<?> createOnlineLec(
             @ModelAttribute OnlineLectureDto onlineLectureDto,
-            @RequestPart(value = "files", required = false) List<MultipartFile> files
+            @RequestPart(value = "files", required = false) MultipartFile file
     ) {
         try {
-            onlineLectureService.createOnLec(onlineLectureDto, files);
+            onlineLectureService.createOnLec(onlineLectureDto, file);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
 
         }
 
@@ -53,9 +53,11 @@ public class OnlineLectureController {
     }
 
     @GetMapping("/Spec")
-    public ResponseEntity<?> lecSpec(@RequestParam Long id) {
+    public ResponseEntity<?> lecSpec(@RequestParam Long id, @RequestParam Long userId) {
         try {
-            OnlineLectureResDto onlineLectureResDto = onlineLectureService.findById(id);
+
+            System.out.println("강의 id : " + id + "학생 ID : " + userId);
+            OnlineLectureResDto onlineLectureResDto = onlineLectureService.findById(id, userId);
             return ResponseEntity.ok(onlineLectureResDto);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
@@ -63,4 +65,25 @@ public class OnlineLectureController {
 
     }
 
+    @PostMapping("/progress")
+    public ResponseEntity<String> progressAdd(@RequestBody OnlineLectureResDto dto) {
+        try {
+            onlineLectureService.stackProgress(dto);
+            return ResponseEntity.ok().body("강좌 시청 진행중 ...");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("오류 발생");
+        }
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> delOLec(@PathVariable Long id) {
+        try {
+            System.out.println("id :          " + id);
+            onlineLectureService.deleteLec(id);
+            return ResponseEntity.ok().body("강좌 시청 진행중 ...");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("오류 발생");
+        }
+
+    }
 }
