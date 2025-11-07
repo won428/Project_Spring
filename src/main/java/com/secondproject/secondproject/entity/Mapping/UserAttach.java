@@ -18,7 +18,7 @@ public class UserAttach {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "submit_id")
+    @JoinColumn(name = "User_id")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
