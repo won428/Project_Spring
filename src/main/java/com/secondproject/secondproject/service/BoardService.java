@@ -6,11 +6,10 @@ import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.entity.Mapping.BoardAttach;
 import com.secondproject.secondproject.entity.Mapping.InquiryAttach;
 import com.secondproject.secondproject.entity.Mapping.LecRegAttach;
-import com.secondproject.secondproject.entity.Mapping.NoticeAttach;
 import com.secondproject.secondproject.repository.*;
-import jakarta.jws.soap.SOAPBinding;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,12 +22,20 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class BoardService {
+
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
     private final UserRepository userRepository;
     private final BoardRepository boardRepository;
     private final AttachmentService attachmentService;
@@ -143,6 +150,78 @@ public class BoardService {
         inquiry.setContent(post.getContent());
         inquiry.setTitle(post.getTitle());
         inquiry.setUser(user);
+        inquiry.setPrivate(post.getIsPrivate());
+        inquiry.setTag(post.getTag());
+
+        this.inquiryRepository.save(inquiry);
+
+        if (files != null && !files.isEmpty()) {
+            for (MultipartFile file : files) {
+                try {
+
+                    Attachment attachment = attachmentService.save(file, user);
+
+                    InquiryAttach inquiryAttach = new InquiryAttach();
+                    inquiryAttach.setAttachment(attachment);
+                    inquiryAttach.setInquiry(inquiry);
+
+                    this.inquiryAttRepository.save(inquiryAttach);
+
+                } catch (IOException ex) {
+                    throw new UncheckedIOException("파일 저장 실패", ex);
+                }
+            }
+        }
+    }
+
+
+    @Transactional
+    public void updateInquiry(InquiryDto post, List<MultipartFile> files, List<AttachmentDto> existingDtos) {
+        User user = this.userRepository.findById(post.getUser())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 유저입니다."));
+
+        List<InquiryAttach> inquiryAttachList = this.inquiryAttRepository.findAllByInquiry_Id(post.getPostNumber());
+
+        Set<Long> keepIds = new HashSet<>();
+        if (existingDtos != null) {
+            for (AttachmentDto dto : existingDtos) {
+                if (dto != null && dto.getId() != null) {
+                    keepIds.add(dto.getId());
+                }
+            }
+        }
+        Path base = Path.of(uploadDir).toAbsolutePath().normalize();
+        for(InquiryAttach InquiryAttach : inquiryAttachList){
+            Long attId = InquiryAttach.getAttachment().getId();
+
+            if(!keepIds.contains(attId)){
+
+                this.inquiryAttRepository.deleteByInquiryIdAndAttachmentId(post.getPostNumber(), attId);
+                Attachment attachment = this.attachmentRepository.findById(attId)
+                        .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"존재하지 않는 파일입니다."));
+
+                Path file = base.resolve(attachment.getStoredKey()).normalize();
+                if (!file.startsWith(base)) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "허용되지 않은 경로 요청");
+                }
+
+                try {
+                    Files.deleteIfExists(file);
+                } catch (IOException e) {
+                    throw new UncheckedIOException("파일 삭제 실패", e);
+                }
+
+                this.attachmentRepository.deleteById(attId);
+
+
+            }
+        }
+
+
+        Inquiry inquiry = this.inquiryRepository.findById(post.getPostNumber())
+                        .orElseThrow((()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 게시글 입니다.")));
+        inquiry.setContent(post.getContent());
+        inquiry.setTitle(post.getTitle());
         inquiry.setPrivate(post.getIsPrivate());
         inquiry.setTag(post.getTag());
 

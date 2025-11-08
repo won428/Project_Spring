@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.dto.AttachmentDto;
 import com.secondproject.secondproject.dto.CommentDto;
 import com.secondproject.secondproject.dto.InquiryDto;
 import com.secondproject.secondproject.service.BoardService;
@@ -29,6 +30,35 @@ public class InquiryController {
     ){
         try {
             this.boardService.createInquiry(post, files);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (ResponseStatusException ex) {
+            try {
+
+                int status = ex.getStatusCode().value();
+                String error = HttpStatus.valueOf(status).name();
+
+                Map<String, Object> body = Map.of(
+                        "status", status,
+                        "error", error,
+                        "message", ex.getReason(),
+                        "timestamp", java.time.OffsetDateTime.now().toString()
+                );
+
+                return ResponseEntity.status(ex.getStatusCode()).body(body);
+            } catch (Exception otherEx) {
+                return ResponseEntity.status(500).body("알수없는 오류");
+            }
+        }
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity<?> updateInquiry(
+            @RequestPart InquiryDto post,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            @RequestPart List<AttachmentDto> existingDtos
+    ){
+        try {
+            this.boardService.updateInquiry(post, files, existingDtos);
             return ResponseEntity.ok(Map.of("success", true));
         } catch (ResponseStatusException ex) {
             try {

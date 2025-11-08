@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface InquiryAttRepository extends JpaRepository<InquiryAttach, Long> {
     List<InquiryAttach> findAllByInquiry_Id(long id);
+
+    void deleteByInquiryIdAndAttachmentId(Long postNumber, Long attId);
 }
