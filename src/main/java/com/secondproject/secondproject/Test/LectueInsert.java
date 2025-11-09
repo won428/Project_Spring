@@ -37,7 +37,7 @@ public class LectueInsert extends AbstractTestNGSpringContextTests {
     @Test
     public void insertLectureList() {
         Lecture lecture = new Lecture();
-        User user = userRepository.findByEmail("PRO123@PRO123")
+        User user = userRepository.findByEmail("PRO123@PR.com")
                 .orElseThrow(() -> new RuntimeException());
         lecture.setName("일반물리학1");
         lecture.setUser(user);
@@ -86,7 +86,7 @@ public class LectueInsert extends AbstractTestNGSpringContextTests {
         grade.setTScore(BigDecimal.ONE);
         grade.setFtScore(BigDecimal.ONE);
         grade.setTotalScore(BigDecimal.ONE);
-        grade.setLectureGrade("A");
+        grade.setLectureGrade(BigDecimal.ONE);
         gradeRepository.save(grade);
 
 //        private User user;
