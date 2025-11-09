@@ -378,4 +378,54 @@ public class BoardService {
 
         return inquiryDtoList;
     }
+
+    public void updateComment(Long id, UpdateCommentDto editingText) {
+        AnswerOnInquiry answer = this.answerOnInquiryRepo.findById(id)
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 댓글입니다."));
+        answer.setContent(editingText.getContent());
+        this.answerOnInquiryRepo.save(answer);
+    }
+
+    public void deleteComment(Long id) {
+        this.answerOnInquiryRepo.deleteById(id);
+
+    }
+
+    @Transactional
+    public void deletePost(Long id) {
+        List<AnswerOnInquiry> answer = this.answerOnInquiryRepo.findAllByInquiry_id(id);
+        List<InquiryAttach> inquiryAttachList = this.inquiryAttRepository.findAllByInquiry_Id(id);
+        Path base = Path.of(uploadDir).toAbsolutePath().normalize();
+
+        for(InquiryAttach InquiryAttach : inquiryAttachList){
+            Long attId = InquiryAttach.getAttachment().getId();
+
+            if(inquiryAttachList != null && !inquiryAttachList.isEmpty()){
+
+                this.inquiryAttRepository.deleteByInquiryIdAndAttachmentId(id, attId);
+                Attachment attachment = this.attachmentRepository.findById(attId)
+                        .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"존재하지 않는 파일입니다."));
+
+                Path file = base.resolve(attachment.getStoredKey()).normalize();
+                if (!file.startsWith(base)) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "허용되지 않은 경로 요청");
+                }
+
+                try {
+                    Files.deleteIfExists(file);
+                } catch (IOException e) {
+                    throw new UncheckedIOException("파일 삭제 실패", e);
+                }
+
+                this.attachmentRepository.deleteById(attId);
+            }
+        }
+        if(answer != null && !answer.isEmpty()){
+            for(AnswerOnInquiry answerOnInquiry : answer){
+                this.answerOnInquiryRepo.deleteById(answerOnInquiry.getId());
+            }
+        }
+        this.inquiryRepository.deleteById(id);
+
+    }
 }
