@@ -8,7 +8,6 @@ import com.secondproject.secondproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -431,11 +430,14 @@ public class LectureService {
         }
 
         GradingWeights gradingWeights = this.gradingWeightsRepository.findByLecture_Id(lecture.getId());
-        GradingWeightsDto weightsDto = new GradingWeightsDto();
-        weightsDto.setAssignment(gradingWeights.getAssignmentScore());
-        weightsDto.setFinalExam(gradingWeights.getFinalExam());
-        weightsDto.setMidtermExam(gradingWeights.getMidtermExam());
-        weightsDto.setAttendance(gradingWeights.getAttendanceScore());
+        GradingWeightsDto weightsDto = new GradingWeightsDto(gradingWeights.getAttendanceScore(),
+                gradingWeights.getAssignmentScore(),
+                gradingWeights.getMidtermExam(),
+                gradingWeights.getFinalExam());
+//        weightsDto.setAssignment(gradingWeights.getAssignmentScore());
+//        weightsDto.setFinalExam(gradingWeights.getFinalExam());
+//        weightsDto.setMidtermExam(gradingWeights.getMidtermExam());
+//        weightsDto.setAttendance(gradingWeights.getAttendanceScore());
 
 
         for(LectureSchedule schedule : lectureSchedules){
@@ -662,7 +664,9 @@ public class LectureService {
     public LectureDto findBylectureID(Long id) {
         Lecture lecture = this.lectureRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
+
         LectureDto lectureDto = new LectureDto();
+
         Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
         List<LectureSchedule> lectureSchedules = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
         List<LectureScheduleDto> lectureScheduleDtoList = new ArrayList<>();
@@ -686,6 +690,15 @@ public class LectureService {
         lectureDto.setLectureSchedules(lectureScheduleDtoList);
         lectureDto.setStartDate(lecture.getStartDate());
         lectureDto.setEndDate(lecture.getEndDate());
+
+        gradingWeightsRepository.findByLectureId(id).ifPresent(gw ->
+        {lectureDto.setGradingWeightsDto(new GradingWeightsDto(
+                gw.getAttendanceScore(),
+                gw.getAssignmentScore(),
+                gw.getMidtermExam(),
+                gw.getFinalExam()
+        ));
+        });
 
         return lectureDto;
     }

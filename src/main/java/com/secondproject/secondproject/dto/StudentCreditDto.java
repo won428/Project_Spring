@@ -35,7 +35,7 @@ public class StudentCreditDto {
 
     private BigDecimal totalScore;
 
-    private String lectureGrade;
+    private BigDecimal lectureGrade;
 
     // Lecture 사항
     private String lecName;

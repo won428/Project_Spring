@@ -53,5 +53,5 @@ public class Grade {
     private BigDecimal totalScore = BigDecimal.ZERO; // 총점
 
     @Column(name = "lecture_grade")
-    private String lectureGrade; // 학점
+    private BigDecimal lectureGrade; // 학점
 }
