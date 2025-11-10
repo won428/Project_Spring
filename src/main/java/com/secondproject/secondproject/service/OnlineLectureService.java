@@ -87,7 +87,7 @@ public class OnlineLectureService {
                         {
                             UserLectureProgress us = new UserLectureProgress();
                             us.setUser(user);
-                            us.setStatus(Status.IN_PROGRESS);
+                            us.setStatus(Status.INPROGRESS);
                             us.setAttendanceStatus(AttendStudent.ABSENT);
                             us.setOnlineLecture(onlineLecture);
                             us.setUpdatedAt(LocalDateTime.now());
