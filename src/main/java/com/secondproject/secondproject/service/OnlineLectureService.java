@@ -21,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -33,6 +35,7 @@ public class OnlineLectureService {
     private final OnlineLectureRepository onlineLectureRepository;
     private final OnlineLectureAttachRepository onlineLectureAttachRepository;
     private final ProgressRepository progressRepository;
+
 
     @Transactional
     public void createOnLec(OnlineLectureDto dto, MultipartFile file) throws IOException {
@@ -141,4 +144,6 @@ public class OnlineLectureService {
         attachmentService.deleteFile(attachment.getStoredKey());
         onlineLectureRepository.delete(onlineLecture);
     }
+
+
 }

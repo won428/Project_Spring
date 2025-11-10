@@ -59,9 +59,9 @@ public class LectureController {
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @RequestPart PercentDto percent,
             @RequestPart List<AttachmentDto> existingDtos
-    ){
+    ) {
         try {
-            this.lectureService.updateLecture(lecture, schedule, files, percent,existingDtos);
+            this.lectureService.updateLecture(lecture, schedule, files, percent, existingDtos);
             return ResponseEntity.ok(Map.of("success", true));
         } catch (ResponseStatusException ex) {
             try {
@@ -85,7 +85,7 @@ public class LectureController {
 
     //업데이트용 단일 강의 정보
     @GetMapping("/findOne/{id}")
-    public LectureDto findLectureForUpdate(@PathVariable Long id){
+    public LectureDto findLectureForUpdate(@PathVariable Long id) {
         LectureDto lectureDto = this.lectureService.findByID(id);
 
         return lectureDto;
@@ -227,8 +227,8 @@ public class LectureController {
 
     // 수강신청 후 개강, 종강, 거부된 목록
     @GetMapping("/mylist/completed")
-    public List<LectureDto> applyLectureListEnd(@RequestParam Long userId){
-        List <LectureDto> lectureList = this.lectureService.applyLecturListEnd(userId);
+    public List<LectureDto> applyLectureListEnd(@RequestParam Long userId) {
+        List<LectureDto> lectureList = this.lectureService.applyLecturListEnd(userId);
 
         return lectureList;
     }

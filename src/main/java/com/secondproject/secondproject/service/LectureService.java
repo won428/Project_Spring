@@ -10,8 +10,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -693,12 +696,13 @@ public class LectureService {
         lectureDto.setEndDate(lecture.getEndDate());
 
         gradingWeightsRepository.findByLectureId(id).ifPresent(gw ->
-        {lectureDto.setGradingWeightsDto(new GradingWeightsDto(
-                gw.getAttendanceScore(),
-                gw.getAssignmentScore(),
-                gw.getMidtermExam(),
-                gw.getFinalExam()
-        ));
+        {
+            lectureDto.setGradingWeightsDto(new GradingWeightsDto(
+                    gw.getAttendanceScore(),
+                    gw.getAssignmentScore(),
+                    gw.getMidtermExam(),
+                    gw.getFinalExam()
+            ));
         });
 
         return lectureDto;
@@ -1002,6 +1006,8 @@ public class LectureService {
 
         return lectureDtoList;
     }
+
+
 }
 
 

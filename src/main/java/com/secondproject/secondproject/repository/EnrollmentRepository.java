@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.repository;
 
+import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.entity.Enrollment;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
@@ -32,5 +33,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     boolean existsByUserAndLecture(User user, Lecture lecture);
 
     Enrollment findByUserIdAndLectureId(Long userId, Long lectureId);
+
+    List<Enrollment> findByStatus(Status status);
 }
 

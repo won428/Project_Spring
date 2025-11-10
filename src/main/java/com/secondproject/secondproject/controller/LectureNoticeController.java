@@ -1,9 +1,7 @@
 package com.secondproject.secondproject.controller;
 
-import com.secondproject.secondproject.dto.LectureNoticeListDto;
-import com.secondproject.secondproject.dto.AttachmentDto;
-import com.secondproject.secondproject.dto.LectureNoticeUploadDto;
-import com.secondproject.secondproject.dto.NoticeResponseDto;
+import com.secondproject.secondproject.dto.*;
+import com.secondproject.secondproject.entity.LectureNotice;
 import com.secondproject.secondproject.service.LectureNoticeService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -124,5 +122,22 @@ public class LectureNoticeController {
 
     }
 
+    @GetMapping("/todo/{id}")
+    public ResponseEntity<?> getTodoList(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "0") int pageNotice,
+            @RequestParam(defaultValue = "0") int pageAssign,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        try {
+            ToDoListDto res = lectureNoticeService.getPagedAllNotices(id, pageNotice, pageAssign, size);
+            return ResponseEntity.ok(res);
+
+        } catch (Exception e) {
+            e.printStackTrace(); // 에러의 전체 내용을 콘솔(err)에 출력
+            return ResponseEntity.badRequest().build();
+
+        }
+    }
 
 }
