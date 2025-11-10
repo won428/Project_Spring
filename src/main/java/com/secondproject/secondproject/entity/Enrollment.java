@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.entity;
 
+import com.secondproject.secondproject.Enum.CompletionDiv;
 import com.secondproject.secondproject.Enum.Status;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -29,7 +30,9 @@ public class Enrollment {
     @JoinColumn(name = "grade_id", nullable = false)
     private Grade grade; // 성적 정보 id
 
-
+    @Enumerated(EnumType.STRING)
+    @Column(name = "completion_div", nullable = false)
+    private CompletionDiv completionDiv;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

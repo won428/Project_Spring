@@ -27,8 +27,20 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.secondproject.secondproject.entity.StatusRecords;
+import com.secondproject.secondproject.entity.User;
+import com.secondproject.secondproject.entity.StatusRecords;
+import com.secondproject.secondproject.dto.StudentInfoDto;
+import com.secondproject.secondproject.service.StudentService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.swing.plaf.OptionPaneUI;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +48,8 @@ import java.util.Optional;
 import java.net.URI;
 import java.time.Instant;
 import java.util.*;
+
+import static com.secondproject.secondproject.Enum.UserType.STUDENT;
 
 @RestController
 @RequestMapping("/user")
@@ -46,18 +60,21 @@ public class UserController {
     private final MajorService majorService;
     private final CollegeService collegeService;
     private final PasswordEncoder passwordEncoder;
+    private final StudentService studentService;
     private final LectureService lectureService;
 
     // 유저 등록
     @PostMapping("/signup")
-    public ResponseEntity<?> insertUser(@RequestBody UserDto userinfo){
-
+    public ResponseEntity<?> insertUser(
+            @ModelAttribute UserDto userinfo,
+            @RequestParam MultipartFile file
+    ) {
 
 
         try {
-            this.userService.insertUser(userinfo);
-            return ResponseEntity.ok(Map.of("success",true));
-        }catch (ResponseStatusException ex){
+            this.userService.insertUser(userinfo, file);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (ResponseStatusException ex) {
             try {
 
                 int status = ex.getStatusCode().value();
@@ -71,15 +88,17 @@ public class UserController {
                 );
 
                 return ResponseEntity.status(ex.getStatusCode()).body(body);
-            }catch (Exception otherEx){
+            } catch (Exception otherEx) {
                 return ResponseEntity.status(500).body("네트워크 오류");
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
     // 관리자용 유저 목록 조회
     @GetMapping("/list")
-    public List<UserListDto> userList(){
+    public List<UserListDto> userList() {
         List<UserListDto> userList = this.userService.findUserList();
 
         return userList;
@@ -95,7 +114,7 @@ public class UserController {
             @RequestParam(required = false) UserType searchUserType,
             @RequestParam(required = false) String searchMode,
             @RequestParam(required = false) String searchKeyword
-    ){
+    ) {
         UserListSearchDto userListSearchDto = new UserListSearchDto(searchMajor, searchGender, searchUserType, searchMode, searchKeyword);
         Page<UserListDto> userList = this.userService.ListPageUser(userListSearchDto, pageNumber, pageSize);
 
@@ -110,7 +129,7 @@ public class UserController {
 
     // 학과별 교수 목록
     @GetMapping("/professorList")
-    public List<UserListDto> professorList(@RequestParam("major_id") Long majorId){
+    public List<UserListDto> professorList(@RequestParam("major_id") Long majorId) {
         List<UserListDto> userList = this.userService.findProfessorList(majorId);
 
         return userList;
@@ -118,13 +137,13 @@ public class UserController {
 
     // 유저코드로 유저 찾기
     @GetMapping("/selectUserCode/{id}")
-    public UserUpdateDto findByUsercode(@PathVariable Long id){
+    public UserUpdateDto findByUsercode(@PathVariable Long id) {
 
         UserUpdateDto userDto = new UserUpdateDto();
         Optional<User> optUser = this.userService.findByUsercode(id);
         User user = optUser
-                .orElseThrow(()->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, id + "사용자 없음"));
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, id + "사용자 없음"));
         College college = this.collegeService.getCollegeId(user.getMajor().getCollege().getId());
 
         userDto.setId(user.getId());
@@ -145,14 +164,14 @@ public class UserController {
 
     // 관리자용 유저 정보수정(컨트롤러 부분 나중에 서비스로 이식할겁니다.)
     @PatchMapping("/admin/update/{id}")
-    public ResponseEntity<?> userUpdateByAdmin(@PathVariable Long id, @RequestBody UserUpdateDto userReactDto){
+    public ResponseEntity<?> userUpdateByAdmin(@PathVariable Long id, @RequestBody UserUpdateDto userReactDto) {
 
         User findUser = this.userService.findByUsercode(id)
-                .orElseThrow(()->
+                .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, id + "사용자 없음"));
         Major major = this.majorService.findMajor(userReactDto.getMajor());
 
-        this.userService.update(id, userReactDto, findUser , major);
+        this.userService.update(id, userReactDto, findUser, major);
 
         return ResponseEntity.ok(200);
     }
@@ -160,24 +179,29 @@ public class UserController {
     // 학생 일괄 등록(페이지로 넘기기, DB 저장 X)
     //consumes = MediaType.MULTIPART_FORM_DATA_VALUE <- 파일 업로드 형식 요청만 받겠다는 뜻 / Json 요청은 거부
     @PostMapping(value = "/parse", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public List<UserStBatchDto> studentListInsert(@RequestPart("file")MultipartFile file){
+    public List<UserStBatchDto> studentListInsert(@RequestPart("file") MultipartFile file) {
         return userService.parse(file);
     }
 
-    // 학생 일괄 저장(DB에 저장)
-    @PostMapping("/import")
-    public ResponseEntity<?> inserBatchUser(@RequestBody @Valid List<UserStBatchDto> users, HttpServletRequest request){
-        try {
-            userService.importUsers(users);
-            return ResponseEntity.ok().build();
 
-            // 서비스에서 명시적으로 던진 상태예외
-        } catch (ResponseStatusException ex) {
-            ProblemDetail pd = ex.getBody();
-            pd.setProperty("path", request.getRequestURI());
-            pd.setProperty("timestamp", Instant.now().toString());
-            return ResponseEntity.status(ex.getStatusCode()).body(pd);
-        }
-    }
+//        // 4) 학적 상태 조회 (최종적으로 이 형태로 바뀌어야 함)
+//        StatusRecords statusRecord = studentService.getStatusRecordByUserId(user.getId());
+//        // 학생 일괄 저장(DB에 저장)
+//        @PostMapping("/import")
+//        public ResponseEntity<?> inserBatchUser (@RequestBody @Valid List < UserStBatchDto > users, HttpServletRequest
+//        request){
+//            try {
+//                userService.importUsers(users);
+//                return ResponseEntity.ok().build();
+//
+//                // 서비스에서 명시적으로 던진 상태예외
+//            } catch (ResponseStatusException ex) {
+//                ProblemDetail pd = ex.getBody();
+//                pd.setProperty("path", request.getRequestURI());
+//                pd.setProperty("timestamp", Instant.now().toString());
+//                return ResponseEntity.status(ex.getStatusCode()).body(pd);
+//            }
+//        }
 
 }
+

@@ -51,9 +51,49 @@ public class LectureController {
 
     // 수강신청 관련해서 나중에 수강신청 컨트롤러로 이식할게요.
 
-    //단일 강의정보
+
+    @PatchMapping("/lectureUpdate")
+    public ResponseEntity<?> updateLecture(
+            @RequestPart LectureDto lecture,
+            @RequestPart List<LectureScheduleDto> schedule,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            @RequestPart PercentDto percent,
+            @RequestPart List<AttachmentDto> existingDtos
+    ){
+        try {
+            this.lectureService.updateLecture(lecture, schedule, files, percent,existingDtos);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (ResponseStatusException ex) {
+            try {
+
+                int status = ex.getStatusCode().value();
+                String error = HttpStatus.valueOf(status).name();
+
+                Map<String, Object> body = Map.of(
+                        "status", status,
+                        "error", error,
+                        "message", ex.getReason(),
+                        "timestamp", java.time.OffsetDateTime.now().toString()
+                );
+
+                return ResponseEntity.status(ex.getStatusCode()).body(body);
+            } catch (Exception otherEx) {
+                return ResponseEntity.status(500).body("알수없는 오류");
+            }
+        }
+    }
+
+    //업데이트용 단일 강의 정보
+    @GetMapping("/findOne/{id}")
+    public LectureDto findLectureForUpdate(@PathVariable Long id){
+        LectureDto lectureDto = this.lectureService.findByID(id);
+
+        return lectureDto;
+    }
+
+    //모달 단일 강의정보
     @GetMapping("/info")
-    public LectureDto getLectureInfo(@RequestParam Long modalId){
+    public LectureDto getLectureInfo(@RequestParam Long modalId) {
         LectureDto lectureDto = this.lectureService.findByID(modalId);
 
         return lectureDto;
@@ -142,7 +182,6 @@ public class LectureController {
     }
 
 
-
     // 단일 신청(추후에 수강신청 컨트롤러로 이식)
     @PostMapping("/applyOne")
     public ResponseEntity<?> applyLectureOne(@RequestBody Long lecId, @RequestParam Long id) {
@@ -180,8 +219,16 @@ public class LectureController {
 
     // 학생 수강신청 가능 목록
     @GetMapping("/apply/list")
-    public List<LectureDto> applyLectureList(@RequestParam Long id){
-        List <LectureDto> lectureList = this.lectureService.applyLecturList(id);
+    public List<LectureDto> applyLectureList(@RequestParam Long id) {
+        List<LectureDto> lectureList = this.lectureService.applyLecturList(id);
+
+        return lectureList;
+    }
+
+    // 수강신청 후 개강, 종강, 거부된 목록
+    @GetMapping("/mylist/completed")
+    public List<LectureDto> applyLectureListEnd(@RequestParam Long userId){
+        List <LectureDto> lectureList = this.lectureService.applyLecturListEnd(userId);
 
         return lectureList;
     }
@@ -213,22 +260,44 @@ public class LectureController {
     //강의실 목록
     @GetMapping("/List")
     @Transactional
-    public ResponseEntity<List<LectureDto>> GiveLectureList(@RequestParam String email) {
+    public ResponseEntity<List<LectureDto>> GiveLectureList(@RequestParam String email, @RequestParam String sortKey) {
+        try {
+            System.out.println(sortKey);
+            User user = userService.findUserByEmail(email)
+                    .orElseThrow(() -> (new UsernameNotFoundException("존재하지 않는 사용자 입니다.")));
 
-        User user = userService.findUserByEmail(email)
-                .orElseThrow(() -> (new UsernameNotFoundException("존재하지 않는 사용자 입니다.")));
+            List<LectureDto> lectureListDto = lectureService.findByUser(user, sortKey);
 
-        List<LectureDto> lectureListDto = lectureService.findByUser(user);
+            return ResponseEntity.ok(lectureListDto);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
 
+    }
 
-        return ResponseEntity.ok(lectureListDto);
+    @GetMapping("/stlist")
+    public ResponseEntity<?> StudentLecList(@RequestParam String email, @RequestParam String sortKey) {
+        try {
+
+            User user = userService.findUserByEmail(email)
+                    .orElseThrow(() -> (new UsernameNotFoundException("존재하지 않는 사용자 입니다.")));
+
+            List<LectureDto> lectureListDto = lectureService.findByStudent(user, sortKey);
+            return ResponseEntity.ok(lectureListDto);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("오류 발생");
+        }
+
     }
 
     // 강의 회차 목록 - 강의테이블에서 강의일, 요일, 교시 리스트로 받아오기
     @GetMapping("/{id}/sessions")
     public ResponseEntity<LecSessionResponseDto> selectLectureSession(
             @PathVariable Long id,
-            @ModelAttribute LecSessionRequestDto requestDto){
+            @ModelAttribute LecSessionRequestDto requestDto) {
         // 해당 강의 id
         lectureRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -239,7 +308,7 @@ public class LectureController {
     }
 
     @GetMapping("/{id}/schedule")
-    public ResponseEntity<?> findById(@PathVariable Long id){
+    public ResponseEntity<?> findById(@PathVariable Long id) {
         return ResponseEntity.ok(lectureService.getSchedule(id));
     }
 
@@ -253,11 +322,11 @@ public class LectureController {
     @PostMapping("/{id}/insertAttendances")
     public ResponseEntity<List<AttendanceResponseDto>> insertAttendances(
             @PathVariable Long id,
-            @RequestBody List<AttendanceRequestDto> requestDtos){
+            @RequestBody List<AttendanceRequestDto> requestDtos) {
 
-        log.info(">>> HIT insertAttendances id={}, bodySize={}", id, (requestDtos==null?0:requestDtos.size()));
+        log.info(">>> HIT insertAttendances id={}, bodySize={}", id, (requestDtos == null ? 0 : requestDtos.size()));
 
-List<AttendanceResponseDto> responseDtos = attendanceStudentService.insertAttendances(id, requestDtos);
+        List<AttendanceResponseDto> responseDtos = attendanceStudentService.insertAttendances(id, requestDtos);
 
         return ResponseEntity.ok(responseDtos);
     }
@@ -265,7 +334,7 @@ List<AttendanceResponseDto> responseDtos = attendanceStudentService.insertAttend
     // 학생 출결 저장 후 라디오 영구 비활성화를 위한 메소드
     @GetMapping("/{id}/attendance/finalized")
     public ResponseEntity<Map<String, Object>> isFinalized(@PathVariable Long id, @RequestParam("date") @org.springframework.format.annotation.DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    LocalDate sessionDate){
+    LocalDate sessionDate) {
         boolean finalized = attendanceStudentService.isFinalizedAny(id, sessionDate);
         return ResponseEntity.ok().body(Map.of("finalized", finalized));
     }
@@ -299,11 +368,11 @@ List<AttendanceResponseDto> responseDtos = attendanceStudentService.insertAttend
 
     // 관리자가 승인이 완료되고 정원이 모두 채워진 강의 묶음을 개강으로 전환합니다.
     @PatchMapping("/inprogress")
-    public ResponseEntity<?> lectureInprogress(@RequestBody List<Long> idList, @RequestParam Status status){
+    public ResponseEntity<?> lectureInprogress(@RequestBody List<Long> idList, @RequestParam Status status) {
         try {
             this.lectureService.lectureInprogress(idList, status);
             return ResponseEntity.ok(200);
-        }catch (ResponseStatusException ex) {
+        } catch (ResponseStatusException ex) {
             try {
 
                 int errStatus = ex.getStatusCode().value();
@@ -323,28 +392,13 @@ List<AttendanceResponseDto> responseDtos = attendanceStudentService.insertAttend
         }
     }
 
-    @GetMapping("/stlist")
-    public ResponseEntity<?> StudentLecList(@RequestParam String email) {
-        try {
-            User user = userService.findUserByEmail(email)
-                    .orElseThrow(() -> (new UsernameNotFoundException("존재하지 않는 사용자 입니다.")));
-
-            List<LectureDto> lectureListDto = lectureService.findByStudent(user);
-            return ResponseEntity.ok(lectureListDto);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("오류 발생");
-        }
-
-    }
 
     @PatchMapping("/status/admin")
-    public ResponseEntity<?> lecturesChangeStatus(@RequestBody List<Long> idList, @RequestParam Status status){
+    public ResponseEntity<?> lecturesChangeStatus(@RequestBody List<Long> idList, @RequestParam Status status) {
         try {
             this.lectureService.lectureChangeStatus(idList, status);
             return ResponseEntity.ok(200);
-        }catch (ResponseStatusException ex) {
+        } catch (ResponseStatusException ex) {
             try {
 
                 int errStatus = ex.getStatusCode().value();
@@ -363,7 +417,6 @@ List<AttendanceResponseDto> responseDtos = attendanceStudentService.insertAttend
             }
         }
     }
-
 
 
 }

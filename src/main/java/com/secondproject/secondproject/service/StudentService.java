@@ -1,80 +1,75 @@
 package com.secondproject.secondproject.service;
 
-import com.secondproject.secondproject.entity.Enrollment;
+import com.secondproject.secondproject.dto.StudentInfoDto;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.Enum.UserType;
-import com.secondproject.secondproject.repository.EnrollmentRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import com.secondproject.secondproject.repository.RecordStatusRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.stream.Collectors;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+
+import static com.secondproject.secondproject.Enum.UserType.STUDENT;
 
 @Service
 public class StudentService {
-
     private final UserRepository userRepository;
-    private final EnrollmentRepository enrollmentRepository;
     private final RecordStatusRepository recordStatusRepository;
 
-    @Autowired
-    public StudentService(UserRepository userRepository, EnrollmentRepository enrollmentRepository, RecordStatusRepository recordStatusRepository) {
+    public StudentService(UserRepository userRepository, RecordStatusRepository recordStatusRepository) {
         this.userRepository = userRepository;
-        this.enrollmentRepository = enrollmentRepository;
         this.recordStatusRepository = recordStatusRepository;
     }
 
-    // 학생 정보 조회
-    public User getStudentById(Long id) {
-        Optional<User> userOpt = userRepository.findById(id);
-        if (userOpt.isEmpty() || userOpt.get().getType() != UserType.STUDENT) {
-            return null; // 학생이 아니거나 유저 없음
+    // userId 기반 StudentInfoDto 조회
+    public StudentInfoDto getStudentInfoById(Long userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null || user.getType() != STUDENT) {
+            return null;
         }
-        return userOpt.get();
+
+        StatusRecords status = recordStatusRepository.findByUserId(userId).orElse(null);
+
+        return new StudentInfoDto(user, status);
     }
 
-    // 학적 정보 조회
-    public StatusRecords getStatusRecordById(Long statusId) {
-        return recordStatusRepository.findById(statusId).orElse(null);
-    }
+    // DTO를 프론트에서 요구하는 Response 형태로 매핑
+    public Map<String, Object> mapToResponse(StudentInfoDto dto) {
+        if (dto == null) return null;
 
-    // 증명서 발급(학생, 졸업생 검증 포함)
-    public Object issueCertificate(Long id, String type) {
-        User user = getStudentById(id);
-        if (user == null) {
-            return Map.of("error", "학생만 접근 가능한 서비스입니다.");
-        }
+        Map<String, Object> statusMap = new HashMap<>();
+        statusMap.put("statusid", dto.getStatusId());
+        statusMap.put("studentStatus", dto.getStudent_status());
+        statusMap.put("admissionDate", dto.getAdmissionDate());
+        statusMap.put("leaveDate", dto.getLeaveDate());
+        statusMap.put("returnDate", dto.getReturnDate());
+        statusMap.put("graduationDate", dto.getGraduationDate());
+        statusMap.put("retentionDate", dto.getRetentionDate());
+        statusMap.put("expelledDate", dto.getExpelledDate());
+        statusMap.put("majorCredit", dto.getMajorCredit());
+        statusMap.put("generalCredit", dto.getGeneralCredit());
+        statusMap.put("totalCredit", dto.getTotalCredit());
+        statusMap.put("currentCredit", dto.getCurrentCredit());
+        statusMap.put("studentImage", dto.getStudentImage());
 
-        StatusRecords sr = getStatusRecordById(user.getId());
-        if (sr == null) {
-            return Map.of("error", "학적 정보가 없습니다.");
-        }
+        Map<String, Object> studentMap = new HashMap<>();
+        studentMap.put("userid", dto.getId());
+        studentMap.put("userCode", dto.getUserCode());
+        studentMap.put("name", dto.getName());
+        studentMap.put("type", dto.getUserType());
+        studentMap.put("birthDate", dto.getBirthdate());
+        studentMap.put("email", dto.getEmail());
+        studentMap.put("phone", dto.getPhone());
+        studentMap.put("gender", dto.getGender());
+        studentMap.put("major", dto.getMajorname()); // null 안전 처리 완료
 
-        boolean isGraduated = "졸업".equals(sr.getStudentStatus());
-        if (!isGraduated) {
-            return Map.of("error", "재학생/휴학생은 증명서 발급 메뉴에서 신청하세요.");
-        }
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("studentInfo", studentMap);
+        responseBody.put("statusRecords", statusMap);
 
-        List<String> allowedTypes = List.of("등록금납부내역서", "성적증명서", "장학수혜내역서");
-        if (!allowedTypes.contains(type)) {
-            return Map.of("error", "졸업생만 발급 가능한 증명서 종류입니다.");
-        }
-
-        // 증명서 발급 성공 처리 로직 (예시)
-        return Map.of("message", type + " 발급 완료 (유저ID: " + id + ")");
-    }
-
-    // 교수별 학생 목록 조회
-    public List<User> getStudentsByLecture(Long id) {
-        List<Enrollment> enrollments = enrollmentRepository.findByLectureIdAndType(id, UserType.STUDENT);
-        // Enrollment 리스트에서 User만 추출해서 리스트로 반환
-        return enrollments.stream()
-                .map(Enrollment::getUser)  // Enrollment에 getUser() 메서드가 있다고 가정
-                .collect(Collectors.toList());
+        return responseBody;
     }
 }
+

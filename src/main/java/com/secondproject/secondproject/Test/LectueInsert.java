@@ -1,6 +1,7 @@
 package com.secondproject.secondproject.Test;
 
 
+import com.secondproject.secondproject.Enum.CompletionDiv;
 import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.entity.*;
@@ -122,5 +123,108 @@ public class LectueInsert extends AbstractTestNGSpringContextTests {
 
     }
 
+    @Test
+    public void insertLectureDaisuHak1() {
+        Lecture lecture = new Lecture();
+        User user = userRepository.findByEmail("younghee.kim@example.com")
+                .orElseThrow(() -> new RuntimeException());
 
+        lecture.setName("대수학1");                     // 강의명
+        lecture.setUser(user);                          // 교수 또는 담당자 정보 (User 엔티티)
+        lecture.setCredit(3);                           // 학점
+        lecture.setStartDate(LocalDate.now());          // 시작일 (예: 오늘 날짜)
+        lecture.setDescription("대수학1 강의입니다.");  // 강의 설명
+
+        lecture.setMajor(user.getMajor());              // 담당 전공
+        lecture.setTotalStudent(40);                     // 총 수강생 수
+        lecture.setStatus(Status.COMPLETED);             // 강의 상태 (예: COMPLETED, ONGOING 등)
+
+        // 반드시 null 불가 컬럼인 completionDiv 설정 추가
+        lecture.setCompletionDiv(CompletionDiv.MAJOR_REQUIRED);
+        lectureRepository.save(lecture);                 // 강의 저장
+    }
+
+    @Test
+    public void insertLectureComputer1() {
+        Lecture lecture = new Lecture();
+        User user = userRepository.findByEmail("younghee.kim@example.com")
+                .orElseThrow(() -> new RuntimeException());
+
+        lecture.setName("컴퓨터공학");                     // 강의명
+        lecture.setUser(user);                          // 교수 또는 담당자 정보 (User 엔티티)
+        lecture.setCredit(3);                           // 학점
+        lecture.setStartDate(LocalDate.of(2025, 3, 2));
+        lecture.setDescription("컴퓨터공학 강의입니다.");  // 강의 설명
+
+        lecture.setMajor(user.getMajor());              // 담당 전공
+        lecture.setTotalStudent(40);                     // 총 수강생 수
+        lecture.setStatus(Status.COMPLETED);             // 강의 상태 (예: COMPLETED, ONGOING 등)
+
+        // 반드시 null 불가 컬럼인 completionDiv 설정 추가
+        lecture.setCompletionDiv(CompletionDiv.MAJOR_REQUIRED);
+        lectureRepository.save(lecture);                 // 강의 저장
+    }
+
+    @Test
+    public void insertLecture2() {
+        Lecture lecture = new Lecture();
+        User user = userRepository.findByEmail("younghee.kim@example.com")
+                .orElseThrow(() -> new RuntimeException());
+
+        lecture.setName("물리");                     // 강의명
+        lecture.setUser(user);                          // 교수 또는 담당자 정보 (User 엔티티)
+        lecture.setCredit(3);                           // 학점
+        lecture.setStartDate(LocalDate.of(2024, 9, 5));
+        lecture.setDescription("물리학 강의입니다.");  // 강의 설명
+
+        lecture.setMajor(user.getMajor());              // 담당 전공
+        lecture.setTotalStudent(40);                     // 총 수강생 수
+        lecture.setStatus(Status.COMPLETED);             // 강의 상태 (예: COMPLETED, ONGOING 등)
+
+        // 반드시 null 불가 컬럼인 completionDiv 설정 추가
+        lecture.setCompletionDiv(CompletionDiv.MAJOR_REQUIRED);
+        lectureRepository.save(lecture);                 // 강의 저장
+    }
+
+    @Test
+    public void insertLecture3() {
+        Lecture lecture = new Lecture();
+        User user = userRepository.findByEmail("John.prof@univ.com")
+                .orElseThrow(() -> new RuntimeException());
+
+        lecture.setName("화학");                     // 강의명
+        lecture.setUser(user);                          // 교수 또는 담당자 정보 (User 엔티티)
+        lecture.setCredit(3);                           // 학점
+        lecture.setStartDate(LocalDate.of(2025, 10, 5));
+        lecture.setDescription("화학 강의입니다.");  // 강의 설명
+
+        lecture.setMajor(user.getMajor());              // 담당 전공
+        lecture.setTotalStudent(40);                     // 총 수강생 수
+        lecture.setStatus(Status.COMPLETED);             // 강의 상태 (예: COMPLETED, ONGOING 등)
+
+        // 반드시 null 불가 컬럼인 completionDiv 설정 추가
+        lecture.setCompletionDiv(CompletionDiv.MAJOR_REQUIRED);
+        lectureRepository.save(lecture);                 // 강의 저장
+    }
+
+    @Test
+    public void insertLecture4() {
+        Lecture lecture = new Lecture();
+        User user = userRepository.findByEmail("chulsoo.prof@univ.com")
+                .orElseThrow(() -> new RuntimeException());
+
+        lecture.setName("생명");                     // 강의명
+        lecture.setUser(user);                          // 교수 또는 담당자 정보 (User 엔티티)
+        lecture.setCredit(2);                           // 학점
+        lecture.setStartDate(LocalDate.of(2025, 7, 5));
+        lecture.setDescription("생명 강의입니다.");  // 강의 설명
+
+        lecture.setMajor(user.getMajor());              // 담당 전공
+        lecture.setTotalStudent(40);                     // 총 수강생 수
+        lecture.setStatus(Status.COMPLETED);             // 강의 상태 (예: COMPLETED, ONGOING 등)
+
+        // 반드시 null 불가 컬럼인 completionDiv 설정 추가
+        lecture.setCompletionDiv(CompletionDiv.MAJOR_REQUIRED);
+        lectureRepository.save(lecture);                 // 강의 저장
+    }
 }

@@ -1,6 +1,6 @@
 package com.secondproject.secondproject.controller;
 
-import com.secondproject.secondproject.Entity.RefreshToken;
+import com.secondproject.secondproject.entity.RefreshToken;
 import com.secondproject.secondproject.config.JWT.JwtTokenProvider;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.repository.RefreshTokenRepo;

@@ -13,4 +13,8 @@ public interface GradingWeightsRepository extends JpaRepository<GradingWeights, 
     Optional<BigDecimal> findAttendanceRatioByLectureId(@Param("lectureId") Long lectureId);
 
     Optional<GradingWeights> findByLecture_Id(Long lectureId);
+
+    GradingWeights findByLecture_Id(Long id);
+
+    void deleteByLecture_Id(Long id);
 }

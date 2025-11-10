@@ -22,7 +22,7 @@ public class StudentRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "record_id")
-    private Long id;                  // 유저ID(FK), number
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_studentRecord_user")) // 신청자ID
@@ -33,6 +33,7 @@ public class StudentRecord {
     private Student_status studentStatus;                // 신청 목적
 
     @Column(name = "record_title", nullable = false)
+
     private String title;                 // 제목(varchar)
 
     @Column(name = "record_content", nullable = false)

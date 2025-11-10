@@ -2,12 +2,16 @@ package com.secondproject.secondproject.dto;
 
 import com.secondproject.secondproject.Enum.CompletionDiv;
 import com.secondproject.secondproject.Enum.Status;
+import com.secondproject.secondproject.entity.GradingWeights;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.LectureSchedule;
 import com.secondproject.secondproject.service.GradingWeightsDto;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Digits;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -71,17 +75,9 @@ public class LectureDto {
         this.totalStudent = totalStudent;
         this.status = status;
     }
+    private Long college;
 
-    public LectureDto(String name, String userName, int credit, LocalDate startDate, LocalDate endDate, String majorName, int totalStudent, Status status) {
-        this.name = name;
-        this.userName = userName;
-        this.credit = credit;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.majorName = majorName;
-        this.totalStudent = totalStudent;
-        this.status = status;
-    }
+    private GradingWeightsDto weightsDto;
 
     public LectureDto(String name, String userName, int totalStudent, String majorName) {
         this.name = name;
