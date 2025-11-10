@@ -80,7 +80,7 @@ public class OnlineLectureController {
         try {
             System.out.println("id :          " + id);
             onlineLectureService.deleteLec(id);
-            return ResponseEntity.ok().body("강좌 시청 진행중 ...");
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("오류 발생");
         }

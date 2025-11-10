@@ -69,6 +69,7 @@ public class OnlineLectureService {
 
     public Page<OnlineLectureDto> getPage(Long id, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by((Sort.Direction.DESC), "endDate"));
+
         Page<OnlineLecture> lectures = onlineLectureRepository.findByLectureId(id, pageable);
         return lectures.map(OnlineLectureDto::fromEntity);
 
@@ -101,7 +102,7 @@ public class OnlineLectureService {
 
         OnlineLectureAttach onlineLectureAttaches = onlineLectureAttachRepository.findByOnlineLecture(onlineLecture);
 
-        Attachment attachment = attachmentService.findById(onlineLectureAttaches.getId())
+        Attachment attachment = attachmentService.findById(onlineLectureAttaches.getAttachment().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Tlqkf"));
 
         return OnlineLectureResDto.fromEntity(onlineLecture, attachment, progress);
@@ -126,14 +127,18 @@ public class OnlineLectureService {
 
     }
 
+    @Transactional
     public void deleteLec(Long id) {
-        OnlineLecture onlineLecture = onlineLectureRepository.findByLectureId(id)
+        OnlineLecture onlineLecture = onlineLectureRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("없음111"));
         OnlineLectureAttach onlineLectureAttach = onlineLectureAttachRepository.findByOnlineLecture(onlineLecture);
         Attachment attachment = attachmentService.findById(onlineLectureAttach.getAttachment().getId()).orElseThrow(() -> new EntityNotFoundException("ddd"));
+        UserLectureProgress userLectureProgress = progressRepository.findByOnlineLecture(onlineLecture).orElseThrow(() -> new EntityNotFoundException("없음222"));
+
+        progressRepository.delete(userLectureProgress);
+        onlineLectureAttachRepository.delete(onlineLectureAttach);
         attachmentService.deleteById(attachment.getId());
         attachmentService.deleteFile(attachment.getStoredKey());
-        onlineLectureAttachRepository.delete(onlineLectureAttach);
         onlineLectureRepository.delete(onlineLecture);
     }
 }
