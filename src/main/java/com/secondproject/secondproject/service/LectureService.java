@@ -1,12 +1,6 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.Status;
-import com.secondproject.secondproject.dto.AttendanceAppealDto;
-import com.secondproject.secondproject.dto.LectureBasicInfoDto;
-import com.secondproject.secondproject.dto.AttachmentDto;
-import com.secondproject.secondproject.dto.LectureDto;
-import com.secondproject.secondproject.dto.LectureScheduleDto;
-import com.secondproject.secondproject.dto.PercentDto;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.entity.Mapping.LecRegAttach;
@@ -14,15 +8,12 @@ import com.secondproject.secondproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
@@ -31,10 +22,6 @@ import java.nio.file.Path;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
@@ -71,9 +58,9 @@ public class LectureService {
         LocalDate end = lectureDto.getEndDate();
         LocalDate today = LocalDate.now();
 
-        if (!start.isAfter(today)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "오늘 이후의 강의만 등록할 수 있습니다.");
-        }
+//        if (!start.isAfter(today)) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "오늘 이후의 강의만 등록할 수 있습니다.");
+//        }
 
         if (end.isBefore(start)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "종료일이 시작일보다 빠릅니다.");
@@ -237,8 +224,9 @@ public class LectureService {
 
             lecture.setStatus(status);
             this.lectureRepository.save(lecture);
+            // 테스트 위해서 임시로 비활성화
 //            int total = lecture.getTotalStudent();
-//            int minRequired = (int) Math.ceil(total * 0.3); // 신청인원 일정 비율 이상일때 개강가능
+//            int minRequired = (int) Math.ceil(total * 0.8); // 신청인원 일정 비율 이상일때 개강가능
 //
 //            if (minRequired > courseRegistrationList.size()) {
 //                throw new ResponseStatusException(HttpStatus.CONFLICT, "신청 인원이 부족합니다");
@@ -371,7 +359,7 @@ public class LectureService {
 
             List<LectureSchedule> lectureScheduleList = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
             List<LectureScheduleDto> lectureScheduleDtos = new ArrayList<>();
-            for(LectureSchedule schedule : lectureScheduleList){
+            for (LectureSchedule schedule : lectureScheduleList) {
                 LectureScheduleDto scheduleDto = new LectureScheduleDto();
                 scheduleDto.setId(schedule.getId());
                 scheduleDto.setLecture(schedule.getLecture().getId());
@@ -392,6 +380,7 @@ public class LectureService {
             lectureDto.setEndDate(lecture.getEndDate());
             lectureDto.setTotalStudent(lecture.getTotalStudent());
             lectureDto.setCredit(lecture.getCredit());
+            lectureDto.setStatus(lecture.getStatus());
             lectureDto.setLevel(lecture.getLevel());
             lectureDto.setCompletionDiv(lecture.getCompletionDiv());
             lectureDto.setStatus(courseReg.getStatus()); // 내 수강신청 상태(신청 확정, 장바구니 등)
@@ -441,11 +430,14 @@ public class LectureService {
         }
 
         GradingWeights gradingWeights = this.gradingWeightsRepository.findByLecture_Id(lecture.getId());
-        GradingWeightsDto weightsDto = new GradingWeightsDto();
-        weightsDto.setAssignment(gradingWeights.getAssignmentScore());
-        weightsDto.setFinalExam(gradingWeights.getFinalExam());
-        weightsDto.setMidtermExam(gradingWeights.getMidtermExam());
-        weightsDto.setAttendance(gradingWeights.getAttendanceScore());
+        GradingWeightsDto weightsDto = new GradingWeightsDto(gradingWeights.getAttendanceScore(),
+                gradingWeights.getAssignmentScore(),
+                gradingWeights.getMidtermExam(),
+                gradingWeights.getFinalExam());
+//        weightsDto.setAssignment(gradingWeights.getAssignmentScore());
+//        weightsDto.setFinalExam(gradingWeights.getFinalExam());
+//        weightsDto.setMidtermExam(gradingWeights.getMidtermExam());
+//        weightsDto.setAttendance(gradingWeights.getAttendanceScore());
 
 
         for (LectureSchedule schedule : lectureSchedules) {
@@ -548,7 +540,7 @@ public class LectureService {
 
             List<LectureSchedule> lectureScheduleList = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
             List<LectureScheduleDto> lectureScheduleDtos = new ArrayList<>();
-            for(LectureSchedule schedule : lectureScheduleList){
+            for (LectureSchedule schedule : lectureScheduleList) {
                 LectureScheduleDto scheduleDto = new LectureScheduleDto();
                 scheduleDto.setId(schedule.getId());
                 scheduleDto.setLecture(schedule.getLecture().getId());
@@ -573,6 +565,7 @@ public class LectureService {
             lectureDto.setMajorName(lecture.getMajor().getName());
             lectureDto.setUserName(lecture.getUser().getName());
             lectureDto.setMajor(lecture.getMajor().getId());
+            lectureDto.setLectureSchedules(lectureScheduleDtos);
 
             lectureDtoList.add(lectureDto);
         }
@@ -611,7 +604,6 @@ public class LectureService {
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."));
 
 
-
                 Grade grade = new Grade();
                 grade.setLecture(lecture);
                 grade.setUser(user);
@@ -623,12 +615,33 @@ public class LectureService {
                 enrollment.setGrade(newGrade);
                 enrollment.setLecture(lecture);
                 enrollment.setStatus(Status.IN_PROGRESS);
+                enrollment.setCompletionDiv(lecture.getCompletionDiv());
 
                 this.enrollmentRepository.save(enrollment);
             }
         }
     }
 
+    public List<LectureDto> findByStudent(User user) {
+        List<Enrollment> enrollments = enrollmentRepository.findByUser(user);
+
+        List<Long> lectureId = enrollments.stream()
+                .map(Enrollment::getLecture)
+                .map(Lecture::getId)
+                .toList();
+
+        List<Lecture> lectures = lectureRepository.findAllById(lectureId);
+
+//        for(Long lec : lectureId){
+//            Lecture lectures = lectureRepository.findAllById(lec)
+//                    .orElseThrow(()->new EntityNotFoundException("sdsd"));
+//            lectureDtoList.add(lectures);
+//        }
+
+        return lectures.stream()
+                .map(LectureDto::fromEntity)
+                .toList();
+    }
 
     public void lectureChangeStatus(List<Long> idList, Status status) {
 
@@ -646,22 +659,13 @@ public class LectureService {
 
     }
 
-    public LectureBasicInfoDto getLectureBasicInfo(Long lectureId) {
-        return lectureRepository.findById(lectureId)
-                .map(lecture -> new LectureBasicInfoDto(
-                        lecture.getId(),
-                        lecture.getName(),
-                        lecture.getUser().getId(),
-                        lecture.getUser().getName()
-                ))
-                .orElseThrow(() -> new RuntimeException("강의를 찾을 수 없습니다."));
-    }
-
     /// ///////////////
     public LectureDto findBylectureID(Long id) {
         Lecture lecture = this.lectureRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
+
         LectureDto lectureDto = new LectureDto();
+
         Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
         List<LectureSchedule> lectureSchedules = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
         List<LectureScheduleDto> lectureScheduleDtoList = new ArrayList<>();
@@ -685,6 +689,16 @@ public class LectureService {
         lectureDto.setLectureSchedules(lectureScheduleDtoList);
         lectureDto.setStartDate(lecture.getStartDate());
         lectureDto.setEndDate(lecture.getEndDate());
+
+        gradingWeightsRepository.findByLectureId(id).ifPresent(gw ->
+        {
+            lectureDto.setGradingWeightsDto(new GradingWeightsDto(
+                    gw.getAttendanceScore(),
+                    gw.getAssignmentScore(),
+                    gw.getMidtermExam(),
+                    gw.getFinalExam()
+            ));
+        });
 
         return lectureDto;
     }
@@ -759,144 +773,145 @@ public class LectureService {
         out.sort(Comparator.naturalOrder()); // 요일별로 모은 리스트를 전체 오름차순으로 정렬
         return out; // 최종리스트 반환
     }
-        @Transactional
-        public void updateLecture (LectureDto
-        lectureDto, List < LectureScheduleDto > lectureScheduleDtos, List < MultipartFile > files, PercentDto percent, List<AttachmentDto> existingDtos){
 
-            if (lectureDto.getMajor() == null) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "소속 대학과 학과를 선택해주세요");
-            }
-            if (lectureDto.getStartDate() == null || lectureDto.getEndDate() == null) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "강의 날짜를 선택해주세요");
-            }
+    @Transactional
+    public void updateLecture(LectureDto
+                                      lectureDto, List<LectureScheduleDto> lectureScheduleDtos, List<MultipartFile> files, PercentDto percent, List<AttachmentDto> existingDtos) {
 
-            LocalDate start = lectureDto.getStartDate();
-            LocalDate end = lectureDto.getEndDate();
-            LocalDate today = LocalDate.now();
+        if (lectureDto.getMajor() == null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "소속 대학과 학과를 선택해주세요");
+        }
+        if (lectureDto.getStartDate() == null || lectureDto.getEndDate() == null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "강의 날짜를 선택해주세요");
+        }
 
-            if (!start.isAfter(today)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "오늘 이후의 강의만 등록할 수 있습니다.");
-            }
+        LocalDate start = lectureDto.getStartDate();
+        LocalDate end = lectureDto.getEndDate();
+        LocalDate today = LocalDate.now();
 
-            if (end.isBefore(start)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "종료일이 시작일보다 빠릅니다.");
-            }
+        if (!start.isAfter(today)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "오늘 이후의 강의만 등록할 수 있습니다.");
+        }
 
-            LocalDate minEnd = start.plusMonths(2);
-            if (end.isBefore(minEnd)) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "강의 기간은 최소 2개월이어야 합니다. (가능한 최소 종료일: " + minEnd + ")"
-                );
-            }
-            if (lectureScheduleDtos == null || lectureScheduleDtos.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "수업 일정을 하루 이상 선택해주세요.");
-            }
+        if (end.isBefore(start)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "종료일이 시작일보다 빠릅니다.");
+        }
 
-            if (lectureDto.getUser() == null) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "담당 교수를 선택해주세요.");
-            }
-            if (lectureDto.getCredit() == 0) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "이수 학점은 1점 이상이여야 합니다.");
-            }
-            if (lectureDto.getName().isBlank() || lectureDto.getName() == null) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "강의명을 입력해주세요.");
-            }
-            if (lectureDto.getLevel() == 0) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "학년을 선택해주세요.");
-            }
-            if (lectureDto.getTotalStudent() < 10) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수강인원은 10명 이상이여야 합니다.");
-            }
+        LocalDate minEnd = start.plusMonths(2);
+        if (end.isBefore(minEnd)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "강의 기간은 최소 2개월이어야 합니다. (가능한 최소 종료일: " + minEnd + ")"
+            );
+        }
+        if (lectureScheduleDtos == null || lectureScheduleDtos.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "수업 일정을 하루 이상 선택해주세요.");
+        }
 
-            BigDecimal totalPercent = percent.getAssignment()
-                    .add(percent.getAttendance())
-                    .add(percent.getMidtermExam())
-                    .add(percent.getFinalExam());
-            BigDecimal overPercent = new BigDecimal("100.00");
-            if (totalPercent.compareTo(overPercent) > 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "비율은 100을 넘을 수 없습니다.");
-            }
+        if (lectureDto.getUser() == null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "담당 교수를 선택해주세요.");
+        }
+        if (lectureDto.getCredit() == 0) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이수 학점은 1점 이상이여야 합니다.");
+        }
+        if (lectureDto.getName().isBlank() || lectureDto.getName() == null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "강의명을 입력해주세요.");
+        }
+        if (lectureDto.getLevel() == 0) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "학년을 선택해주세요.");
+        }
+        if (lectureDto.getTotalStudent() < 10) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수강인원은 10명 이상이여야 합니다.");
+        }
 
-            for (LectureScheduleDto lectureScheduleDto : lectureScheduleDtos) {
-                if (lectureScheduleDto.getDay() == null || lectureScheduleDto.getStartTime() == null || lectureScheduleDto.getEndTime() == null) {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "수업 요일과 교시를 모두 선택해주세요.");
+        BigDecimal totalPercent = percent.getAssignment()
+                .add(percent.getAttendance())
+                .add(percent.getMidtermExam())
+                .add(percent.getFinalExam());
+        BigDecimal overPercent = new BigDecimal("100.00");
+        if (totalPercent.compareTo(overPercent) > 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "비율은 100을 넘을 수 없습니다.");
+        }
+
+        for (LectureScheduleDto lectureScheduleDto : lectureScheduleDtos) {
+            if (lectureScheduleDto.getDay() == null || lectureScheduleDto.getStartTime() == null || lectureScheduleDto.getEndTime() == null) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "수업 요일과 교시를 모두 선택해주세요.");
+            }
+        }
+
+        Lecture lecture = this.lectureRepository.findById(lectureDto.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 강의 입니다."));
+
+
+        List<LecRegAttach> lecRegAttachList = this.lecRegAttachRepository.findByLecture_id(lecture.getId());
+
+
+        Set<Long> keepIds = new HashSet<>();
+        if (existingDtos != null) {
+            for (AttachmentDto dto : existingDtos) {
+                if (dto != null && dto.getId() != null) {
+                    keepIds.add(dto.getId());
                 }
             }
+        }
+        Path base = Path.of(uploadDir).toAbsolutePath().normalize();
+        for (LecRegAttach lecRegAttach : lecRegAttachList) {
+            Long attId = lecRegAttach.getAttachment().getId();
 
-            Lecture lecture = this.lectureRepository.findById(lectureDto.getId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 강의 입니다."));
+            if (!keepIds.contains(attId)) {
 
+                this.lecRegAttachRepository.deleteByLectureIdAndAttachmentId(lecture.getId(), attId);
+                Attachment attachment = this.attachmentRepository.findById(attId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 파일입니다."));
 
-            List<LecRegAttach> lecRegAttachList = this.lecRegAttachRepository.findByLecture_id(lecture.getId());
-
-
-            Set<Long> keepIds = new HashSet<>();
-            if (existingDtos != null) {
-                for (AttachmentDto dto : existingDtos) {
-                    if (dto != null && dto.getId() != null) {
-                        keepIds.add(dto.getId());
-                    }
+                Path file = base.resolve(attachment.getStoredKey()).normalize();
+                if (!file.startsWith(base)) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "허용되지 않은 경로 요청");
                 }
-            }
-            Path base = Path.of(uploadDir).toAbsolutePath().normalize();
-            for(LecRegAttach lecRegAttach : lecRegAttachList){
-                Long attId = lecRegAttach.getAttachment().getId();
 
-                if(!keepIds.contains(attId)){
-
-                    this.lecRegAttachRepository.deleteByLectureIdAndAttachmentId(lecture.getId(), attId);
-                    Attachment attachment = this.attachmentRepository.findById(attId)
-                            .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"존재하지 않는 파일입니다."));
-
-                    Path file = base.resolve(attachment.getStoredKey()).normalize();
-                    if (!file.startsWith(base)) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "허용되지 않은 경로 요청");
-                    }
-
-                    try {
-                        Files.deleteIfExists(file);
-                    } catch (IOException e) {
-                        throw new UncheckedIOException("파일 삭제 실패", e);
-                    }
-
-                    this.attachmentRepository.deleteById(attId);
-
-
+                try {
+                    Files.deleteIfExists(file);
+                } catch (IOException e) {
+                    throw new UncheckedIOException("파일 삭제 실패", e);
                 }
+
+                this.attachmentRepository.deleteById(attId);
+
+
             }
+        }
 
 
-            this.lecScheduleRepository.deleteAllByLecture_Id(lecture.getId());
+        this.lecScheduleRepository.deleteAllByLecture_Id(lecture.getId());
 
-            for (LectureScheduleDto scheduleDto : lectureScheduleDtos) {
-                LectureSchedule lectureSchedule = new LectureSchedule();
-                lectureSchedule.setLecture(lecture);
-                lectureSchedule.setDay(scheduleDto.getDay());
-                lectureSchedule.setStartTime(scheduleDto.getStartTime());
-                lectureSchedule.setEndTime(scheduleDto.getEndTime());
+        for (LectureScheduleDto scheduleDto : lectureScheduleDtos) {
+            LectureSchedule lectureSchedule = new LectureSchedule();
+            lectureSchedule.setLecture(lecture);
+            lectureSchedule.setDay(scheduleDto.getDay());
+            lectureSchedule.setStartTime(scheduleDto.getStartTime());
+            lectureSchedule.setEndTime(scheduleDto.getEndTime());
 
-                this.lecScheduleRepository.save(lectureSchedule);
-            }
+            this.lecScheduleRepository.save(lectureSchedule);
+        }
 
-            Major major = this.majorRepository.findById(lectureDto.getMajor())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 학과 입니다."));
-            User user = this.userRepository.findById(lectureDto.getUser())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 교수 입니다."));
+        Major major = this.majorRepository.findById(lectureDto.getMajor())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 학과 입니다."));
+        User user = this.userRepository.findById(lectureDto.getUser())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 교수 입니다."));
 
-            lecture.setDescription((lectureDto.getDescription()));
-            lecture.setMajor(major);
-            lecture.setStatus(lectureDto.getStatus());
-            lecture.setUser(user);
-            lecture.setLevel(lectureDto.getLevel());
-            lecture.setCompletionDiv(lectureDto.getCompletionDiv());
-            lecture.setTotalStudent(lectureDto.getTotalStudent());
-            lecture.setStartDate(lectureDto.getStartDate());
-            lecture.setEndDate(lectureDto.getEndDate());
-            lecture.setName(lectureDto.getName());
-            lecture.setCredit(lectureDto.getCredit());
+        lecture.setDescription((lectureDto.getDescription()));
+        lecture.setMajor(major);
+        lecture.setStatus(lectureDto.getStatus());
+        lecture.setUser(user);
+        lecture.setLevel(lectureDto.getLevel());
+        lecture.setCompletionDiv(lectureDto.getCompletionDiv());
+        lecture.setTotalStudent(lectureDto.getTotalStudent());
+        lecture.setStartDate(lectureDto.getStartDate());
+        lecture.setEndDate(lectureDto.getEndDate());
+        lecture.setName(lectureDto.getName());
+        lecture.setCredit(lectureDto.getCredit());
 
-            Lecture saveLecture = this.lectureRepository.save(lecture);
+        Lecture saveLecture = this.lectureRepository.save(lecture);
 
         GradingWeights gradingWeights = this.gradingWeightsRepository.findByLecture_Id(saveLecture.getId());
 
@@ -907,10 +922,10 @@ public class LectureService {
 
         this.gradingWeightsRepository.save(gradingWeights);
 
-        if(files != null && !files.isEmpty()){
-            for (MultipartFile file : files){
+        if (files != null && !files.isEmpty()) {
+            for (MultipartFile file : files) {
                 try {
-                    Attachment attachment = attachmentService.save(file,user);
+                    Attachment attachment = attachmentService.save(file, user);
 
                     LecRegAttach lecRegAttach = new LecRegAttach();
                     lecRegAttach.setAttachment(attachment);
@@ -918,7 +933,7 @@ public class LectureService {
 
                     this.lecRegAttachRepository.save(lecRegAttach);
 
-                }catch (IOException ex){
+                } catch (IOException ex) {
                     throw new UncheckedIOException("파일 저장 실패", ex);
                 }
             }
@@ -929,48 +944,240 @@ public class LectureService {
     public List<LectureDto> applyLecturListEnd(Long id) {
         List<CourseRegistration> courseRegistrationList = this.courseRegRepository.findAllByUser_Id(id);
         List<LectureDto> lectureDtoList = new ArrayList<>();
-        for(CourseRegistration courseReg : courseRegistrationList){
+        for (CourseRegistration courseReg : courseRegistrationList) {
             Lecture lecture = this.lectureRepository.findById(courseReg.getLecture().getId())
-                    .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"존재 하지 않는 강의입니다."));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재 하지 않는 강의입니다."));
 
             Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
 
-            List<LectureSchedule> lectureScheduleList = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
-            List<LectureScheduleDto> lectureScheduleDtos = new ArrayList<>();
-            for(LectureSchedule schedule : lectureScheduleList){
-                LectureScheduleDto scheduleDto = new LectureScheduleDto();
-                scheduleDto.setId(schedule.getId());
-                scheduleDto.setLecture(schedule.getLecture().getId());
-                scheduleDto.setDay(schedule.getDay());
-                scheduleDto.setStartTime(schedule.getStartTime());
-                scheduleDto.setEndTime(schedule.getEndTime());
-
-                lectureScheduleDtos.add(scheduleDto);
+            public LectureBasicInfoDto getLectureBasicInfo (Long lectureId){
+                return lectureRepository.findById(lectureId)
+                        .map(lecture -> new LectureBasicInfoDto(
+                                lecture.getName(),
+                                lecture.getUser().getId(),
+                                lecture.getUser().getName()
+                        ))
+                        .orElseThrow(() -> new RuntimeException("강의를 찾을 수 없습니다."));
             }
 
-            LectureDto lectureDto = new LectureDto();
+            @Transactional
+            public void updateLecture (
+                    LectureDto lectureDto,
+                    List < LectureScheduleDto > lectureScheduleDtos,
+                    List < MultipartFile > files,
+                    PercentDto percent,
+                    List < AttachmentDto > existingDtos){
 
-            lectureDto.setId(lecture.getId());
-            lectureDto.setLectureSchedules(lectureScheduleDtos);
-            lectureDto.setUser(lecture.getUser().getId());
-            lectureDto.setLevel(lecture.getLevel());
-            lectureDto.setStatus(courseReg.getStatus());
-            lectureDto.setLecStatus(lecture.getStatus());
-            lectureDto.setEndDate(lecture.getEndDate());
-            lectureDto.setStartDate(lecture.getStartDate());
-            lectureDto.setNowStudent(nowStudent);
-            lectureDto.setTotalStudent(lecture.getTotalStudent());
-            lectureDto.setMajor(lecture.getMajor().getId());
-            lectureDto.setCredit(lecture.getCredit());
-            lectureDto.setCompletionDiv(lecture.getCompletionDiv());
-            lectureDto.setName(lecture.getName());
-            lectureDto.setMajorName(lecture.getMajor().getName());
-            lectureDto.setUserName(lecture.getUser().getName());
+                if (lectureDto.getMajor() == null) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "소속 대학과 학과를 선택해주세요");
+                }
+                if (lectureDto.getStartDate() == null || lectureDto.getEndDate() == null) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "강의 날짜를 선택해주세요");
+                }
 
-            lectureDtoList.add(lectureDto);
+                LocalDate start = lectureDto.getStartDate();
+                LocalDate end = lectureDto.getEndDate();
+                LocalDate today = LocalDate.now();
+
+                if (!start.isAfter(today)) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "오늘 이후의 강의만 등록할 수 있습니다.");
+                }
+
+                if (end.isBefore(start)) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "종료일이 시작일보다 빠릅니다.");
+                }
+
+                LocalDate minEnd = start.plusMonths(2);
+                if (end.isBefore(minEnd)) {
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST,
+                            "강의 기간은 최소 2개월이어야 합니다. (가능한 최소 종료일: " + minEnd + ")"
+                    );
+                }
+                if (lectureScheduleDtos == null || lectureScheduleDtos.isEmpty()) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "수업 일정을 하루 이상 선택해주세요.");
+                }
+
+                if (lectureDto.getUser() == null) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "담당 교수를 선택해주세요.");
+                }
+                if (lectureDto.getCredit() == 0) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "이수 학점은 1점 이상이여야 합니다.");
+                }
+                if (lectureDto.getName().isBlank() || lectureDto.getName() == null) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "강의명을 입력해주세요.");
+                }
+                if (lectureDto.getLevel() == 0) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "학년을 선택해주세요.");
+                }
+                if (lectureDto.getTotalStudent() < 10) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수강인원은 10명 이상이여야 합니다.");
+                }
+
+                BigDecimal totalPercent = percent.getAssignment()
+                        .add(percent.getAttendance())
+                        .add(percent.getMidtermExam())
+                        .add(percent.getFinalExam());
+                BigDecimal overPercent = new BigDecimal("100.00");
+                if (totalPercent.compareTo(overPercent) > 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "비율은 100을 넘을 수 없습니다.");
+                }
+
+                for (LectureScheduleDto lectureScheduleDto : lectureScheduleDtos) {
+                    if (lectureScheduleDto.getDay() == null || lectureScheduleDto.getStartTime() == null || lectureScheduleDto.getEndTime() == null) {
+                        throw new ResponseStatusException(HttpStatus.CONFLICT, "수업 요일과 교시를 모두 선택해주세요.");
+                    }
+                }
+
+                Lecture lecture = this.lectureRepository.findById(lectureDto.getId())
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 강의 입니다."));
+
+
+                List<LecRegAttach> lecRegAttachList = this.lecRegAttachRepository.findByLecture_id(lecture.getId());
+
+
+                Set<Long> keepIds = new HashSet<>();
+                if (existingDtos != null) {
+                    for (AttachmentDto dto : existingDtos) {
+                        if (dto != null && dto.getId() != null) {
+                            keepIds.add(dto.getId());
+                        }
+                    }
+                }
+                Path base = Path.of(uploadDir).toAbsolutePath().normalize();
+                for (LecRegAttach lecRegAttach : lecRegAttachList) {
+                    Long attId = lecRegAttach.getAttachment().getId();
+
+                    if (!keepIds.contains(attId)) {
+
+                        this.lecRegAttachRepository.deleteByLectureIdAndAttachmentId(lecture.getId(), attId);
+                        Attachment attachment = this.attachmentRepository.findById(attId)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 파일입니다."));
+
+                        Path file = base.resolve(attachment.getStoredKey()).normalize();
+                        if (!file.startsWith(base)) {
+                            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "허용되지 않은 경로 요청");
+                        }
+
+                        try {
+                            Files.deleteIfExists(file);
+                        } catch (IOException e) {
+                            throw new UncheckedIOException("파일 삭제 실패", e);
+                        }
+
+                        this.attachmentRepository.deleteById(attId);
+
+
+                    }
+                }
+
+
+                this.lecScheduleRepository.deleteAllByLecture_Id(lecture.getId());
+
+                for (LectureScheduleDto scheduleDto : lectureScheduleDtos) {
+                    LectureSchedule lectureSchedule = new LectureSchedule();
+                    lectureSchedule.setLecture(lecture);
+                    lectureSchedule.setDay(scheduleDto.getDay());
+                    lectureSchedule.setStartTime(scheduleDto.getStartTime());
+                    lectureSchedule.setEndTime(scheduleDto.getEndTime());
+
+                    this.lecScheduleRepository.save(lectureSchedule);
+                }
+
+                Major major = this.majorRepository.findById(lectureDto.getMajor())
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 학과 입니다."));
+                User user = this.userRepository.findById(lectureDto.getUser())
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 교수 입니다."));
+
+                lecture.setDescription((lectureDto.getDescription()));
+                lecture.setMajor(major);
+                lecture.setStatus(lectureDto.getStatus());
+                lecture.setUser(user);
+                lecture.setLevel(lectureDto.getLevel());
+                lecture.setCompletionDiv(lectureDto.getCompletionDiv());
+                lecture.setTotalStudent(lectureDto.getTotalStudent());
+                lecture.setStartDate(lectureDto.getStartDate());
+                lecture.setEndDate(lectureDto.getEndDate());
+                lecture.setName(lectureDto.getName());
+                lecture.setCredit(lectureDto.getCredit());
+
+                Lecture saveLecture = this.lectureRepository.save(lecture);
+
+                GradingWeights gradingWeights = this.gradingWeightsRepository.findByLecture_Id(saveLecture.getId());
+
+                gradingWeights.setAttendanceScore(percent.getAttendance());
+                gradingWeights.setAssignmentScore(percent.getAssignment());
+                gradingWeights.setMidtermExam(percent.getMidtermExam());
+                gradingWeights.setFinalExam(percent.getFinalExam());
+
+                this.gradingWeightsRepository.save(gradingWeights);
+
+                if (files != null && !files.isEmpty()) {
+                    for (MultipartFile file : files) {
+                        try {
+                            Attachment attachment = attachmentService.save(file, user);
+
+                            LecRegAttach lecRegAttach = new LecRegAttach();
+                            lecRegAttach.setAttachment(attachment);
+                            lecRegAttach.setLecture(saveLecture);
+
+                            this.lecRegAttachRepository.save(lecRegAttach);
+
+                        } catch (IOException ex) {
+                            throw new UncheckedIOException("파일 저장 실패", ex);
+                        }
+                    }
+                }
+
+            }
+
+            public List<LectureDto> applyLecturListEnd (Long id){
+                List<CourseRegistration> courseRegistrationList = this.courseRegRepository.findAllByUser_Id(id);
+                List<LectureDto> lectureDtoList = new ArrayList<>();
+                for (CourseRegistration courseReg : courseRegistrationList) {
+                    Lecture lecture = this.lectureRepository.findById(courseReg.getLecture().getId())
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재 하지 않는 강의입니다."));
+
+                    Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
+
+                    List<LectureSchedule> lectureScheduleList = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
+                    List<LectureScheduleDto> lectureScheduleDtos = new ArrayList<>();
+                    for (LectureSchedule schedule : lectureScheduleList) {
+                        LectureScheduleDto scheduleDto = new LectureScheduleDto();
+                        scheduleDto.setId(schedule.getId());
+                        scheduleDto.setLecture(schedule.getLecture().getId());
+                        scheduleDto.setDay(schedule.getDay());
+                        scheduleDto.setStartTime(schedule.getStartTime());
+                        scheduleDto.setEndTime(schedule.getEndTime());
+
+                        lectureScheduleDtos.add(scheduleDto);
+                    }
+
+                    LectureDto lectureDto = new LectureDto();
+
+                    lectureDto.setId(lecture.getId());
+                    lectureDto.setLectureSchedules(lectureScheduleDtos);
+                    lectureDto.setUser(lecture.getUser().getId());
+                    lectureDto.setLevel(lecture.getLevel());
+                    lectureDto.setStatus(courseReg.getStatus());
+                    lectureDto.setLecStatus(lecture.getStatus());
+                    lectureDto.setEndDate(lecture.getEndDate());
+                    lectureDto.setStartDate(lecture.getStartDate());
+                    lectureDto.setNowStudent(nowStudent);
+                    lectureDto.setTotalStudent(lecture.getTotalStudent());
+                    lectureDto.setMajor(lecture.getMajor().getId());
+                    lectureDto.setCredit(lecture.getCredit());
+                    lectureDto.setCompletionDiv(lecture.getCompletionDiv());
+                    lectureDto.setName(lecture.getName());
+                    lectureDto.setMajorName(lecture.getMajor().getName());
+                    lectureDto.setUserName(lecture.getUser().getName());
+
+                    lectureDtoList.add(lectureDto);
+                }
+
+                return lectureDtoList;
+            }
         }
-
-        return lectureDtoList;
     }
 }
 

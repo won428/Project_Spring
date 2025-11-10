@@ -85,7 +85,7 @@ public class BoardController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
-
-
     }
+
+
 }

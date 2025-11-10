@@ -189,7 +189,6 @@ public class LectureController {
     }
 
 
-
     // 단일 신청(추후에 수강신청 컨트롤러로 이식)
     @PostMapping("/applyOne")
     public ResponseEntity<?> applyLectureOne(@RequestBody Long lecId, @RequestParam Long id) {
@@ -249,6 +248,7 @@ public class LectureController {
         return lectureDto;
     }
 
+    // 순수 강의 정보 - 첨부파일 미포함
     @GetMapping("/detailLecture/{id}")
     public LectureDto lectureDetail(@PathVariable Long id) {
         LectureDto lectureDto = lectureService.findBylectureID(id);
@@ -450,6 +450,13 @@ public class LectureController {
         if (attendanceDetail != null && !attendanceDetail.isEmpty()) {
             dto.setContent("[" + attendanceDetail + "] " + dto.getContent());
         }
+    @GetMapping("/regForPro/{id}")
+    public ProRegDto proRegDto (@PathVariable Long id) {
+        ProRegDto proRegDto = this.userService.findProfessor(id);
+
+        return proRegDto;
+    }
+
 
         dto.setStatus(Status.PENDING);
         dto.setAppealDate(LocalDate.now());

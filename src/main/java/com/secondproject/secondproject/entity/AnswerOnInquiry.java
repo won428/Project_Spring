@@ -41,4 +41,17 @@ public class AnswerOnInquiry {
     @Column(name = "answer_updated_at")
     private LocalDateTime updatedAt;
 
+    @PrePersist
+    void prePersist() {
+        var now = LocalDateTime.now();
+        if (createdAt == null) createdAt = now; // 최초 생성일
+        updatedAt = now;                                // 최초 수정일도 now
+    }
+
+    // 문의글 수정일을 UPDATE 직전에 자동으로 채우는 기능
+    @PreUpdate
+    void preUpdate() {
+        updatedAt = LocalDateTime.now();                // 수정될 때마다 갱신
+    }
+
 }

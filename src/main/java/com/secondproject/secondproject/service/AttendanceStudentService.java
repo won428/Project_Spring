@@ -5,9 +5,7 @@ import com.secondproject.secondproject.dto.AttendanceResponseDto;
 import com.secondproject.secondproject.entity.Attendance_records;
 import com.secondproject.secondproject.entity.Enrollment;
 import com.secondproject.secondproject.entity.User;
-import com.secondproject.secondproject.repository.AttendanceRecordsRepository;
-import com.secondproject.secondproject.repository.EnrollmentRepository;
-import com.secondproject.secondproject.repository.UserRepository;
+import com.secondproject.secondproject.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -15,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +29,7 @@ public class AttendanceStudentService {
     private final AttendanceRecordsRepository attendanceRecordsRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
+    private final GradingWeightsRepository gradingWeightsRepository;
 
     // 학생 출결 일괄 등록
     public List<AttendanceResponseDto> insertAttendances(Long id, List<AttendanceRequestDto> requestDtos) {
@@ -115,5 +115,25 @@ public class AttendanceStudentService {
                         .attendStudent(a.getAttendStudent())
                         .build())
                 .toList();
+    }
+
+    public AttendanceSummary getAttendanceSummary(Long lectureId, Long userId) {
+        AttendanceCounts c = attendanceRecordsRepository.countByLectureAndOptionalUser(lectureId, userId);
+        long total = Optional.ofNullable(c.getTotal()).orElse(0L); // 총 출결수
+        long lateN = Optional.ofNullable(c.getLate()).orElse(0L); // 지각 수
+        long earlyN = Optional.ofNullable(c.getEarlyLeave()).orElse(0L); // 조퇴 수
+        long absent = Optional.ofNullable(c.getAbsent()).orElse(0L); // 결석 수
+        long excused = Optional.ofNullable(c.getExcused()).orElse(0L); // 공결 수
+
+        long totalLateAndAbsent = lateN + earlyN; // 지각 + 조퇴 총합
+
+        double absentEq = absent + (0.3 * totalLateAndAbsent) + (0.1 * (totalLateAndAbsent / 3)); // 3회 지각시 -1점
+        double effective = Math.max(0, total - absentEq);
+
+        BigDecimal ratio = gradingWeightsRepository.findAttendanceRatioByLectureId(lectureId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"해당하는 값이 없습니다."));
+        double r = ratio.doubleValue();
+        double score = (total == 0) ? 0.0 : Math.round((effective / total * r) * 100.0) / 100.0;
+
+        return  new AttendanceSummary(total, c.getPresent(), lateN, earlyN, absent, c.getExcused(), score);
     }
 }
