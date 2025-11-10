@@ -60,9 +60,9 @@ public class LectureService {
         LocalDate end = lectureDto.getEndDate();
         LocalDate today = LocalDate.now();
 
-        if (!start.isAfter(today)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "오늘 이후의 강의만 등록할 수 있습니다.");
-        }
+//        if (!start.isAfter(today)) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "오늘 이후의 강의만 등록할 수 있습니다.");
+//        }
 
         if (end.isBefore(start)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "종료일이 시작일보다 빠릅니다.");
