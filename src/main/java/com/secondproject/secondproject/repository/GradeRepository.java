@@ -1,6 +1,7 @@
 package com.secondproject.secondproject.repository;
 
 import com.secondproject.secondproject.entity.Grade;
+import com.secondproject.secondproject.service.GradeSummaryDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +20,16 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
 
     List<Grade> findAllByLecture_Id(Long id);
     boolean existsByLecture_IdAndUser_Id(Long lectureId, Long userId);
+
+    // 성적이 이미 저장된 학생인지 확인
+    @Query("""
+            select new com.secondproject.secondproject.service.GradeSummaryDto(
+                  g.user.id, g.totalScore, g.lectureGrade
+              )
+              from Grade g
+              where g.lecture.id = :lectureId
+                and g.totalScore is not null
+                and g.totalScore > 0
+            """)
+    List<GradeSummaryDto> findSummariesByLectureId(Long lectureId);
 }

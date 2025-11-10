@@ -1,17 +1,18 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.dto.GradeResponseDto;
 import com.secondproject.secondproject.repository.GradeRepository;
 import com.secondproject.secondproject.service.GradeSaveRequest;
 import com.secondproject.secondproject.service.GradeService;
+import com.secondproject.secondproject.service.GradeSummaryDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -27,5 +28,11 @@ public class GradeController {
     public ResponseEntity<Map<String, Object>> saveGrade(@Valid @RequestBody GradeSaveRequest req){
         Long id = gradeService.createGrade(req);
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("id",id));
+    }
+
+    // 성적이 저장된 학생 검증
+    @GetMapping("/listByGrade")
+    public List<GradeSummaryDto> listByGrade(@RequestParam Long lectureId){
+        return gradeService.existsByGrade(lectureId);
     }
 }
