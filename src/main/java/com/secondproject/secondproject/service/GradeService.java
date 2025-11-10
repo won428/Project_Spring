@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.service;
 
+import com.secondproject.secondproject.dto.GradeResponseDto;
 import com.secondproject.secondproject.entity.Grade;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
@@ -11,6 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -38,5 +43,9 @@ public class GradeService {
 
         gradeRepository.save(grade);
         return grade.getId();
+    }
+
+    public List<GradeSummaryDto> existsByGrade(Long lectureId) {
+        return gradeRepository.findSummariesByLectureId(lectureId);
     }
 }
