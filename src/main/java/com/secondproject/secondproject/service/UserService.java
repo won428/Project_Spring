@@ -594,8 +594,8 @@ public class UserService {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "학번 생성 데이터가 누락되었습니다.");
             }
 
-            // 연도4자리+유저번호 0포함 4자리+학과코드
-            String userNum = String.format("%04d%04d%03d", year, userId, majorId);
+            // 연도4자리 + 학과코드 3자리 + 유저번호 0포함 2자리
+            String userNum = String.format("%04d%03d%02d", year, majorId, userId);
 
             // Long으로 타입변환
             Long userCode = Long.parseLong(userNum);

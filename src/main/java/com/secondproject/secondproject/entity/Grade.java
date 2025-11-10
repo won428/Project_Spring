@@ -9,7 +9,9 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 
-@Getter @Setter @ToString
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "grade")
 public class Grade {
@@ -54,4 +56,5 @@ public class Grade {
 
     @Column(name = "lecture_grade")
     private BigDecimal lectureGrade; // 학점
+
 }

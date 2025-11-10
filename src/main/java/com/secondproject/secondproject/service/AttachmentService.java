@@ -2,6 +2,7 @@ package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.dto.DownloadFile;
 import com.secondproject.secondproject.entity.Attachment;
+import com.secondproject.secondproject.entity.OnlineLecture;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.publicMethod.DownloadForProject;
 import com.secondproject.secondproject.repository.AttachmentRepository;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -135,12 +137,18 @@ public class AttachmentService {
     }
 
     // 단일 파일 삭제
-    public void deleteFile(Path file){
+    public void deleteFile(String storedKey) {
+        if (storedKey == null || storedKey.isEmpty()) {
+            return; // 삭제할 키가 없음
+        }
+        Path filePath = Paths.get(vidDir).resolve(storedKey).normalize();
         try {
-            Files.deleteIfExists(file);
+            Files.deleteIfExists(filePath);
+
         } catch (IOException e) {
             throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "파일 삭제 실패 " );
+                    HttpStatus.INTERNAL_SERVER_ERROR, "파일 삭제 실패 ");
         }
     }
+
 }
