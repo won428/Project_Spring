@@ -226,8 +226,9 @@ public class LectureService {
 
             lecture.setStatus(status);
             this.lectureRepository.save(lecture);
+            // 테스트 위해서 임시로 비활성화
 //            int total = lecture.getTotalStudent();
-//            int minRequired = (int) Math.ceil(total * 0.3); // 신청인원 일정 비율 이상일때 개강가능
+//            int minRequired = (int) Math.ceil(total * 0.8); // 신청인원 일정 비율 이상일때 개강가능
 //
 //            if (minRequired > courseRegistrationList.size()) {
 //                throw new ResponseStatusException(HttpStatus.CONFLICT, "신청 인원이 부족합니다");
@@ -249,6 +250,7 @@ public class LectureService {
                 enrollment.setGrade(newGrade);
                 enrollment.setLecture(lecture);
                 enrollment.setStatus(Status.INPROGRESS);
+                enrollment.setCompletionDiv(lecture.getCompletionDiv());
 
                 this.enrollmentRepository.save(enrollment);
             }
@@ -615,6 +617,7 @@ public class LectureService {
                 enrollment.setGrade(newGrade);
                 enrollment.setLecture(lecture);
                 enrollment.setStatus(Status.INPROGRESS);
+                enrollment.setCompletionDiv(lecture.getCompletionDiv());
 
                 this.enrollmentRepository.save(enrollment);
             }

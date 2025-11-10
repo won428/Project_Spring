@@ -2,10 +2,12 @@ package com.secondproject.secondproject.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.secondproject.secondproject.Enum.InquiryStatus;
+import com.secondproject.secondproject.Enum.Tag;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 
@@ -45,6 +47,14 @@ public class Inquiry {
     @Enumerated(EnumType.STRING)
     @Column(name = "inquiry_status", nullable = false)
     private InquiryStatus inquiryStatus = InquiryStatus.PENDING; // 처리상태(대기중,처리완료)
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tag")
+    Tag tag;
+
+    @Column(name ="view_count")
+    @ColumnDefault("0")
+    int viewCount = 0;
 
     // 문의글 등록일을 INSERT 직전에 자동으로 채우는 기능
     @PrePersist
