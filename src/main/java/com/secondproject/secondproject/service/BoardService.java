@@ -1,6 +1,8 @@
 package com.secondproject.secondproject.service;
 
 
+import com.secondproject.secondproject.Enum.InquiryStatus;
+import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.entity.Mapping.BoardAttach;
@@ -427,5 +429,13 @@ public class BoardService {
         }
         this.inquiryRepository.deleteById(id);
 
+    }
+
+    public void updatePostStatus(Long id, InquiryStatus postStatus) {
+        Inquiry inquiry = this.inquiryRepository.findById(id)
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 게시글 입니다."));
+        inquiry.setInquiryStatus(postStatus);
+
+        this.inquiryRepository.save(inquiry);
     }
 }

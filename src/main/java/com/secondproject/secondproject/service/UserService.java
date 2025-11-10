@@ -594,8 +594,8 @@ public class UserService {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "학번 생성 데이터가 누락되었습니다.");
             }
 
-            // 연도4자리+유저번호 0포함 4자리+학과코드
-            String userNum = String.format("%04d%04d%03d", year, userId, majorId);
+            // 연도4자리 + 학과코드 3자리 + 유저번호 0포함 2자리
+            String userNum = String.format("%04d%03d%02d", year, majorId, userId);
 
             // Long으로 타입변환
             Long userCode = Long.parseLong(userNum);
@@ -642,5 +642,22 @@ public class UserService {
         return userRepository.findById(id)
                 .map(user -> new UserNameDto(user.getId(), user.getName()))
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+    }
+
+    public ProRegDto findProfessor(Long id) {
+        User user = this.userRepository.findById(id)
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 유저 입니다."));
+        Major major = this.majorRepository.findById(user.getMajor().getId())
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 학과 입니다."));
+        ProRegDto proRegDto = new ProRegDto();
+
+        proRegDto.setId(user.getId());
+        proRegDto.setName(user.getName());
+        proRegDto.setMajor(major.getId());
+        proRegDto.setMajorName(major.getName());
+        proRegDto.setCollege(major.getCollege().getId());
+        proRegDto.setCollegeName(major.getCollege().getType());
+
+        return proRegDto;
     }
 }
