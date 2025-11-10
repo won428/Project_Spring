@@ -1,15 +1,12 @@
 package com.secondproject.secondproject.controller;
 
-import com.secondproject.secondproject.Enum.AppealType;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
-import com.secondproject.secondproject.entity.Appeal;
 import com.secondproject.secondproject.repository.LecScheduleRepository;
 import com.secondproject.secondproject.repository.LectureRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import com.secondproject.secondproject.Enum.Status;
-import com.secondproject.secondproject.service.*;
 import com.secondproject.secondproject.dto.LectureDto;
 import com.secondproject.secondproject.dto.UserDto;
 import com.secondproject.secondproject.service.*;
@@ -33,12 +30,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.Set;
 
 @Slf4j
@@ -49,9 +44,8 @@ public class LectureController {
     private final MajorService majorService;
     private final LectureService lectureService;
     private final UserService userService;
-    private final AttachmentService attachmentService;
-    private final AttendanceAppealService attendanceAppealService;
     private final AttendanceStudentService attendanceStudentService;
+    private final AttendanceAppealService attendanceAppealService;
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
     private final LecScheduleRepository lecScheduleRepository;
@@ -450,13 +444,6 @@ public class LectureController {
         if (attendanceDetail != null && !attendanceDetail.isEmpty()) {
             dto.setContent("[" + attendanceDetail + "] " + dto.getContent());
         }
-    @GetMapping("/regForPro/{id}")
-    public ProRegDto proRegDto (@PathVariable Long id) {
-        ProRegDto proRegDto = this.userService.findProfessor(id);
-
-        return proRegDto;
-    }
-
 
         dto.setStatus(Status.PENDING);
         dto.setAppealDate(LocalDate.now());
@@ -464,5 +451,12 @@ public class LectureController {
         attendanceAppealService.createAppealWithFile(dto, file);
 
         return ResponseEntity.ok("출결 이의제기 신청이 완료되었습니다.");
+    }
+
+    @GetMapping("/regForPro/{id}")
+    public ProRegDto proRegDto (@PathVariable Long id) {
+        ProRegDto proRegDto = this.userService.findProfessor(id);
+
+        return proRegDto;
     }
 }

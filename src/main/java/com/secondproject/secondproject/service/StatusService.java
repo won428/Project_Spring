@@ -13,13 +13,17 @@ import com.secondproject.secondproject.repository.StatusChangeRepository;
 import com.secondproject.secondproject.repository.StatusRecordsRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -145,20 +149,7 @@ public class StatusService {
     }
 
     /*관리자 학생 학적 변경용*/
-    public List<UserDto> getStudentsForManagement() {
-        List<User> students = userRepository.findAllByType(UserType.STUDENT);
 
-        return students.stream()
-                .map(u -> {
-                    UserDto dto = new UserDto();
-                    dto.setId(u.getId());
-                    dto.setName(u.getName());
-                    dto.setMajorName(u.getMajor() != null ? u.getMajor().getName() : "");
-                    dto.setType(u.getType());
-                    return dto;
-                })
-                .toList();
-    }
 
     /*관리자 학생 학적 변경용*/
     /** 학적 정보 조회 */
@@ -217,5 +208,40 @@ public class StatusService {
         StatusRecords status = statusRecordsRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("학적 정보가 존재하지 않습니다."));
         statusRecordsRepository.delete(status);
+    }
+
+    public List<UserDto> getStudentsForManagement() {
+        List<User> students = userRepository.findAllByType(UserType.STUDENT);
+
+        return students.stream()
+                .map(u -> {
+                    UserDto dto = new UserDto();
+                    dto.setId(u.getId());
+                    dto.setName(u.getName());
+                    dto.setMajorName(u.getMajor() != null ? u.getMajor().getName() : "");
+                    dto.setType(u.getType());
+                    return dto;
+                })
+                .toList();
+    }
+
+    /**
+     * PENDING 상태 StudentRecord 목록을 StatusChangeRequestDto로 반환
+     */
+    public List<StatusChangeRequestDto> getPendingStudentRecords() {
+        List<StudentRecord> pendingRecords = statusChangeRepository.findByStatus(Status.PENDING);
+
+        return pendingRecords.stream()
+                .map(record -> new StatusChangeRequestDto(record, null)) // Attachment는 필요 시 연결
+                .collect(Collectors.toList());
+    }
+
+    /** 학적 변경 신청 승인/거부 처리 */
+    public void approveOrRejectStatus(Long recordId, Status status) {
+        StudentRecord record = statusChangeRepository.findById(recordId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 학생 신청 기록이 없습니다."));
+
+        record.setStatus(status);  // enum Status 적용
+        statusChangeRepository.save(record);
     }
 }

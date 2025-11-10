@@ -1,34 +1,37 @@
 package com.secondproject.secondproject.service;
 
+import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.dto.AppealListDto;
 import com.secondproject.secondproject.dto.CreditAppealDto;
 import com.secondproject.secondproject.dto.EnrollmentInfoDto;
+import com.secondproject.secondproject.dto.GradeAppealDto;
 import com.secondproject.secondproject.entity.Appeal;
 import com.secondproject.secondproject.entity.Enrollment;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.repository.AppealRepository;
 import com.secondproject.secondproject.repository.EnrollmentRepository;
+import com.secondproject.secondproject.repository.LectureRepository;
 import com.secondproject.secondproject.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CreditAppealService {
 
     private final EnrollmentRepository enrollmentRepository;
     private final AppealRepository appealRepository;
+    private final LectureRepository lectureRepository;
 
 
-    public CreditAppealService(EnrollmentRepository enrollmentRepository,
-                               AppealRepository appealRepository,
-                               UserRepository userRepository) {
-        this.enrollmentRepository = enrollmentRepository;
-        this.appealRepository = appealRepository;
 
-    }
 
     public List<AppealListDto> getAppealsByStudentId(Long studentId) {
         List<Appeal> appeals = appealRepository.findBySendingId(studentId); // ✅ 인스턴스로 호출
@@ -78,6 +81,28 @@ public class CreditAppealService {
         appealRepository.save(gradeAppeal);
 
 
+    }
+
+    public void createGradeAppeal(GradeAppealDto appealForm) {
+        Appeal appeal = new Appeal(); // 새로 만들 이의제기 객체
+
+        // 폼에서 보낸 강의ID로 만든 객체
+        Lecture lecture = this.lectureRepository.findById(appealForm.getLectureId())
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 강의 입니다,"));
+        // 특정된 강의와 보낸사람 ID와 일치하는 수강정보 생성
+        Enrollment enrollment = this.enrollmentRepository.findByUserIdAndLectureId(appealForm.getSendingId(), lecture.getId());
+
+        appeal.setReceiverId(appealForm.getReceiverId());
+        appeal.setSendingId(appealForm.getSendingId());
+        appeal.setAppealDate(LocalDate.now());
+        appeal.setAppealType(appealForm.getAppealType());
+        appeal.setTitle(appealForm.getTitle());
+        appeal.setContent(appealForm.getContent());
+        appeal.setLecture(lecture);
+        appeal.setEnrollment(enrollment);
+        appeal.setStatus(Status.PENDING);
+
+        this.appealRepository.save(appeal);
     }
 
 //    public List<AppealListDto> getMyAppeals(String sendingId) {

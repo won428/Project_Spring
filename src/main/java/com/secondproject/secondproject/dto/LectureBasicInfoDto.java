@@ -16,5 +16,5 @@ public class LectureBasicInfoDto {
     private String lecName;   // 강의명
     private Long userId;      // 교수 id
     private String userName;  // 교수 이름
-    
+
 }

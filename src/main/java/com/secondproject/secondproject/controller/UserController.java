@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.College;
@@ -212,9 +213,34 @@ public class UserController {
         statusService.deleteStudentStatus(userId);
     }
 
+
     @GetMapping("/manageList")
     public List<UserDto> getStudentList() {
         return statusService.getStudentsForManagement();
+    }
+
+    @GetMapping("/student/record/all")
+    public List<StatusChangeRequestDto> getAllPendingRecords(@RequestParam(value = "status", required = false) String status) {
+        if (!"PENDING".equalsIgnoreCase(status)) {
+            return Collections.emptyList();
+        }
+        return statusService.getPendingStudentRecords();
+    }
+
+    /** 학적 변경 신청 승인/거부 처리 */
+    @PutMapping("/status/{recordId}")
+    public void approveOrReject(@PathVariable Long recordId,
+                                @RequestBody Map<String, String> body) {
+        String statusStr = body.get("status");
+        Status status;
+
+        try {
+            status = Status.valueOf(statusStr); // "APPROVED" 또는 "REJECTED"
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("잘못된 status 값입니다. APPROVED 또는 REJECTED 만 가능.");
+        }
+
+        statusService.approveOrRejectStatus(recordId, status);
     }
 //        // 4) 학적 상태 조회 (최종적으로 이 형태로 바뀌어야 함)
 //        StatusRecords statusRecord = studentService.getStatusRecordByUserId(user.getId());

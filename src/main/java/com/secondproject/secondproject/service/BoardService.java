@@ -277,13 +277,13 @@ public class BoardService {
         Inquiry inquiry = inquiryRepository.findById(id)
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 게시글입니다."));
         InquiryDto inquiryDto = new InquiryDto();
-        List<InquiryAttach> inquiryAttachList = this.inquiryAttRepository.findAllByInquiry_Id(inquiry.getId());
-        List<AttachmentDto> attachmentDtos = new ArrayList<>();
-        if(inquiryAttachList != null && !inquiryAttachList.isEmpty()){
+        List<InquiryAttach> inquiryAttachList = this.inquiryAttRepository.findAllByInquiry_Id(inquiry.getId()); // 첨부파일 매핑 리스트 만들기 (게시판에 매칭되는 파일첨부 PK를 가져오기 위함)
+        List<AttachmentDto> attachmentDtos = new ArrayList<>(); // 파일 정보를 담을 DTO 리스트(리액트로 반환)
+        if(inquiryAttachList != null && !inquiryAttachList.isEmpty()){ // 파일첨부가 존재 할때만 작동
             for(InquiryAttach inquiryAttach : inquiryAttachList){
                 Attachment attachment = this.attachmentRepository.findById(inquiryAttach.getAttachment().getId())
-                        .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 파일입니다."));
-                AttachmentDto attachmentDto = new AttachmentDto();
+                        .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 파일입니다.")); // 매핑테이블에서 뽑아온 파일 PK로 파일객체 만들기
+                AttachmentDto attachmentDto = new AttachmentDto(); // 파일정보를 담을 DTO객체
 
                 attachmentDto.setUploadAt(attachment.getUploadAt());
                 attachmentDto.setName(attachment.getName());
@@ -292,8 +292,8 @@ public class BoardService {
                 attachmentDto.setStoredKey(attachment.getStoredKey());
                 attachmentDto.setSizeBytes(attachment.getSizeBytes());
                 attachmentDto.setContentType(attachment.getContentType());
-
-                attachmentDtos.add(attachmentDto);
+                // 필요한정보 DTO에 담기
+                attachmentDtos.add(attachmentDto); // 만들어진 객체 리스트에 담기 (매핑테이블 리스트 끝날때까지)
             }
         }
 
@@ -310,7 +310,7 @@ public class BoardService {
         inquiryDto.setUser(inquiry.getUser().getId());
         inquiryDto.setUserName(inquiry.getUser().getName());
         inquiryDto.setPostNumber(inquiry.getId());
-        inquiryDto.setAttachmentDtos(attachmentDtos);
+        inquiryDto.setAttachmentDtos(attachmentDtos); // 위에서 만든 파일첨부 정보를 DTO 파일리스트 필드변수에 집어넣기
 
         return inquiryDto;
     }

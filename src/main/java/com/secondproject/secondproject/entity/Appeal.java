@@ -50,4 +50,8 @@ public class Appeal {
     @Column(name = "appeal_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private AppealType appealType; // 이의제기 타입은 이의제기가 출결, 과제, 성적등 어디에 이의제기를 하는지 정의합니다.
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lecture_id", nullable = false, foreignKey = @ForeignKey(name = "fk_appeal_lecture"))
+    Lecture lecture;
 }

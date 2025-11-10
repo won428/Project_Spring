@@ -31,5 +31,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     boolean existsByPhone(String phone);
 
     List<User> findAllByType(UserType type);
+
+
 }
 

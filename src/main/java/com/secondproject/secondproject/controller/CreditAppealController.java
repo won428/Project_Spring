@@ -28,23 +28,12 @@ public class CreditAppealController {
 
     // POST /api/appeals
     @PostMapping("/myappeal")
-    public ResponseEntity<?> createAppeal(@RequestBody CreditAppealDto dto) {
-        CreditAppealDto saved = new CreditAppealDto();
-        LectureDto lectureDto = this.lectureService.findByID(dto.getLectureId());
-        System.out.println(dto);
+    public ResponseEntity<?> createAppeal(@RequestBody GradeAppealDto appealForm) {
 
-        saved.setStatus(dto.getStatus());
-        saved.setAppealType(dto.getAppealType());
-        saved.setContent(dto.getContent());
-        saved.setAppealDate(dto.getAppealDate());
-        saved.setSendingId(dto.getSendingId());
-        saved.setLectureId(dto.getLectureId());
-        saved.setReceiverId(dto.getReceiverId());
-        saved.setTitle(dto.getTitle());
+        this.appealService.createGradeAppeal(appealForm);
 
-        this.appealService.createAppeal(saved);
 
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(200);
     }
 
     // 교수 이름 찾아오기
