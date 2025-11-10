@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.service;
 
+import com.secondproject.secondproject.dto.GradeResponseDto;
 import com.secondproject.secondproject.entity.Grade;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
@@ -12,6 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class GradeService {
@@ -21,7 +26,7 @@ public class GradeService {
 
     // 클라이언트에서 받아온 payload 저장하기
     public Long createGrade(@Valid GradeSaveRequest req) {
-        Grade grade = new Grade();
+        Grade grade = gradeRepository.findByUser_IdAndLecture_Id(req.userId(), req.lectureId());
         User user = userRepository.findById(req.userId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"해당하는 학생이 없습니다."));
         Lecture lec = lectureRepository.findById(req.lectureId())
@@ -38,5 +43,9 @@ public class GradeService {
 
         gradeRepository.save(grade);
         return grade.getId();
+    }
+
+    public List<GradeSummaryDto> existsByGrade(Long lectureId) {
+        return gradeRepository.findSummariesByLectureId(lectureId);
     }
 }
