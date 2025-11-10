@@ -11,8 +11,8 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PercentDto {
-    BigDecimal attendance;
-    BigDecimal assignment;
+    BigDecimal attendanceScore;
+    BigDecimal assignmentScore;
     BigDecimal midtermExam;
     BigDecimal finalExam;
 }
