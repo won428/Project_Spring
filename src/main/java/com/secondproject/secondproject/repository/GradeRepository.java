@@ -17,6 +17,8 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
     @Query("SELECT g FROM Grade g JOIN FETCH g.lecture l WHERE g.user.id = :userId")
     List<Grade> findByUserId(@Param("userId") Long userId);
 
+    Grade findByUser_IdAndLecture_Id(Long userId, Long lectureId);
+
 
     List<Grade> findAllByLecture_Id(Long id);
     boolean existsByLecture_IdAndUser_Id(Long lectureId, Long userId);
@@ -32,4 +34,6 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
                 and g.totalScore > 0
             """)
     List<GradeSummaryDto> findSummariesByLectureId(Long lectureId);
+
+
 }

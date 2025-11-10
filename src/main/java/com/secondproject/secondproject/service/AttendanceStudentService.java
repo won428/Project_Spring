@@ -117,6 +117,7 @@ public class AttendanceStudentService {
                 .toList();
     }
 
+    // 학생 출결 점수 계산
     public AttendanceSummary getAttendanceSummary(Long lectureId, Long userId) {
         AttendanceCounts c = attendanceRecordsRepository.countByLectureAndOptionalUser(lectureId, userId);
         long total = Optional.ofNullable(c.getTotal()).orElse(0L); // 총 출결수
@@ -136,4 +137,6 @@ public class AttendanceStudentService {
 
         return  new AttendanceSummary(total, c.getPresent(), lateN, earlyN, absent, c.getExcused(), score);
     }
+
+
 }

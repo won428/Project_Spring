@@ -37,4 +37,6 @@ where e.lecture.id = :lectureId
 """)
     AttendanceCounts countByLectureAndOptionalUser(@Param("lectureId") Long lectureId,
                                                    @Param("userId") Long userId);
+
+
 }

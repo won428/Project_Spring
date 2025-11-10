@@ -29,4 +29,5 @@ public class AttendanceController {
         AttendanceSummary body = attendanceStudentService.getAttendanceSummary(lectureId, userId);
         return ResponseEntity.ok(body);
     }
+    //
 }

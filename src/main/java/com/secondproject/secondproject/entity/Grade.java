@@ -49,8 +49,8 @@ public class Grade {
     @ColumnDefault("0")
     private BigDecimal ftScore = BigDecimal.ZERO; // 기말 점수
 
-    @Column(name = "total_score", precision = 4, scale = 2, nullable = false) // => DECIMAL(4,2)
-    @Digits(integer = 2, fraction = 2)  // Bean Validation (00.00 ~ 99.99)
+    @Column(name = "total_score", precision = 5, scale = 2, nullable = false) // => DECIMAL(4,2)
+    @Digits(integer = 3, fraction = 2)  // Bean Validation (00.00 ~ 99.99)
     @ColumnDefault("0")
     private BigDecimal totalScore = BigDecimal.ZERO; // 총점
 

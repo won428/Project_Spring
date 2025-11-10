@@ -350,6 +350,9 @@ public class LectureController {
         return ResponseEntity.ok(attendanceStudentService.getAttendances(id, sessionDate));
     }
 
+    // 학생 1명이 수강중인 모든 강의 불러오기
+
+
     @GetMapping("/spec")
     public ResponseEntity<?> LectureSpec(@RequestParam Long id) {
         try {
