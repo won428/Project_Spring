@@ -11,15 +11,17 @@ public class FilePathConfig implements WebMvcConfigurer {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-    @Value("${lectureVid.upload-dir}")
-    private String vidDir;
+    @Value("${image.upload-dir}")
+    private String imageDir;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry
                 .addResourceHandler("/media/**")
                 .addResourceLocations(uploadDir);
-
+        registry
+                .addResourceHandler("/images/**")
+                .addResourceLocations(imageDir);
     }
 
 }
