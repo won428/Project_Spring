@@ -2,6 +2,7 @@ package com.secondproject.secondproject.repository;
 
 import com.secondproject.secondproject.entity.Grade;
 import com.secondproject.secondproject.service.GradeSummaryDto;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -32,4 +33,7 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
                 and g.totalScore > 0
             """)
     List<GradeSummaryDto> findSummariesByLectureId(Long lectureId);
+
+    Grade findByUser_IdAndLecture_Id(Long userId, Long lectureId);
+
 }

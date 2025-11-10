@@ -26,7 +26,7 @@ public class GradeService {
 
     // 클라이언트에서 받아온 payload 저장하기
     public Long createGrade(@Valid GradeSaveRequest req) {
-        Grade grade = new Grade();
+        Grade grade = gradeRepository.findByUser_IdAndLecture_Id(req.userId(), req.lectureId());
         User user = userRepository.findById(req.userId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"해당하는 학생이 없습니다."));
         Lecture lec = lectureRepository.findById(req.lectureId())
