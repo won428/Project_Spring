@@ -217,7 +217,7 @@ public class LectureService {
         Lecture lecture = lectureOpt
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, id + " 해당 강의가 존재하지 않습니다."));
-        if (status.equals(Status.IN_PROGRESS)) {
+        if (status.equals(Status.INPROGRESS)) {
             List<CourseRegistration> courseRegistrationList = this.courseRegRepository.findAllByLecture_IdAndStatus(id, Status.SUBMITTED);
             if (courseRegistrationList == null || courseRegistrationList.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "신청 인원이 없습니다.");
@@ -248,7 +248,8 @@ public class LectureService {
                 enrollment.setUser(user);
                 enrollment.setGrade(newGrade);
                 enrollment.setLecture(lecture);
-                enrollment.setStatus(Status.IN_PROGRESS);
+                enrollment.setStatus(Status.INPROGRESS);
+                enrollment.setCompletionDiv(lecture.getCompletionDiv());
 
                 this.enrollmentRepository.save(enrollment);
             }
@@ -612,7 +613,8 @@ public class LectureService {
                 enrollment.setUser(user);
                 enrollment.setGrade(newGrade);
                 enrollment.setLecture(lecture);
-                enrollment.setStatus(Status.IN_PROGRESS);
+                enrollment.setStatus(Status.INPROGRESS);
+                enrollment.setCompletionDiv(lecture.getCompletionDiv());
 
                 this.enrollmentRepository.save(enrollment);
             }
@@ -768,7 +770,7 @@ public class LectureService {
                 ))
                 .orElseThrow(() -> new RuntimeException("강의를 찾을 수 없습니다."));
     }
-}
+
         @Transactional
         public void updateLecture (LectureDto
         lectureDto, List < LectureScheduleDto > lectureScheduleDtos, List < MultipartFile > files, PercentDto percent, List<AttachmentDto> existingDtos){
