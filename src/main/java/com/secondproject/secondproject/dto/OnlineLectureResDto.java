@@ -3,6 +3,8 @@ package com.secondproject.secondproject.dto;
 import com.secondproject.secondproject.entity.Attachment;
 import com.secondproject.secondproject.entity.Notice;
 import com.secondproject.secondproject.entity.OnlineLecture;
+import com.secondproject.secondproject.entity.UserLectureProgress;
+import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,12 +30,18 @@ public class OnlineLectureResDto {
 
     private LocalDate endDate;
 
-
     private String path;
+
+    private int lastViewedSec;
+
+    private int totalWatchedSec;
+
+    private int vidLength;
 
     public static OnlineLectureResDto fromEntity(
             OnlineLecture onlineLecture,
-            List<Attachment> attachments
+            Attachment attachment,
+            UserLectureProgress progress
     ) {
         OnlineLectureResDto resDto = new OnlineLectureResDto();
         resDto.setId(onlineLecture.getId());
@@ -43,10 +51,10 @@ public class OnlineLectureResDto {
         resDto.setDisable(onlineLecture.isDisable());
         resDto.setStartDate(onlineLecture.getCreatedAt());
         resDto.setEndDate(onlineLecture.getEndDate().toLocalDate());
-
-        for (Attachment attachment : attachments) {
-            resDto.setPath(attachment.getStoredKey());
-        }
+        resDto.setLastViewedSec(progress.getLastViewedSec());
+        resDto.setTotalWatchedSec(progress.getTotalWatchedSec());
+        resDto.setPath(attachment.getStoredKey());
+        resDto.setVidLength(onlineLecture.getVidLength());
         return resDto;
     }
 }

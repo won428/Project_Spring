@@ -54,4 +54,7 @@ public class Grade {
 
     @Column(name = "lecture_grade")
     private BigDecimal lectureGrade; // 학점
+
+    @Column(name = "lecture_atRate")
+    private double atRate; // 학점
 }
