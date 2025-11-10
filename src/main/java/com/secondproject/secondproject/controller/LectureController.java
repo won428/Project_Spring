@@ -241,6 +241,7 @@ public class LectureController {
         return lectureDto;
     }
 
+    // 순수 강의 정보 - 첨부파일 미포함
     @GetMapping("/detailLecture/{id}")
     public LectureDto lectureDetail(@PathVariable Long id) {
         LectureDto lectureDto = lectureService.findBylectureID(id);

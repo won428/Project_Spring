@@ -218,7 +218,7 @@ public class LectureService {
         Lecture lecture = lectureOpt
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, id + " 해당 강의가 존재하지 않습니다."));
-        if (status.equals(Status.IN_PROGRESS)) {
+        if (status.equals(Status.INPROGRESS)) {
             List<CourseRegistration> courseRegistrationList = this.courseRegRepository.findAllByLecture_IdAndStatus(id, Status.SUBMITTED);
             if (courseRegistrationList == null || courseRegistrationList.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "신청 인원이 없습니다.");
@@ -248,7 +248,7 @@ public class LectureService {
                 enrollment.setUser(user);
                 enrollment.setGrade(newGrade);
                 enrollment.setLecture(lecture);
-                enrollment.setStatus(Status.IN_PROGRESS);
+                enrollment.setStatus(Status.INPROGRESS);
 
                 this.enrollmentRepository.save(enrollment);
             }
@@ -430,11 +430,14 @@ public class LectureService {
         }
 
         GradingWeights gradingWeights = this.gradingWeightsRepository.findByLecture_Id(lecture.getId());
-        GradingWeightsDto weightsDto = new GradingWeightsDto();
-        weightsDto.setAssignment(gradingWeights.getAssignmentScore());
-        weightsDto.setFinalExam(gradingWeights.getFinalExam());
-        weightsDto.setMidtermExam(gradingWeights.getMidtermExam());
-        weightsDto.setAttendance(gradingWeights.getAttendanceScore());
+        GradingWeightsDto weightsDto = new GradingWeightsDto(gradingWeights.getAttendanceScore(),
+                gradingWeights.getAssignmentScore(),
+                gradingWeights.getMidtermExam(),
+                gradingWeights.getFinalExam());
+//        weightsDto.setAssignment(gradingWeights.getAssignmentScore());
+//        weightsDto.setFinalExam(gradingWeights.getFinalExam());
+//        weightsDto.setMidtermExam(gradingWeights.getMidtermExam());
+//        weightsDto.setAttendance(gradingWeights.getAttendanceScore());
 
 
         for (LectureSchedule schedule : lectureSchedules) {
@@ -611,7 +614,7 @@ public class LectureService {
                 enrollment.setUser(user);
                 enrollment.setGrade(newGrade);
                 enrollment.setLecture(lecture);
-                enrollment.setStatus(Status.IN_PROGRESS);
+                enrollment.setStatus(Status.INPROGRESS);
 
                 this.enrollmentRepository.save(enrollment);
             }
@@ -659,7 +662,9 @@ public class LectureService {
     public LectureDto findBylectureID(Long id) {
         Lecture lecture = this.lectureRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
+
         LectureDto lectureDto = new LectureDto();
+
         Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
         List<LectureSchedule> lectureSchedules = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
         List<LectureScheduleDto> lectureScheduleDtoList = new ArrayList<>();
@@ -683,6 +688,15 @@ public class LectureService {
         lectureDto.setLectureSchedules(lectureScheduleDtoList);
         lectureDto.setStartDate(lecture.getStartDate());
         lectureDto.setEndDate(lecture.getEndDate());
+
+        gradingWeightsRepository.findByLectureId(id).ifPresent(gw ->
+        {lectureDto.setGradingWeightsDto(new GradingWeightsDto(
+                gw.getAttendanceScore(),
+                gw.getAssignmentScore(),
+                gw.getMidtermExam(),
+                gw.getFinalExam()
+        ));
+        });
 
         return lectureDto;
     }
@@ -769,8 +783,12 @@ public class LectureService {
     }
 
     @Transactional
-    public void updateLecture(LectureDto
-                                      lectureDto, List<LectureScheduleDto> lectureScheduleDtos, List<MultipartFile> files, PercentDto percent, List<AttachmentDto> existingDtos) {
+    public void updateLecture(
+            LectureDto lectureDto,
+            List<LectureScheduleDto> lectureScheduleDtos,
+            List<MultipartFile> files,
+            PercentDto percent,
+            List<AttachmentDto> existingDtos) {
 
         if (lectureDto.getMajor() == null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "소속 대학과 학과를 선택해주세요");

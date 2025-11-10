@@ -9,9 +9,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 
-@Getter
-@Setter
-@ToString
+@Getter @Setter @ToString
 @Entity
 @Table(name = "grade")
 public class Grade {
@@ -55,7 +53,7 @@ public class Grade {
     private BigDecimal totalScore = BigDecimal.ZERO; // 총점
 
     @Column(name = "lecture_grade")
-    private String lectureGrade; // 학점
+    private BigDecimal lectureGrade; // 학점
 
     @Column(name = "lecture_atRate")
     private double atRate; // 학점

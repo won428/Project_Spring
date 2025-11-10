@@ -5,6 +5,7 @@ import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.entity.GradingWeights;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.LectureSchedule;
+import com.secondproject.secondproject.service.GradingWeightsDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Digits;
 import lombok.*;
@@ -60,10 +61,30 @@ public class LectureDto {
 
     private List<AttachmentDto> attachmentDtos;
 
+    private GradingWeightsDto gradingWeightsDto;
+
+    // 강의 등록용 생성자
+    public LectureDto(String name, Long user, int credit, LocalDate startDate, LocalDate endDate, String description, Long major, int totalStudent, Status status) {
+        this.name = name;
+        this.user = user;
+        this.credit = credit;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.description = description;
+        this.major = major;
+        this.totalStudent = totalStudent;
+        this.status = status;
+    }
     private Long college;
 
     private GradingWeightsDto weightsDto;
 
+    public LectureDto(String name, String userName, int totalStudent, String majorName) {
+        this.name = name;
+        this.userName = userName;
+        this.totalStudent = totalStudent;
+        this.majorName = majorName;
+    }
 
 
     public static LectureDto fromEntity(Lecture lecture) {
