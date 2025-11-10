@@ -8,7 +8,6 @@ import com.secondproject.secondproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -217,7 +216,7 @@ public class LectureService {
         Lecture lecture = lectureOpt
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, id + " 해당 강의가 존재하지 않습니다."));
-        if (status.equals(Status.IN_PROGRESS)) {
+        if (status.equals(Status.INPROGRESS)) {
             List<CourseRegistration> courseRegistrationList = this.courseRegRepository.findAllByLecture_IdAndStatus(id, Status.SUBMITTED);
             if (courseRegistrationList == null || courseRegistrationList.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "신청 인원이 없습니다.");
@@ -247,7 +246,7 @@ public class LectureService {
                 enrollment.setUser(user);
                 enrollment.setGrade(newGrade);
                 enrollment.setLecture(lecture);
-                enrollment.setStatus(Status.IN_PROGRESS);
+                enrollment.setStatus(Status.INPROGRESS);
 
                 this.enrollmentRepository.save(enrollment);
             }
@@ -429,11 +428,14 @@ public class LectureService {
         }
 
         GradingWeights gradingWeights = this.gradingWeightsRepository.findByLecture_Id(lecture.getId());
-        GradingWeightsDto weightsDto = new GradingWeightsDto();
-        weightsDto.setAssignment(gradingWeights.getAssignmentScore());
-        weightsDto.setFinalExam(gradingWeights.getFinalExam());
-        weightsDto.setMidtermExam(gradingWeights.getMidtermExam());
-        weightsDto.setAttendance(gradingWeights.getAttendanceScore());
+        GradingWeightsDto weightsDto = new GradingWeightsDto(gradingWeights.getAttendanceScore(),
+                gradingWeights.getAssignmentScore(),
+                gradingWeights.getMidtermExam(),
+                gradingWeights.getFinalExam());
+//        weightsDto.setAssignment(gradingWeights.getAssignmentScore());
+//        weightsDto.setFinalExam(gradingWeights.getFinalExam());
+//        weightsDto.setMidtermExam(gradingWeights.getMidtermExam());
+//        weightsDto.setAttendance(gradingWeights.getAttendanceScore());
 
 
         for(LectureSchedule schedule : lectureSchedules){
@@ -611,7 +613,7 @@ public class LectureService {
                 enrollment.setUser(user);
                 enrollment.setGrade(newGrade);
                 enrollment.setLecture(lecture);
-                enrollment.setStatus(Status.IN_PROGRESS);
+                enrollment.setStatus(Status.INPROGRESS);
 
                 this.enrollmentRepository.save(enrollment);
             }
@@ -686,7 +688,7 @@ public class LectureService {
         lectureDto.setStartDate(lecture.getStartDate());
         lectureDto.setEndDate(lecture.getEndDate());
 
-        gradingWeightsRepository.findByLecture_Id(id).ifPresent(gw ->
+        gradingWeightsRepository.findByLectureId(id).ifPresent(gw ->
         {lectureDto.setGradingWeightsDto(new GradingWeightsDto(
                 gw.getAttendanceScore(),
                 gw.getAssignmentScore(),
@@ -778,7 +780,7 @@ public class LectureService {
                 ))
                 .orElseThrow(() -> new RuntimeException("강의를 찾을 수 없습니다."));
     }
-}
+
         @Transactional
         public void updateLecture (LectureDto
         lectureDto, List < LectureScheduleDto > lectureScheduleDtos, List < MultipartFile > files, PercentDto percent, List<AttachmentDto> existingDtos){

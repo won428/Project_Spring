@@ -12,7 +12,7 @@ public interface GradingWeightsRepository extends JpaRepository<GradingWeights, 
     @Query("select g.attendanceScore from GradingWeights g where g.lecture.id = :lectureId")
     Optional<BigDecimal> findAttendanceRatioByLectureId(@Param("lectureId") Long lectureId);
 
-    Optional<GradingWeights> findByLecture_Id(Long lectureId);
+    Optional<GradingWeights> findByLectureId(Long lectureId);
 
     GradingWeights findByLecture_Id(Long id);
 

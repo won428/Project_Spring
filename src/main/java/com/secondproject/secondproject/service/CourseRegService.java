@@ -22,7 +22,7 @@ public class CourseRegService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
         Status nowStatus = lecture.getStatus();
 
-        if (nowStatus.equals(Status.IN_PROGRESS)) {
+        if (nowStatus.equals(Status.INPROGRESS)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 개강된 강의는 확정할 수 없습니다. 목록에서 삭제해주세요.");
         } else if (nowStatus.equals(Status.CANCELED)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 폐강된 강의는 확정할 수 없습니다. 목록에서 삭제해주세요.");
