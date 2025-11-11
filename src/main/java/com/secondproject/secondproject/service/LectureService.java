@@ -252,6 +252,7 @@ public class LectureService {
                 enrollment.setLecture(lecture);
                 enrollment.setStatus(Status.INPROGRESS);
 
+
                 this.enrollmentRepository.save(enrollment);
             }
         } else if (status.equals(Status.COMPLETED)) {
