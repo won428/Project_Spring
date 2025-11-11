@@ -8,11 +8,10 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 @Getter @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class PercentDto {
-    BigDecimal attendanceScore;
-    BigDecimal assignmentScore;
-    BigDecimal midtermExam;
-    BigDecimal finalExam;
+@NoArgsConstructor
+public class GradeResponseDto {
+    Long userId;
+    BigDecimal totalScore;
+    BigDecimal gpa;
 }

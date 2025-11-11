@@ -54,6 +54,9 @@ public class OnlineLecture {
     @Column(name = "ol_end")
     private LocalDateTime endDate;
 
+    @Column(name = "lecture_atRate")
+    private double atRate; // 온라인 출석률
+
     @PrePersist
         // @PrePersist: 엔티티가 처음 INSERT 되기 직전에 자동 실행
     void onCreate() {

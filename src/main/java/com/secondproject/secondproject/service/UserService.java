@@ -643,4 +643,21 @@ public class UserService {
                 .map(user -> new UserNameDto(user.getId(), user.getName()))
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
     }
+
+    public ProRegDto findProfessor(Long id) {
+        User user = this.userRepository.findById(id)
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 유저 입니다."));
+        Major major = this.majorRepository.findById(user.getMajor().getId())
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 학과 입니다."));
+        ProRegDto proRegDto = new ProRegDto();
+
+        proRegDto.setId(user.getId());
+        proRegDto.setName(user.getName());
+        proRegDto.setMajor(major.getId());
+        proRegDto.setMajorName(major.getName());
+        proRegDto.setCollege(major.getCollege().getId());
+        proRegDto.setCollegeName(major.getCollege().getType());
+
+        return proRegDto;
+    }
 }

@@ -1,5 +1,7 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.Enum.InquiryStatus;
+import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.dto.AttachmentDto;
 import com.secondproject.secondproject.dto.CommentDto;
 import com.secondproject.secondproject.dto.InquiryDto;
@@ -241,6 +243,33 @@ public class InquiryController {
         List<CommentDto> commentDtoList = this.boardService.inquiryCommentList(id);
 
         return commentDtoList;
+    }
+
+
+
+    @PatchMapping("/post/status/{id}")
+    public ResponseEntity<?> updatePostStatus(@PathVariable Long id, @RequestBody InquiryStatus postStatus){
+        try {
+            this.boardService.updatePostStatus(id, postStatus);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (ResponseStatusException ex) {
+            try {
+
+                int status = ex.getStatusCode().value();
+                String error = HttpStatus.valueOf(status).name();
+
+                Map<String, Object> body = Map.of(
+                        "status", status,
+                        "error", error,
+                        "message", ex.getReason(),
+                        "timestamp", java.time.OffsetDateTime.now().toString()
+                );
+
+                return ResponseEntity.status(ex.getStatusCode()).body(body);
+            } catch (Exception otherEx) {
+                return ResponseEntity.status(500).body("알수없는 오류");
+            }
+        }
     }
 
 }

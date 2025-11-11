@@ -418,5 +418,12 @@ public class LectureController {
         }
     }
 
+    @GetMapping("/regForPro/{id}")
+    public ProRegDto proRegDto (@PathVariable Long id) {
+        ProRegDto proRegDto = this.userService.findProfessor(id);
+
+        return proRegDto;
+    }
+
 
 }

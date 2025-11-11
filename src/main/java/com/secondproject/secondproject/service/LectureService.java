@@ -63,9 +63,9 @@ public class LectureService {
         LocalDate end = lectureDto.getEndDate();
         LocalDate today = LocalDate.now();
 
-        if (!start.isAfter(today)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "오늘 이후의 강의만 등록할 수 있습니다.");
-        }
+//        if (!start.isAfter(today)) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "오늘 이후의 강의만 등록할 수 있습니다.");
+//        }
 
         if (end.isBefore(start)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "종료일이 시작일보다 빠릅니다.");
@@ -98,8 +98,8 @@ public class LectureService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수강인원은 10명 이상이여야 합니다.");
         }
 
-        BigDecimal totalPercent = percent.getAssignment()
-                .add(percent.getAttendance())
+        BigDecimal totalPercent = percent.getAssignmentScore()
+                .add(percent.getAttendanceScore())
                 .add(percent.getMidtermExam())
                 .add(percent.getFinalExam());
         BigDecimal overPercent = new BigDecimal("100.00");
@@ -148,8 +148,8 @@ public class LectureService {
 
         GradingWeights gradingWeights = new GradingWeights();
         gradingWeights.setLecture(saveLecture);
-        gradingWeights.setAttendanceScore(percent.getAttendance());
-        gradingWeights.setAssignmentScore(percent.getAssignment());
+        gradingWeights.setAttendanceScore(percent.getAttendanceScore());
+        gradingWeights.setAssignmentScore(percent.getAssignmentScore());
         gradingWeights.setMidtermExam(percent.getMidtermExam());
         gradingWeights.setFinalExam(percent.getFinalExam());
 
@@ -435,7 +435,8 @@ public class LectureService {
         }
 
         GradingWeights gradingWeights = this.gradingWeightsRepository.findByLecture_Id(lecture.getId());
-        GradingWeightsDto weightsDto = new GradingWeightsDto(gradingWeights.getAttendanceScore(),
+        GradingWeightsDto weightsDto = new GradingWeightsDto(
+                gradingWeights.getAttendanceScore(),
                 gradingWeights.getAssignmentScore(),
                 gradingWeights.getMidtermExam(),
                 gradingWeights.getFinalExam());
@@ -843,8 +844,8 @@ public class LectureService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수강인원은 10명 이상이여야 합니다.");
         }
 
-        BigDecimal totalPercent = percent.getAssignment()
-                .add(percent.getAttendance())
+        BigDecimal totalPercent = percent.getAssignmentScore()
+                .add(percent.getAttendanceScore())
                 .add(percent.getMidtermExam())
                 .add(percent.getFinalExam());
         BigDecimal overPercent = new BigDecimal("100.00");
@@ -934,8 +935,8 @@ public class LectureService {
 
         GradingWeights gradingWeights = this.gradingWeightsRepository.findByLecture_Id(saveLecture.getId());
 
-        gradingWeights.setAttendanceScore(percent.getAttendance());
-        gradingWeights.setAssignmentScore(percent.getAssignment());
+        gradingWeights.setAttendanceScore(percent.getAttendanceScore());
+        gradingWeights.setAssignmentScore(percent.getAssignmentScore());
         gradingWeights.setMidtermExam(percent.getMidtermExam());
         gradingWeights.setFinalExam(percent.getFinalExam());
 
