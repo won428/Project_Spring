@@ -20,20 +20,35 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     List<Enrollment> findByUser(User user);
 
-    List<Enrollment> findByUser_Id(Long userId);
-
-    boolean existsByUserAndLecture(User user, Lecture lecture);
-
-    Enrollment findByUserIdAndLectureId(Long userId, Long lectureId);
-
-    ;
-
-
     List<Enrollment> findByLecture_IdAndUser_IdIn(Long id, List<Long> userIds);
 
     List<Enrollment> findByLecture_Id(Long lectureId);
 
     // 총 수강 인원 카운트 (학생 출결등록 및 중복 저장 방지용)
     long countByLecture_Id(Long lectureId);
+
+    List<Enrollment> findByUser_Id(Long userId);
+
+    boolean existsByUserAndLecture(User user, Lecture lecture);
+
+    Enrollment findByUserIdAndLectureId(Long userId, Long lectureId);
+
+    List<Enrollment> findAllByLecture_Id(Long id);
+
+    @Query("""
+            select 
+            e.id as enrollmentId,
+            l.id as lectureId, 
+            l.name as lectureName, 
+            l.user.name as userName, 
+            l.credit as credit,
+            l.completionDiv as completionDiv,
+            m.name as majorName
+            from Enrollment e
+            join e.lecture l
+            left join l.major m
+            where e.user.id = :studentId
+            """)
+    List<EnrollmentView> findDtoByUserId(@Param("studentId")Long studentId);
 }
 

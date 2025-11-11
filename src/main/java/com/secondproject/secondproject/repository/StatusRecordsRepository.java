@@ -11,4 +11,5 @@ public interface StatusRecordsRepository extends JpaRepository<StatusRecords, Lo
     Optional<StatusRecords> findByUserId(Long userId);
 
 
+    StatusRecords findByUser_id(Long id);
 }

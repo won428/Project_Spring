@@ -19,11 +19,13 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
     @Query("SELECT g FROM Grade g JOIN FETCH g.lecture l WHERE g.user.id = :userId")
     List<Grade> findByUserId(@Param("userId") Long userId);
 
+    Grade findByUser_IdAndLecture_Id(Long userId, Long lectureId);
 
     List<Grade> findAllByLecture_Id(Long id);
-    boolean existsByLecture_IdAndUser_Id(Long lectureId, Long userId);
 
+    boolean existsByLecture_IdAndUser_Id(Long lectureId, Long userId);
     // 성적이 이미 저장된 학생인지 확인
+
     @Query("""
             select new com.secondproject.secondproject.service.GradeSummaryDto(
                   g.user.id, g.totalScore, g.lectureGrade
@@ -35,7 +37,7 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
             """)
     List<GradeSummaryDto> findSummariesByLectureId(Long lectureId);
 
-    Grade findByUser_IdAndLecture_Id(Long userId, Long lectureId);
+
 
     Optional<Grade> findByUserIdAndLectureId(Long userId, Long lectureId);
 }

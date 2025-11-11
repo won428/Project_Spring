@@ -154,6 +154,18 @@ public class LectureController {
         return ResponseEntity.ok(200);
     }
 
+    @PutMapping("/restart")
+    public ResponseEntity<?> restart(@RequestParam Long id, @RequestParam("status") Status status) {
+
+        if (id == null || id < 0 || status == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "존재하지 않는 강의이거나 존재하지 않는 상태 표시입니다."));
+        }
+
+        this.lectureService.lectureRestart(id, status);
+
+        return ResponseEntity.ok(200);
+    }
+
     // 일괄 신청(수강신청 컨트롤러로 추후에 이식)
     @PostMapping("/apply")
     public ResponseEntity<?> applyLecture(@RequestBody List<Long> idList, @RequestParam Long id) {
@@ -351,6 +363,9 @@ public class LectureController {
         return ResponseEntity.ok(attendanceStudentService.getAttendances(id, sessionDate));
     }
 
+    // 학생 1명이 수강중인 모든 강의 불러오기
+
+
     @GetMapping("/spec")
     public ResponseEntity<?> LectureSpec(@RequestParam Long id) {
         try {
@@ -372,6 +387,31 @@ public class LectureController {
     public ResponseEntity<?> lectureInprogress(@RequestBody List<Long> idList, @RequestParam Status status) {
         try {
             this.lectureService.lectureInprogress(idList, status);
+            return ResponseEntity.ok(200);
+        } catch (ResponseStatusException ex) {
+            try {
+
+                int errStatus = ex.getStatusCode().value();
+                String error = HttpStatus.valueOf(errStatus).name();
+
+                Map<String, Object> body = Map.of(
+                        "status", status,
+                        "error", error,
+                        "message", ex.getReason(),
+                        "timestamp", java.time.OffsetDateTime.now().toString()
+                );
+
+                return ResponseEntity.status(ex.getStatusCode()).body(body);
+            } catch (Exception otherEx) {
+                return ResponseEntity.status(500).body("알수없는 오류");
+            }
+        }
+    }
+
+    @PatchMapping("/reinprogress")
+    public ResponseEntity<?> reInprogress(@RequestBody List<Long> idList, @RequestParam Status status) {
+        try {
+            this.lectureService.reInprogress(idList, status);
             return ResponseEntity.ok(200);
         } catch (ResponseStatusException ex) {
             try {

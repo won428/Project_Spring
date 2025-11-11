@@ -101,12 +101,15 @@ public class UserService {
 
         StatusRecords savedRecords = statusRecordsRepository.save(userStatus);
 
-        //사진 저장
-        Attachment attachment = attachmentService.savedImage(file, saved);
-        UserAttach userAttach = new UserAttach();
-        userAttach.setUser(saved);
-        userAttach.setAttachment(attachment);
-        userAttachRepository.save(userAttach);
+        if(file != null){
+            //사진 저장
+            Attachment attachment = attachmentService.savedImage(file, saved);
+            UserAttach userAttach = new UserAttach();
+            userAttach.setUser(saved);
+            userAttach.setAttachment(attachment);
+            userAttachRepository.save(userAttach);
+        }
+
 
         int year = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).getYear();     // 1997-04-28
         Long id = saved.getId();
@@ -251,6 +254,13 @@ public class UserService {
 
         Specification<User> spec = (root, query, cb) -> cb.conjunction();
 
+        if(userListSearchDto.getSearchLevel() != null && userListSearchDto.getSearchLevel() > 0){
+            spec = spec.and(PublicSpecification.hasLevel(userListSearchDto.getSearchLevel()));
+        }
+
+        if (userListSearchDto.getSearchCollege() != null) {
+            spec = spec.and(PublicSpecification.hasCollege(userListSearchDto.getSearchCollege()));
+        }
 
         if (userListSearchDto.getSearchMajor() != null) {
             spec = spec.and(PublicSpecification.hasMajor(userListSearchDto.getSearchMajor()));
@@ -260,19 +270,25 @@ public class UserService {
             spec = spec.and(PublicSpecification.hasUserType(userListSearchDto.getSearchUserType()));
         }
 
-        if (userListSearchDto.getSearchGender() != null || !userListSearchDto.getSearchGender().isBlank()) {
-            spec = spec.and(PublicSpecification.hasGender(userListSearchDto.getSearchGender()));
-        }
-
         String searchMode = userListSearchDto.getSearchMode();
         String searchKeyword = userListSearchDto.getSearchKeyword();
 
-        if (searchMode != null && searchKeyword != null) {
-            if (searchMode.equals("name")) {
+        boolean hasGender = userListSearchDto.getSearchGender() != null
+                && !userListSearchDto.getSearchGender().isBlank();
+        if (hasGender) {
+            spec = spec.and(PublicSpecification.hasGender(userListSearchDto.getSearchGender()));
+        }
+
+        boolean hasMode = searchMode != null && !searchMode.isBlank();
+        boolean hasKeyword = searchKeyword != null && !searchKeyword.isBlank();
+        if (hasMode && hasKeyword) {
+            if ("all".equalsIgnoreCase(searchMode)) {
+                spec = spec.and(PublicSpecification.keywordInAll(searchKeyword));
+            } else if ("name".equalsIgnoreCase(searchMode)) {
                 spec = spec.and(PublicSpecification.hasName(searchKeyword));
-            } else if (searchMode.equals("email")) {
+            } else if ("email".equalsIgnoreCase(searchMode)) {
                 spec = spec.and(PublicSpecification.hasEmail(searchKeyword));
-            } else if (searchMode.equals("phone")) {
+            } else if ("phone".equalsIgnoreCase(searchMode)) {
                 spec = spec.and(PublicSpecification.hasPhone(searchKeyword));
             }
         }
@@ -283,6 +299,7 @@ public class UserService {
 
         Page<User> userList = this.userRepository.findAll(spec, pageable);
         Page<UserListDto> userListDtos = userList.map(user -> {
+            StatusRecords statusRecords = this.statusRecordsRepository.findByUser_id(user.getId());
             UserListDto userdto = new UserListDto();
             userdto.setId(user.getId());
             userdto.setUser_code(user.getUserCode());
@@ -294,6 +311,7 @@ public class UserService {
             userdto.setMajor(user.getMajor() != null ? user.getMajor().getName() : null);
             userdto.setU_type(user.getType());
             userdto.setCollege(user.getMajor().getCollege().getType());
+            userdto.setLevel(statusRecords.getLevel());
 
             return userdto;
         });

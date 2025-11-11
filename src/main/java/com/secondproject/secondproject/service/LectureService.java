@@ -8,6 +8,7 @@ import com.secondproject.secondproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import java.nio.file.Path;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
@@ -216,6 +218,7 @@ public class LectureService {
         Lecture lecture = lectureOpt
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, id + " 해당 강의가 존재하지 않습니다."));
+        List<Enrollment> enrollmentList = this.enrollmentRepository.findAllByLecture_Id(lecture.getId());
         if (status.equals(Status.INPROGRESS)) {
             List<CourseRegistration> courseRegistrationList = this.courseRegRepository.findAllByLecture_IdAndStatus(id, Status.SUBMITTED);
             if (courseRegistrationList == null || courseRegistrationList.isEmpty()) {
@@ -248,7 +251,7 @@ public class LectureService {
                 enrollment.setGrade(newGrade);
                 enrollment.setLecture(lecture);
                 enrollment.setStatus(Status.INPROGRESS);
-                enrollment.setCompletionDiv(lecture.getCompletionDiv());
+
 
                 this.enrollmentRepository.save(enrollment);
             }
@@ -262,11 +265,21 @@ public class LectureService {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "아직 점수가 전부 입력되지 않은 강의는 종강 할 수 없습니다.");
                 }
             }
+            for(Enrollment enrollment : enrollmentList){
+                enrollment.setStatus(status);
+                this.enrollmentRepository.save(enrollment);
+            }
+
             lecture.setStatus(status);
             this.lectureRepository.save(lecture);
         } else {
             lecture.setStatus(status);
             this.lectureRepository.save(lecture);
+
+            for(Enrollment enrollment : enrollmentList){
+                enrollment.setStatus(status);
+                this.enrollmentRepository.save(enrollment);
+            }
         }
     }
 
@@ -348,7 +361,7 @@ public class LectureService {
     }
 
     public List<LectureDto> myLectureList(Long userId) {
-        List<CourseRegistration> courseRegistrations = this.courseRegRepository.findByUser_IdAndLecture_Status(userId, Status.APPROVED);
+        List<CourseRegistration> courseRegistrations = this.courseRegRepository.findByUser_Id(userId);
         List<LectureDto> myLectureList = new ArrayList<>();
 
         for (CourseRegistration courseReg : courseRegistrations) {
@@ -430,7 +443,8 @@ public class LectureService {
         }
 
         GradingWeights gradingWeights = this.gradingWeightsRepository.findByLecture_Id(lecture.getId());
-        GradingWeightsDto weightsDto = new GradingWeightsDto(gradingWeights.getAttendanceScore(),
+        GradingWeightsDto weightsDto = new GradingWeightsDto(
+                gradingWeights.getAttendanceScore(),
                 gradingWeights.getAssignmentScore(),
                 gradingWeights.getMidtermExam(),
                 gradingWeights.getFinalExam());
@@ -615,7 +629,45 @@ public class LectureService {
                 enrollment.setGrade(newGrade);
                 enrollment.setLecture(lecture);
                 enrollment.setStatus(Status.INPROGRESS);
-                enrollment.setCompletionDiv(lecture.getCompletionDiv());
+
+                this.enrollmentRepository.save(enrollment);
+            }
+        }
+    }
+
+    @Transactional
+    public void reInprogress(List<Long> idList, Status status) {
+
+        if (idList == null || idList.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "강의는 최소 1개 이상 선택해야합니다.");
+        }
+
+        for (Long lectureId : idList) {
+            Lecture lecture = this.lectureRepository.findById(lectureId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
+            lecture.setStatus(status);
+            this.lectureRepository.save(lecture);
+
+            List<CourseRegistration> courseRegistrationList = this.courseRegRepository.findAllByLecture_IdAndStatus(lectureId, Status.SUBMITTED);
+
+            if (courseRegistrationList == null || courseRegistrationList.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "신청 인원이 없습니다.");
+            }
+
+//            int total = lecture.getTotalStudent();
+//            int minRequired = (int) Math.ceil(total * 0.3); // 신청인원 일정 비율 이상일때 개강가능
+//
+//            if (minRequired > courseRegistrationList.size()) {
+//                throw new ResponseStatusException(HttpStatus.CONFLICT, "신청 인원이 부족합니다");
+//            }
+
+            for (CourseRegistration courseReg : courseRegistrationList) {
+                User user = this.userRepository.findById(courseReg.getUser().getId())
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."));
+
+
+                Enrollment enrollment = this.enrollmentRepository.findByUserIdAndLectureId(user.getId(),lectureId);
+                enrollment.setStatus(Status.INPROGRESS);
 
                 this.enrollmentRepository.save(enrollment);
             }
@@ -653,21 +705,16 @@ public class LectureService {
             Lecture lecture = this.lectureRepository.findById(lectureId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
             lecture.setStatus(status);
+            List<Enrollment> enrollmentList = this.enrollmentRepository.findAllByLecture_Id(lecture.getId());
+
+            for(Enrollment enrollment : enrollmentList){
+                enrollment.setStatus(status);
+                this.enrollmentRepository.save(enrollment);
+            }
 
             this.lectureRepository.save(lecture);
         }
 
-    }
-
-    public LectureBasicInfoDto getLectureBasicInfo(Long lectureId) {
-        return lectureRepository.findById(lectureId)
-                .map(lecture -> new LectureBasicInfoDto(
-                        lecture.getId(),
-                        lecture.getName(),
-                        lecture.getUser().getId(),
-                        lecture.getUser().getName()
-                ))
-                .orElseThrow(() -> new RuntimeException("강의를 찾을 수 없습니다."));
     }
 
     /// ///////////////
@@ -785,9 +832,23 @@ public class LectureService {
         return out; // 최종리스트 반환
     }
 
+    public LectureBasicInfoDto getLectureBasicInfo(Long lectureId) {
+        return lectureRepository.findById(lectureId)
+                .map(lecture -> new LectureBasicInfoDto(
+                        lecture.getName(),
+                        lecture.getUser().getId(),
+                        lecture.getUser().getName()
+                ))
+                .orElseThrow(() -> new RuntimeException("강의를 찾을 수 없습니다."));
+    }
+
     @Transactional
-    public void updateLecture(LectureDto
-                                      lectureDto, List<LectureScheduleDto> lectureScheduleDtos, List<MultipartFile> files, PercentDto percent, List<AttachmentDto> existingDtos) {
+    public void updateLecture(
+            LectureDto lectureDto,
+            List<LectureScheduleDto> lectureScheduleDtos,
+            List<MultipartFile> files,
+            PercentDto percent,
+            List<AttachmentDto> existingDtos) {
 
         if (lectureDto.getMajor() == null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "소속 대학과 학과를 선택해주세요");
@@ -999,9 +1060,21 @@ public class LectureService {
         return lectureDtoList;
     }
 
+    public void lectureRestart(Long id, Status status) {
+        Lecture lecture = this.lectureRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 강의입니다."));
+        List<Enrollment> enrollmentList = this.enrollmentRepository.findAllByLecture_Id(lecture.getId());
+
+        lecture.setStatus(status);
+        this.lectureRepository.save(lecture);
+
+        for(Enrollment enrollment : enrollmentList){
+            enrollment.setStatus(status);
+            this.enrollmentRepository.save(enrollment);
+        }
+
+    }
 }
-
-
 
 
 

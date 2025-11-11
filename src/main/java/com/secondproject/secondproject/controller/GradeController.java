@@ -2,9 +2,11 @@ package com.secondproject.secondproject.controller;
 
 import com.secondproject.secondproject.dto.GradeResponseDto;
 import com.secondproject.secondproject.repository.GradeRepository;
+import com.secondproject.secondproject.repository.GradingWeightsRepository;
 import com.secondproject.secondproject.service.GradeSaveRequest;
 import com.secondproject.secondproject.service.GradeService;
 import com.secondproject.secondproject.service.GradeSummaryDto;
+import com.secondproject.secondproject.service.GradingWeightsDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -35,4 +37,5 @@ public class GradeController {
     public List<GradeSummaryDto> listByGrade(@RequestParam Long lectureId){
         return gradeService.existsByGrade(lectureId);
     }
+
 }
