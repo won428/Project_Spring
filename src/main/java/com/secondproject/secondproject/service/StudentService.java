@@ -3,32 +3,31 @@ package com.secondproject.secondproject.service;
 import com.secondproject.secondproject.dto.StudentInfoDto;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.entity.StatusRecords;
-import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.repository.UserRepository;
 import com.secondproject.secondproject.repository.RecordStatusRepository;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Value;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import static com.secondproject.secondproject.Enum.UserType.STUDENT;
 
 @Service
+@RequiredArgsConstructor
 public class StudentService {
     private final UserRepository userRepository;
     private final RecordStatusRepository recordStatusRepository;
 
     @Value("${image.upload-dir}")
     private String imageUploadDir;
-
-    public StudentService(UserRepository userRepository, RecordStatusRepository recordStatusRepository) {
-        this.userRepository = userRepository;
-        this.recordStatusRepository = recordStatusRepository;
-    }
 
     // userId 기반 StudentInfoDto 조회
     public StudentInfoDto getStudentInfoById(Long userId) {
@@ -84,27 +83,46 @@ public class StudentService {
     // ====================== 학생 이미지 업로드 ======================
     /**
      * 학생 이미지 업로드
+     *
      * @param userId 학생 ID
-     * @param file 업로드할 MultipartFile (이미지)
+     * @param file   업로드할 MultipartFile (이미지)
      * @return 업데이트된 StatusRecords
      * @throws IOException 파일 저장 중 에러
      */
-    public StatusRecords updateStudentImage(Long userId, MultipartFile file) throws IOException {
-        StatusRecords statusRecord = recordStatusRepository.findByUserId(userId).orElse(null);
-        if (statusRecord == null) return null;
+    // 이미지 저장 경로 예시 (프로젝트 내 "uploads" 폴더)
+    private final String uploadDir = System.getProperty("user.dir") + "/uploads/";
 
-        // 프로퍼티에서 경로 가져오기
-        File dir = new File(imageUploadDir);
-        if (!dir.exists()) dir.mkdirs();
+    public String saveStudentImage(Long userId, MultipartFile file) throws IOException {
 
-        String fileName = userId + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
-        File dest = new File(dir, fileName);
+        // 1. 유저 조회 및 학생 타입 체크
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("학생 정보 없음"));
 
-        file.transferTo(dest);
+        if (user.getType() != STUDENT) {
+            throw new IllegalArgumentException("학생이 아닌 사용자는 업로드 불가");
+        }
 
-        // DB에는 상대 경로 저장 (웹에서 접근 가능한 경로)
-        statusRecord.setStudentImage("/images/" + fileName); // 필요에 따라 경로 맞춤
-        return recordStatusRepository.save(statusRecord);
+        // 2. StatusRecords 조회, 없으면 새로 생성
+        StatusRecords record = recordStatusRepository.findByUserId(userId)
+                .orElseGet(() -> {
+                    StatusRecords r = new StatusRecords();
+                    r.setUser(user);
+                    r.setAdmissionDate(LocalDate.now());
+                    return r;
+                });
+
+        // 3. 파일 저장
+        String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+        String savedFileName = UUID.randomUUID() + ext;
+        File saveFile = new File(imageUploadDir + savedFileName);
+        saveFile.getParentFile().mkdirs();
+        file.transferTo(saveFile);
+
+        // 4. StatusRecords에 이미지 URL 저장 (React에서 접근할 URL)
+        record.setStudentImage("/images/" + savedFileName);
+        recordStatusRepository.save(record);
+
+        return record.getStudentImage();
     }
 
 }

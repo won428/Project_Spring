@@ -1,17 +1,12 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.Status;
-import com.secondproject.secondproject.dto.AppealListDto;
-import com.secondproject.secondproject.dto.CreditAppealDto;
-import com.secondproject.secondproject.dto.EnrollmentInfoDto;
-import com.secondproject.secondproject.dto.GradeAppealDto;
+import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.Appeal;
 import com.secondproject.secondproject.entity.Enrollment;
+import com.secondproject.secondproject.entity.Grade;
 import com.secondproject.secondproject.entity.Lecture;
-import com.secondproject.secondproject.repository.AppealRepository;
-import com.secondproject.secondproject.repository.EnrollmentRepository;
-import com.secondproject.secondproject.repository.LectureRepository;
-import com.secondproject.secondproject.repository.UserRepository;
+import com.secondproject.secondproject.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,6 +17,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.secondproject.secondproject.Enum.Status.APPROVED;
+
 @Service
 @RequiredArgsConstructor
 public class CreditAppealService {
@@ -29,9 +26,7 @@ public class CreditAppealService {
     private final EnrollmentRepository enrollmentRepository;
     private final AppealRepository appealRepository;
     private final LectureRepository lectureRepository;
-
-
-
+    private final GradeRepository gradeRepository;
 
     public List<AppealListDto> getAppealsByStudentId(Long studentId) {
         List<Appeal> appeals = appealRepository.findBySendingId(studentId); // ✅ 인스턴스로 호출
@@ -103,6 +98,112 @@ public class CreditAppealService {
         appeal.setStatus(Status.PENDING);
 
         this.appealRepository.save(appeal);
+    }
+
+    public StudentCreditDto getGradeForStudent(Long userId, Long lectureId) {
+        Grade grade = gradeRepository.findByUserIdAndLectureId(userId, lectureId)
+                .orElseThrow(() -> new RuntimeException("성적 정보가 존재하지 않습니다."));
+
+        // 엔티티 -> DTO 변환
+        StudentCreditDto dto = new StudentCreditDto();
+        dto.setId(grade.getId());
+        dto.setUserId(grade.getUser().getId());
+        dto.setLectureId(grade.getLecture().getId());
+        dto.setAScore(grade.getAScore());
+        dto.setAsScore(grade.getAsScore());
+        dto.setTScore(grade.getTScore());
+        dto.setFtScore(grade.getFtScore());
+        dto.setTotalScore(grade.getTotalScore());
+        dto.setLectureGrade(grade.getLectureGrade());
+
+        dto.setLecName(grade.getLecture().getName());
+        dto.setStartDate(grade.getLecture().getStartDate());
+
+        return dto;
+    }
+
+    // 강의별 이의제기 조회
+    @Transactional(readOnly = true)
+    public List<AppealManageDto> getAppealsByLecture(Long lectureId, Long receiverId) {
+        List<Appeal> appeals = appealRepository.findByLectureIdAndReceiverId(lectureId, receiverId);
+
+        return appeals.stream().map(appeal -> {
+            Enrollment enrollment = appeal.getEnrollment();
+            if (enrollment == null || enrollment.getUser() == null || enrollment.getGrade() == null) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Enrollment/Grade/User 정보가 없습니다.");
+            }
+            Grade grade = appeal.getEnrollment().getGrade();
+            String studentName = enrollment.getUser().getName();
+            Long studentCode = enrollment.getUser().getUserCode();
+
+            return new AppealManageDto(
+                    appeal.getId(),
+                    appeal.getSendingId(),
+                    appeal.getReceiverId(),
+                    appeal.getLecture().getId(),
+                    appeal.getTitle(),
+                    studentName,
+                    studentCode,
+                    appeal.getContent(),
+                    appeal.getAppealDate(),
+                    appeal.getStatus(),
+                    appeal.getAppealType(),
+                    grade.getAScore(),
+                    grade.getAsScore(),
+                    grade.getTScore(),
+                    grade.getFtScore(),
+                    grade.getTotalScore(),
+                    grade.getLectureGrade()
+            );
+        }).collect(Collectors.toList());
+    }
+
+    // 승인
+    @Transactional
+    public void approveAppeal(Long appealId, AppealManageDto dto) {
+        Appeal appeal = appealRepository.findById(appealId)
+                .orElseThrow(() -> new RuntimeException("Appeal not found"));
+
+        // Enrollment → Grade 조회
+        Grade grade = gradeRepository.findById(appeal.getEnrollment().getGrade().getId())
+                .orElseThrow(() -> new RuntimeException("Grade not found"));
+
+        // 점수는 null 안전하게 업데이트
+        if (dto.getAScore() != null) grade.setAScore(dto.getAScore());
+        if (dto.getAsScore() != null) grade.setAsScore(dto.getAsScore());
+        if (dto.getTScore() != null) grade.setTScore(dto.getTScore());
+        if (dto.getFtScore() != null) grade.setFtScore(dto.getFtScore());
+        if (dto.getTotalScore() != null) grade.setTotalScore(dto.getTotalScore());
+
+        // 상태 변경 등 다른 로직
+        appeal.setStatus(APPROVED);
+
+        appealRepository.save(appeal);
+        gradeRepository.save(grade);
+    }
+
+    // 반려
+    @Transactional
+    public void rejectAppeal(Long appealId) {
+        Appeal appeal = appealRepository.findById(appealId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "이의제기가 존재하지 않습니다."));
+        appeal.setStatus(Status.REJECTED);
+        appealRepository.save(appeal);
+    }
+
+    @Transactional
+    public void updateScores(Long appealId, UpdateScoresDto dto) {
+        Grade grade = gradeRepository.findByUserIdAndLectureId(dto.getSendingId(), dto.getLectureId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 학생의 성적 정보를 찾을 수 없습니다."));
+
+        if (dto.getAScore() != null) grade.setAScore(dto.getAScore());
+        if (dto.getAsScore() != null) grade.setAsScore(dto.getAsScore());
+        if (dto.getTScore() != null) grade.setTScore(dto.getTScore());
+        if (dto.getFtScore() != null) grade.setFtScore(dto.getFtScore());
+        if (dto.getTotalScore() != null) grade.setTotalScore(dto.getTotalScore());
+        if (dto.getLectureGrade() != null) grade.setLectureGrade(dto.getLectureGrade());
+
+        gradeRepository.save(grade);
     }
 
 //    public List<AppealListDto> getMyAppeals(String sendingId) {

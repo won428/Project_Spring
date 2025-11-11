@@ -47,6 +47,15 @@ public class StudentRecord {
     @Column(name = "processed_date")
     private LocalDate processedDate;      // 처리일(date), null 허용
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Column(name = "target_start_date")
+    private LocalDate startDate;      // 처리일(date), null 허용
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Column(name = "target_end_date")
+    private LocalDate endDate;      // 처리일(date), null 허용
+
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;         // 처리상태

@@ -21,7 +21,7 @@ public class FilePathConfig implements WebMvcConfigurer {
                 .addResourceLocations(uploadDir);
         registry
                 .addResourceHandler("/images/**")
-                .addResourceLocations(imageDir);
+                .addResourceLocations("file:" + imageDir); // imageDir 끝에 / 확인
     }
 
 }

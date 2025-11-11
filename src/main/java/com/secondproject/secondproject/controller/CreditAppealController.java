@@ -51,6 +51,51 @@ public class CreditAppealController {
     public ResponseEntity<List<AppealListDto>> getMyAppeals(@RequestParam Long id) {
         return ResponseEntity.ok(appealService.getAppealsByStudentId(id));
     }
+
+    @GetMapping("/grades/one")
+    public StudentCreditDto getGrade(
+            @RequestParam Long userId,
+            @RequestParam Long lectureId
+    ) {
+        return appealService.getGradeForStudent(userId, lectureId);
+    }
+
+    // 강의별 이의제기 조회
+    @GetMapping("/lectureAppeals/{lectureId}")
+    public ResponseEntity<List<AppealManageDto>> getAppealsByLecture(
+            @PathVariable Long lectureId,
+            @RequestParam Long receiverId
+    ) {
+        List<AppealManageDto> appeals = appealService.getAppealsByLecture(lectureId, receiverId);
+        return ResponseEntity.ok(appeals);
+    }
+
+    // 승인
+    @PutMapping("/{appealId}/approve")
+    public ResponseEntity<Void> approveAppeal(
+            @PathVariable Long appealId,
+            @RequestBody AppealManageDto dto
+    ) {
+        appealService.approveAppeal(appealId, dto);
+        return ResponseEntity.ok().build();
+    }
+
+    // 반려
+    @PutMapping("/{appealId}/reject")
+    public ResponseEntity<Void> rejectAppeal(@PathVariable Long appealId) {
+        appealService.rejectAppeal(appealId);
+        return ResponseEntity.ok().build();
+    }
+
+    // 성적 수정
+    @PutMapping("/{appealId}/updateScores")
+    public ResponseEntity<Void> updateScores(
+            @PathVariable Long appealId,
+            @RequestBody UpdateScoresDto dto
+    ) {
+        appealService.updateScores(appealId, dto);
+        return ResponseEntity.ok().build();
+    }
 }
 
 

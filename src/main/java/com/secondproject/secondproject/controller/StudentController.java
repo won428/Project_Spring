@@ -59,29 +59,17 @@ public class StudentController {
             @RequestParam("userId") Long userId,
             @RequestParam("file") MultipartFile file
     ) {
-        if (userId == null || file == null || file.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "사용자 ID 또는 파일이 필요합니다."));
-        }
-
         try {
-            StatusRecords updatedStatus = studentService.updateStudentImage(userId, file);
-
-            if (updatedStatus == null) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(Map.of("error", "이미지 업로드 실패"));
-            }
-
-            return ResponseEntity.ok(Map.of(
-                    "message", "이미지 업로드 성공",
-                    "studentImage", updatedStatus.getStudentImage()
-            ));
-
+            String savedPath = studentService.saveStudentImage(userId, file);
+            return ResponseEntity.ok(savedPath);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (IOException e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "이미지 업로드 중 오류 발생"));
+            return ResponseEntity.internalServerError().body("이미지 업로드 실패");
         }
     }
+
 }
 
 

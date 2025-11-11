@@ -21,4 +21,5 @@ public class UpdateStatusDto {
     private LocalDate retentionDate;       // retention_date
     private LocalDate returnDate;          // return_date
     private LocalDate graduationDate;      // graduation_date
+
 }
