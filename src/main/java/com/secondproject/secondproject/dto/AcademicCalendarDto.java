@@ -25,4 +25,5 @@ public class AcademicCalendarDto {
 
     private String description;
 
+
 }

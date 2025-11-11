@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -58,4 +59,48 @@ public class AcademicCalendarController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @PostMapping("/insert")
+    public ResponseEntity<?> insertCal(
+            @ModelAttribute AcademicCalendarDto dto,
+            @RequestPart(value = "excelFile", required = false)
+            MultipartFile excelFile
+    ) {
+        try {
+            academicCalendarService.installCal(dto, excelFile);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/one/{id}")
+    public ResponseEntity<AcademicCalendar> insertCal(
+            @PathVariable Long id
+    ) {
+        try {
+            AcademicCalendar dto = academicCalendarService.findById(id);
+            return ResponseEntity.ok(dto);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/put/{id}")
+    public ResponseEntity<?> putCal(
+            @PathVariable Long id,
+            @RequestBody AcademicCalendarDto dto
+    ) {
+        System.out.println(dto.getId());
+        try {
+            academicCalendarService.updateById(id, dto);
+            return ResponseEntity.ok(dto);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 }
