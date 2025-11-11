@@ -1,6 +1,5 @@
 package com.secondproject.secondproject.repository;
 
-import com.secondproject.secondproject.dto.EnrollmentRequestDto;
 import com.secondproject.secondproject.entity.Enrollment;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
@@ -35,12 +34,19 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     Enrollment findByUserIdAndLectureId(Long userId, Long lectureId);
 
     @Query("""
-            select new com.secondproject.secondproject.dto.EnrollmentRequestDto(
-            e.user.id, e.lecture.id, e.grade.id, e.completionDiv, e.status ) from Enrollment e
-            join e.user u
+            select 
+            e.id as enrollmentId,
+            l.id as lectureId, 
+            l.name as lectureName, 
+            l.user.name as userName, 
+            l.credit as credit,
+            l.completionDiv as completionDiv,
+            m.name as majorName
+            from Enrollment e
             join e.lecture l
-            where e.user.id = :userId
+            left join l.major m
+            where e.user.id = :studentId
             """)
-    List<EnrollmentRequestDto> findDtoByUserId(@Param("userId") Long userId);
+    List<EnrollmentView> findDtoByUserId(@Param("studentId")Long studentId);
 }
 

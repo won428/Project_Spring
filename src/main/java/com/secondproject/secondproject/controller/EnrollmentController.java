@@ -1,10 +1,11 @@
 package com.secondproject.secondproject.controller;
 
-import com.secondproject.secondproject.dto.EnrollmentRequestDto;
+import com.secondproject.secondproject.repository.EnrollmentView;
 import com.secondproject.secondproject.service.EnrollmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -16,7 +17,7 @@ public class EnrollmentController {
     private final EnrollmentService enrollmentService;
 
     @GetMapping("/selectAll")
-    public List<EnrollmentRequestDto> selectAllLectures(Long userId){
+    public List<EnrollmentView> selectAllLectures(@RequestParam Long userId){
         return enrollmentService.selectAllLectures(userId);
     }
 }

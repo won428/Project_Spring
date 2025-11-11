@@ -43,7 +43,6 @@ public class EnrollmentInsert extends AbstractTestNGSpringContextTests {
             enrollment.setUser(user);
             enrollment.setLecture(lecture);
             enrollment.setGrade(grade);
-            enrollment.setCompletionDiv(lecture.getCompletionDiv());
 
             // 종강 상태로 처리
             enrollment.setStatus(Status.COMPLETED);

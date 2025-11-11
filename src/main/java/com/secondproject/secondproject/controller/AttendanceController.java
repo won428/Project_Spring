@@ -2,6 +2,7 @@ package com.secondproject.secondproject.controller;
 
 import com.secondproject.secondproject.dto.AttendanceResponseDto;
 import com.secondproject.secondproject.repository.AttendanceRecordsRepository;
+import com.secondproject.secondproject.repository.EnrollmentRepository;
 import com.secondproject.secondproject.service.AttendanceStudentService;
 import com.secondproject.secondproject.service.AttendanceSummary;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +18,9 @@ import java.util.List;
 @RequestMapping("/attendance")
 public class AttendanceController {
     private final AttendanceStudentService attendanceStudentService;
+    private final EnrollmentRepository enrollmentRepository;
 
-    //
+    // 출결점수 불러오기
     @GetMapping(
             value = "/selectById/{id}",
     produces = MediaType.APPLICATION_JSON_VALUE
@@ -29,5 +31,11 @@ public class AttendanceController {
         AttendanceSummary body = attendanceStudentService.getAttendanceSummary(lectureId, userId);
         return ResponseEntity.ok(body);
     }
-    //
+
+    // 학생의 출결점수 조회
+    @GetMapping("/selectAllAttendance/{enrollmentId}")
+    public ResponseEntity<List<AttendanceResponseDto>> listAttendance(@RequestParam Long userId,@PathVariable Long enrollmentId){
+        List<AttendanceResponseDto> dtoList = attendanceStudentService.listAttendance(userId, enrollmentId);
+        return ResponseEntity.ok(dtoList);
+    }
 }

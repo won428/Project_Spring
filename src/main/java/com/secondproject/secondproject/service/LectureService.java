@@ -250,7 +250,7 @@ public class LectureService {
                 enrollment.setGrade(newGrade);
                 enrollment.setLecture(lecture);
                 enrollment.setStatus(Status.INPROGRESS);
-                enrollment.setCompletionDiv(lecture.getCompletionDiv());
+
 
                 this.enrollmentRepository.save(enrollment);
             }
@@ -617,7 +617,6 @@ public class LectureService {
                 enrollment.setGrade(newGrade);
                 enrollment.setLecture(lecture);
                 enrollment.setStatus(Status.INPROGRESS);
-                enrollment.setCompletionDiv(lecture.getCompletionDiv());
 
                 this.enrollmentRepository.save(enrollment);
             }

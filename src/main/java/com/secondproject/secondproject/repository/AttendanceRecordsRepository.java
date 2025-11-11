@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.repository;
 
+import com.secondproject.secondproject.dto.AttendanceResponseDto;
 import com.secondproject.secondproject.entity.Attendance_records;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -38,5 +39,5 @@ where e.lecture.id = :lectureId
     AttendanceCounts countByLectureAndOptionalUser(@Param("lectureId") Long lectureId,
                                                    @Param("userId") Long userId);
 
-
+    List<Attendance_records> findByUserIdAndEnrollmentId(Long userId, Long enrollmentId);
 }

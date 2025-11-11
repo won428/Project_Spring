@@ -1,25 +1,20 @@
 package com.secondproject.secondproject.service;
 
-import com.secondproject.secondproject.dto.EnrollmentRequestDto;
-import com.secondproject.secondproject.entity.Enrollment;
+import com.secondproject.secondproject.repository.EnrollmentView;
 import com.secondproject.secondproject.repository.EnrollmentRepository;
+import com.secondproject.secondproject.repository.LectureRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
+    private final LectureRepository lectureRepository;
 
-    public List<EnrollmentRequestDto> selectAllLectures(Long userId) {
-        List<EnrollmentRequestDto> dtoList = enrollmentRepository.findDtoByUserId(userId);
-
-        return dtoList;
+    public List<EnrollmentView> selectAllLectures(Long userId) {
+        return enrollmentRepository.findDtoByUserId(userId);
     }
 }

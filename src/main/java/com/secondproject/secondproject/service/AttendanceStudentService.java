@@ -138,5 +138,20 @@ public class AttendanceStudentService {
         return  new AttendanceSummary(total, c.getPresent(), lateN, earlyN, absent, c.getExcused(), score);
     }
 
+    public List<AttendanceResponseDto> listAttendance(Long userId, Long enrollmentId){
+        List<Attendance_records> attendanceRecords = attendanceRecordsRepository.findByUserIdAndEnrollmentId(userId, enrollmentId);
+        List<AttendanceResponseDto> dtoList = new ArrayList<>();
+        for (Attendance_records a : attendanceRecords){
+            AttendanceResponseDto dto = AttendanceResponseDto.builder()
+                    .userId(a.getUser().getId())
+                    .enrollmentId(a.getEnrollment().getId())
+                    .attendanceDate(a.getAttendanceDate())
+                    .attendStudent(a.getAttendStudent())
+                    .build();
+            dtoList.add(dto);
+        }
+
+        return dtoList;
+    }
 
 }
