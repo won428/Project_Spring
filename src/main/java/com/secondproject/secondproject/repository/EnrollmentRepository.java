@@ -34,5 +34,21 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     Enrollment findByUserIdAndLectureId(Long userId, Long lectureId);
 
     List<Enrollment> findAllByLecture_Id(Long id);
+
+    @Query("""
+            select 
+            e.id as enrollmentId,
+            l.id as lectureId, 
+            l.name as lectureName, 
+            l.user.name as userName, 
+            l.credit as credit,
+            l.completionDiv as completionDiv,
+            m.name as majorName
+            from Enrollment e
+            join e.lecture l
+            left join l.major m
+            where e.user.id = :studentId
+            """)
+    List<EnrollmentView> findDtoByUserId(@Param("studentId")Long studentId);
 }
 
