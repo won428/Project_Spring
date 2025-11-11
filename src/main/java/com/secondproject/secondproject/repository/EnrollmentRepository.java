@@ -33,6 +33,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     Enrollment findByUserIdAndLectureId(Long userId, Long lectureId);
 
+    List<Enrollment> findAllByLecture_Id(Long id);
+
     @Query("""
             select 
             e.id as enrollmentId,

@@ -67,7 +67,7 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<?> insertUser(
             @ModelAttribute UserDto userinfo,
-            @RequestParam MultipartFile file
+            @RequestParam(value = "files", required = false)  MultipartFile file
     ) {
 
 
@@ -113,9 +113,10 @@ public class UserController {
             @RequestParam(required = false) String searchGender,
             @RequestParam(required = false) UserType searchUserType,
             @RequestParam(required = false) String searchMode,
-            @RequestParam(required = false) String searchKeyword
+            @RequestParam(required = false) String searchKeyword,
+            @RequestParam(required = false) Long searchCollege
     ) {
-        UserListSearchDto userListSearchDto = new UserListSearchDto(searchMajor, searchGender, searchUserType, searchMode, searchKeyword);
+        UserListSearchDto userListSearchDto = new UserListSearchDto(searchCollege,searchMajor, searchGender, searchUserType, searchMode, searchKeyword);
         Page<UserListDto> userList = this.userService.ListPageUser(userListSearchDto, pageNumber, pageSize);
 
         System.out.println("검색 조건 : " + userListSearchDto);

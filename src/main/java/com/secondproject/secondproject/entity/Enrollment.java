@@ -30,10 +30,6 @@ public class Enrollment {
     @JoinColumn(name = "grade_id", nullable = false)
     private Grade grade; // 성적 정보 id
 
-//    @Enumerated(EnumType.STRING)
-//    @Column(name = "completion_div", nullable = false)
-//    private CompletionDiv completionDiv;
-
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status; // 수강 상태(수강중인지, 종강인지), 일단 Status Enum클래스로 한번에 관리하려고 하는데 분리 필요하면 분리하셔도 될 것 같습니다.
