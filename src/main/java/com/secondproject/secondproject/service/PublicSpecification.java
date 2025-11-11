@@ -2,10 +2,13 @@ package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.entity.Major;
+import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.repository.MajorRepository;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -131,6 +134,22 @@ public class PublicSpecification {
             var major = root.join("major", JoinType.LEFT);
             var college = major.join("college", JoinType.LEFT);
             return cb.equal(college.get("id"), collegeId);
+        };
+    }
+
+    public static Specification<User> hasLevel(Integer searchLevel) {
+        return (root, query, cb) -> {
+            if (searchLevel == null || searchLevel == 0) return cb.conjunction();
+
+            Subquery<Long> sq = query.subquery(Long.class);
+            Root<StatusRecords> sr = sq.from(StatusRecords.class);
+            sq.select(sr.get("id"))
+                    .where(
+                            cb.equal(sr.get("user"), root),       // 상태레코드의 유저 == 바깥 User
+                            cb.equal(sr.get("level"), searchLevel)
+                    );
+
+            return cb.exists(sq);
         };
     }
 

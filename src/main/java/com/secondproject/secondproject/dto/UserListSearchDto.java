@@ -12,12 +12,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 @NoArgsConstructor
 public class UserListSearchDto {
 
+    Integer searchLevel;
     Long searchCollege;
     Long searchMajor;
     String searchGender;
     UserType searchUserType;
     String searchMode;
     String searchKeyword;
+
 
 
 }

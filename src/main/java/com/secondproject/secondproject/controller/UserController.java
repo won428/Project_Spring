@@ -114,9 +114,10 @@ public class UserController {
             @RequestParam(required = false) UserType searchUserType,
             @RequestParam(required = false) String searchMode,
             @RequestParam(required = false) String searchKeyword,
-            @RequestParam(required = false) Long searchCollege
+            @RequestParam(required = false) Long searchCollege,
+            @RequestParam(required = false) Integer searchLevel
     ) {
-        UserListSearchDto userListSearchDto = new UserListSearchDto(searchCollege,searchMajor, searchGender, searchUserType, searchMode, searchKeyword);
+        UserListSearchDto userListSearchDto = new UserListSearchDto(searchLevel,searchCollege,searchMajor, searchGender, searchUserType, searchMode, searchKeyword);
         Page<UserListDto> userList = this.userService.ListPageUser(userListSearchDto, pageNumber, pageSize);
 
         System.out.println("검색 조건 : " + userListSearchDto);

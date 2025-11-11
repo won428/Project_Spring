@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.repository;
 
+import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.entity.Major;
 import com.secondproject.secondproject.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -34,5 +35,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
 
     boolean existsByPhone(String phone);
+
+    List<User> findAllByMajor_IdAndType(Long id, UserType userType);
 }
 

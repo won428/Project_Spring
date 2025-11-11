@@ -253,6 +253,10 @@ public class UserService {
 
         Specification<User> spec = (root, query, cb) -> cb.conjunction();
 
+        if(userListSearchDto.getSearchLevel() != null && userListSearchDto.getSearchLevel() > 0){
+            spec = spec.and(PublicSpecification.hasLevel(userListSearchDto.getSearchLevel()));
+        }
+
         if (userListSearchDto.getSearchCollege() != null) {
             spec = spec.and(PublicSpecification.hasCollege(userListSearchDto.getSearchCollege()));
         }
