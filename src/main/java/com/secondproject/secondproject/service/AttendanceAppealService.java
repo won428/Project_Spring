@@ -81,7 +81,15 @@ public class AttendanceAppealService {
 
         // 이미 DTO에서 값을 받아와 setting
         Enrollment enrollment = enrollmentRepository.findByUserIdAndLectureId(dto.getSendingId(), dto.getLectureId());
+        if (enrollment == null) {
+            throw new RuntimeException("해당 유저의 수강 정보가 없습니다.");
+        }
         appeal.setEnrollment(enrollment);
+
+        // 2️⃣ Lecture 객체 가져오기
+        Lecture lecture = lectureRepository.findById(dto.getLectureId())
+                .orElseThrow(() -> new RuntimeException("강의를 찾을 수 없습니다."));
+        appeal.setLecture(lecture);
 
         appeal.setSendingId(dto.getSendingId());
         appeal.setReceiverId(dto.getReceiverId());
@@ -90,6 +98,7 @@ public class AttendanceAppealService {
         appeal.setContent(dto.getContent());
         appeal.setStatus(dto.getStatus());
         appeal.setAppealDate(dto.getAppealDate());
+
 
         if (file != null && !file.isEmpty()) {
             try {

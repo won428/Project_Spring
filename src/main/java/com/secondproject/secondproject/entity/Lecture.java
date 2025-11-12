@@ -63,5 +63,4 @@ public class Lecture {
     @Enumerated(EnumType.STRING)
     private CompletionDiv completionDiv; // 이수구분
 
-
 }

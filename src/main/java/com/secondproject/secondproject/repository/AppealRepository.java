@@ -11,5 +11,11 @@ public interface AppealRepository extends JpaRepository<Appeal, Long> {
 
 
     List<Appeal> findBySendingId(Long sendingId);
-    List<Appeal> findByLectureIdAndReceiverId(Long lectureId, Long receiverId);
+    // lectureId AND receiverId 기준 조회
+    List<Appeal> findByLecture_IdAndReceiverId(Long lectureId, Long receiverId);
+    // lecture 기준 조회
+    List<Appeal> findByLecture_Id(Long lectureId);
+
+    // enrollment 기준 조회
+    List<Appeal> findByEnrollment_Id(Long enrollmentId);
 }

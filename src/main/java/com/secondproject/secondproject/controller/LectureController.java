@@ -476,7 +476,7 @@ public class LectureController {
     // 3️⃣ 출결 이의제기 제출 (첨부파일 포함)
     @PostMapping("/attendanceAppeal")
     public ResponseEntity<String> submitAttendanceAppeal(
-            AttendanceAppealDto dto,
+            @ModelAttribute AttendanceAppealDto dto,
             @RequestParam(required = false) MultipartFile file) {
 
         String attendanceDetail = dto.getAttendanceDetail();

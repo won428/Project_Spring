@@ -96,6 +96,15 @@ public class CreditAppealController {
         appealService.updateScores(appealId, dto);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/{appealId}/updateStatus")
+    public ResponseEntity<Void> updateAttendanceStatus(
+            @PathVariable Long appealId,
+            @RequestBody AttendanceAppealDto dto
+    ) {
+        appealService.updateAttendanceAppeal(appealId, dto);
+        return ResponseEntity.ok().build();
+    }
 }
 
 

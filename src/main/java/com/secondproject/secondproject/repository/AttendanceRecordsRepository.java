@@ -40,4 +40,6 @@ where e.lecture.id = :lectureId
                                                    @Param("userId") Long userId);
 
     List<Attendance_records> findByUserIdAndEnrollmentId(Long userId, Long enrollmentId);
+
+    Optional<Attendance_records> findByEnrollmentIdAndAttendanceDate(Long enrollmentId);
 }

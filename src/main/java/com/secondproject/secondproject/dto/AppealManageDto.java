@@ -2,6 +2,7 @@ package com.secondproject.secondproject.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secondproject.secondproject.Enum.AppealType;
+import com.secondproject.secondproject.Enum.AttendStudent;
 import com.secondproject.secondproject.Enum.Status;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -40,5 +41,9 @@ public class AppealManageDto {
     private BigDecimal totalScore;
     @JsonProperty("lectureGrade")
     private BigDecimal lectureGrade;
+
+    // 현재 출결 상태
+    private LocalDate attendanceDate;   // 실제 강의일 기준 출결일
+    private AttendStudent attendStudent; // 현재 출결 상태
 }
 

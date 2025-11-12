@@ -1,11 +1,10 @@
 package com.secondproject.secondproject.service;
 
+import com.secondproject.secondproject.Enum.AppealType;
 import com.secondproject.secondproject.Enum.Status;
+import com.secondproject.secondproject.Enum.AttendStudent;
 import com.secondproject.secondproject.dto.*;
-import com.secondproject.secondproject.entity.Appeal;
-import com.secondproject.secondproject.entity.Enrollment;
-import com.secondproject.secondproject.entity.Grade;
-import com.secondproject.secondproject.entity.Lecture;
+import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,6 +26,7 @@ public class CreditAppealService {
     private final AppealRepository appealRepository;
     private final LectureRepository lectureRepository;
     private final GradeRepository gradeRepository;
+    private final AttendanceRecordsRepository attendanceRecordsRepository;
 
     public List<AppealListDto> getAppealsByStudentId(Long studentId) {
         List<Appeal> appeals = appealRepository.findBySendingId(studentId); // ✅ 인스턴스로 호출
@@ -125,16 +125,26 @@ public class CreditAppealService {
     // 강의별 이의제기 조회
     @Transactional(readOnly = true)
     public List<AppealManageDto> getAppealsByLecture(Long lectureId, Long receiverId) {
-        List<Appeal> appeals = appealRepository.findByLectureIdAndReceiverId(lectureId, receiverId);
+
+        List<Appeal> appeals = appealRepository.findByLecture_IdAndReceiverId(lectureId, receiverId);
 
         return appeals.stream().map(appeal -> {
+
             Enrollment enrollment = appeal.getEnrollment();
             if (enrollment == null || enrollment.getUser() == null || enrollment.getGrade() == null) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Enrollment/Grade/User 정보가 없습니다.");
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Enrollment/Grade/User 정보가 없습니다.");
             }
-            Grade grade = appeal.getEnrollment().getGrade();
+
+            Grade grade = enrollment.getGrade();
             String studentName = enrollment.getUser().getName();
             Long studentCode = enrollment.getUser().getUserCode();
+
+            // ✅ FK로 연결된 출결 기록 가져오기
+            Attendance_records attendanceRecord = appeal.getAttendanceRecord();
+
+            LocalDate attendanceDate = attendanceRecord != null ? attendanceRecord.getAttendanceDate() : null;
+            AttendStudent attendStudent = attendanceRecord != null ? attendanceRecord.getAttendStudent() : null;
 
             return new AppealManageDto(
                     appeal.getId(),
@@ -153,10 +163,19 @@ public class CreditAppealService {
                     grade.getTScore(),
                     grade.getFtScore(),
                     grade.getTotalScore(),
-                    grade.getLectureGrade()
+                    grade.getLectureGrade(),
+                    attendanceDate,
+                    attendStudent
             );
+
         }).collect(Collectors.toList());
     }
+
+
+
+
+
+
 
     // 승인
     @Transactional
@@ -205,6 +224,24 @@ public class CreditAppealService {
 
         gradeRepository.save(grade);
     }
+
+    public void updateAttendanceAppeal(Long appealId, AttendanceAppealDto dto) {
+        Appeal appeal = appealRepository.findById(appealId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 이의제기가 존재하지 않습니다."));
+
+        if (appeal.getAppealType() != AppealType.ATTENDANCE) {
+            throw new IllegalArgumentException("출결 이의제기가 아닙니다.");
+        }
+
+        // 상태만 엔티티에 저장
+        appeal.setStatus(dto.getStatus());
+        appealRepository.save(appeal);
+
+    }
+
+
+
+
 
 //    public List<AppealListDto> getMyAppeals(String sendingId) {
 //        List<Appeal> appeals = appealRepository.findBySendingId(sendingId);
