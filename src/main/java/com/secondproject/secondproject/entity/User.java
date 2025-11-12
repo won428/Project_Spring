@@ -53,8 +53,8 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Gender gender; // 성별 (enum, 문자열 컬럼)
 
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="major_id", foreignKey = @ForeignKey(name = "fk_user_major"))
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "major_id", foreignKey = @ForeignKey(name = "fk_user_major"))
     private Major major; // 소속학과ID (number, FK)
 
     @Enumerated(EnumType.STRING)
@@ -73,7 +73,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return String.valueOf(userCode);
     }
 
     @Override

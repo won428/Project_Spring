@@ -2,6 +2,9 @@ package com.secondproject.secondproject.repository;
 
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,4 +28,5 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
     List<Lecture> findAllNotRegisteredByUser(@Param("userId") Long userId);
 
 
+    Page<Lecture> findAll(Specification<Lecture> spec, Pageable pageable);
 }

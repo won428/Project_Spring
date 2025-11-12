@@ -53,9 +53,9 @@ public class AssignmentController {
 
 
     @GetMapping("/specific")
-    public ResponseEntity<?> SpecPage(@RequestParam Long id, @RequestParam String email) {
+    public ResponseEntity<?> SpecPage(@RequestParam Long id, @RequestParam String username) {
         try {
-            AssignmentResDto resDto = assignmentService.findById(id, email);
+            AssignmentResDto resDto = assignmentService.findById(id, username);
             return ResponseEntity.ok(resDto);
 
         } catch (Exception e) {

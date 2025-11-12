@@ -7,6 +7,7 @@ import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.entity.Mapping.UserAttach;
 import com.secondproject.secondproject.entity.StatusRecords;
 import com.secondproject.secondproject.repository.*;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.math3.stat.descriptive.summary.Product;
@@ -252,6 +253,10 @@ public class UserService {
     public Page<UserListDto> ListPageUser(UserListSearchDto userListSearchDto, int pageNumber, int pageSize) {
 
         Specification<User> spec = (root, query, cb) -> cb.conjunction();
+
+        if(userListSearchDto.getSearchLevel() != null && userListSearchDto.getSearchLevel() > 0){
+            spec = spec.and(PublicSpecification.hasLevel(userListSearchDto.getSearchLevel()));
+        }
 
         if (userListSearchDto.getSearchCollege() != null) {
             spec = spec.and(PublicSpecification.hasCollege(userListSearchDto.getSearchCollege()));
@@ -660,9 +665,9 @@ public class UserService {
 
     public ProRegDto findProfessor(Long id) {
         User user = this.userRepository.findById(id)
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 유저 입니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 유저 입니다."));
         Major major = this.majorRepository.findById(user.getMajor().getId())
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 학과 입니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 학과 입니다."));
         ProRegDto proRegDto = new ProRegDto();
 
         proRegDto.setId(user.getId());
@@ -674,4 +679,13 @@ public class UserService {
 
         return proRegDto;
     }
+
+    public Optional<User> getByUserCode(Long usercode) {
+        return userRepository.getByUserCode(usercode);
+    }
+
+    public Optional<User> findByUsername(Long userCode) {
+        return userRepository.findByUserCode(userCode);
+    }
+    
 }

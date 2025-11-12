@@ -1,12 +1,14 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.MajorPaging;
+import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.College;
 import com.secondproject.secondproject.entity.Major;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.repository.CollegeRepository;
 import com.secondproject.secondproject.repository.MajorRepository;
+import com.secondproject.secondproject.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ public class MajorService {
 
     private final MajorRepository majorRepository;
     private final CollegeRepository collegeRepository;
+    private final UserRepository userRepository;
 
     // 단과대학에 속한 학과 리스트 조회
     public List<MajorInCollegeDto> getMajorListByCollege(Long collegeId) {
@@ -188,4 +191,33 @@ public class MajorService {
     }
 
 
+    public List<ListForLectureDto> ListForLecture() {
+        List<Major> majorLists = this.majorRepository.findAll();
+        List<ListForLectureDto> majorDtos = new ArrayList<>();
+
+
+        for (Major m : majorLists){
+            List<User> userList = this.userRepository.findAllByMajor_IdAndType(m.getId(), UserType.PROFESSOR);
+            List<UserDto> userList1 = new ArrayList<>();
+            for(User user : userList){
+                UserDto userDto = new UserDto();
+                userDto.setId(user.getId());
+                userDto.setName(user.getName());
+
+                userList1.add(userDto);
+            }
+            Long id = m.getId();
+            String name = m.getName();
+            String office = m.getOffice();
+            Long collegeId = m.getCollege().getId();
+            String collegeName = m.getCollege().getType();
+
+
+
+            ListForLectureDto rs = new ListForLectureDto(id,name,office,collegeId,collegeName,userList1);
+
+            majorDtos.add(rs);
+        }
+        return majorDtos;
+    }
 }

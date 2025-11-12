@@ -19,7 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,12 +37,12 @@ public class AssignmentService {
 
     @Transactional
     public void insertAttachment(AssignmentInsertDto assignmentDto, List<MultipartFile> files) throws IOException {
-        if (assignmentDto.getEmail() == null || assignmentDto.getEmail().isEmpty()) {
-            throw new IllegalArgumentException("사용자 이메일이 없습니다.");
+        if (assignmentDto.getUsername() == null || assignmentDto.getUsername().isEmpty()) {
+            throw new IllegalArgumentException("사용자가 없습니다.");
         }
-        System.out.println(assignmentDto.getEmail());
-        User user = userRepository.findByEmail(assignmentDto.getEmail())
-                .orElseThrow(() -> new EntityNotFoundException("해당 이메일의 사용자를 찾을 수 없습니다."));
+        Long userCode = Long.parseLong(assignmentDto.getUsername());
+        User user = userRepository.findByUserCode(userCode)
+                .orElseThrow(() -> new EntityNotFoundException("해당 사용자를 찾을 수 없습니다."));
 
         Lecture lecture = lectureRepository.findById(assignmentDto.getLectureId())
                 .orElseThrow(() -> new EntityNotFoundException("강의명이 일치하지 않습니다."));
@@ -53,6 +56,7 @@ public class AssignmentService {
         assignInsert.setDueAt(assignmentDto.getDueAt());
         assignInsert.setLecture(lecture);
         Assignment assignment = assignmentRepository.save(assignInsert);
+
         List<MultipartFile> safeFiles = (files == null)
                 ? java.util.Collections.emptyList()
                 : files.stream().filter(f -> f != null && !f.isEmpty()).toList();
@@ -60,7 +64,7 @@ public class AssignmentService {
         if (safeFiles.isEmpty()) {
             return;
         }
-        for (MultipartFile file : files) {
+        for (MultipartFile file : safeFiles) {
             Attachment attachment = attachmentService.save(file, user);
             AssignmentAttach saved = new AssignmentAttach();
             saved.setAttachment(attachment);
@@ -77,51 +81,65 @@ public class AssignmentService {
         return result.map(AssignmentDto::fromEntity);
     }
 
-    public AssignmentResDto findById(Long id, String email) {
-        User user = userRepository.findByEmail(email)
+    public AssignmentResDto findById(Long id, String username) {
+        Long userCode = Long.parseLong(username);
+        User user = userRepository.findByUserCode(userCode)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없다!"));
         //과제 매핑 테이블에서 id로 찾기
-        List<AssignmentAttach> assignmentAttaches = assignmentAttachRepository.findByAssignment_Id(id);
+
         //제출된 과제 매핑 테이블에서 제출된 과제들 찾기
-        List<SubmitAssignAttach> submittedAttaches = submitAssignAttachRepository.findByAssignment_Id(id);//교수
-
-//        SubmitAsgmt AForStudent = submitAsgmtRepository.findByUserId(user.getId());
-//        List<SubmitAssignAttach> SubmittedAForStudent = submitAssignAttachRepository.findBySubmitId(AForStudent.getId());
-
 
         Assignment assignment = assignmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("과제 없다."));
 
-        List<SubmitAsgmt> submitAsgmt = submitAsgmtRepository.findByAssignmentId(assignment.getId());
-
+        List<AssignmentAttach> assignmentAttaches = assignmentAttachRepository.findByAssignment_Id(id);
         // 과제 공지 파일 목록
         List<Attachment> attachments = assignmentAttaches.stream()
                 .map(AssignmentAttach::getAttachment)
                 .toList();
         //과제 제출 목록 -  교수
+        List<SubmitAsgmt> allSubmissions = submitAsgmtRepository.findByAssignmentId(assignment.getId());
 
-        List<Attachment> attachmentSubmitted = submittedAttaches.stream()
-                .map(SubmitAssignAttach::getAttachment)
-                .toList();
 
+        List<SubmitAssignAttach> allSubmittedAttaches = submitAssignAttachRepository.findByAssignment_Id(id);
 
         if (user.getType().equals(UserType.STUDENT)) {
             //제출내역
-            SubmitAsgmt submittedOne = submitAsgmt.stream()
+            SubmitAsgmt submittedOne = allSubmissions.stream()
                     .filter(s -> s.getUser().getId().equals(user.getId()))
-                    .findFirst()
+                    .findAny()
                     .orElse(null);
 
-            //자료
-            List<Attachment> submittedA = attachmentSubmitted.stream()
-                    .filter(s -> s.getUser().getId().equals(user.getId()))
-                    .toList();
+            List<Attachment> attachmentsForStudent;
+            if (submittedOne != null) {
+                // 5. 학생 본인의 첨부파일 목록 찾기
+                attachmentsForStudent = allSubmittedAttaches.stream()
+                        .filter(sa -> sa.getSubmitAsgmt().getId().equals(submittedOne.getId()))
+                        .map(SubmitAssignAttach::getAttachment)
+                        .toList();
+            } else {
+                attachmentsForStudent = Collections.emptyList();
+            }
 
-            return AssignmentResDto.fromEntity(assignment, attachments, submittedOne, submittedA);
+            // DTO 생성 (학생용)
+            return AssignmentResDto.fromEntity(assignment, attachments, submittedOne, attachmentsForStudent);
 
         } else {
+            Map<Long, List<Attachment>> attachmentsMap = allSubmittedAttaches.stream()
+                    .collect(Collectors.groupingBy(
+                            sa -> sa.getSubmitAsgmt().getId(), // SubmitAsgmt의 ID로 그룹화
+                            Collectors.mapping(SubmitAssignAttach::getAttachment, Collectors.toList()) // Attachment만 리스트로
+                    ));
 
-            return (AssignmentResDto.fromEntity(assignment, attachments, submitAsgmt, attachmentSubmitted));
+            // 5. '모든' 제출물(allSubmissions)을 DTO 리스트로 변환
+            List<SubmitAsgmtDto> submitAsgmtDtoList = allSubmissions.stream()
+                    .map(submission -> {
+                        // 맵에서 '이 제출물(submission)'의 첨부파일 목록을 찾음
+                        List<Attachment> attachmentsForThisSubmission = attachmentsMap.getOrDefault(submission.getId(), Collections.emptyList());
+                        return SubmitAsgmtDto.fromEntity(submission, attachmentsForThisSubmission);
+                    })
+                    .toList();
+            return (AssignmentResDto.fromProfessorEntity(assignment, attachments, submitAsgmtDtoList));
         }
 
     }
@@ -131,8 +149,8 @@ public class AssignmentService {
             AssignSubmitInsertDto assignSubmitInsertDto,
             List<MultipartFile> files,
             List<String> existingFileKeys) throws IOException {
-
-        User user = userRepository.findByEmail(assignSubmitInsertDto.getEmail())
+        Long userCode = Long.parseLong(assignSubmitInsertDto.getUsername());
+        User user = userRepository.findByUserCode(userCode)
                 .orElseThrow(() -> new EntityNotFoundException("유저 없음"));
         Assignment assignment = assignmentRepository.findById(assignId)
                 .orElseThrow(() -> new EntityNotFoundException("과제 없음"));
@@ -145,8 +163,13 @@ public class AssignmentService {
         if (attaches != null && !attaches.isEmpty()) {
             assignmentAttachRepository.deleteAll(attaches);
         }
-        if (files != null && !files.isEmpty() && files.get(0).getSize() > 0) {
-            for (MultipartFile file : files) {
+
+        List<MultipartFile> newValidFiles = (files == null)
+                ? Collections.emptyList()
+                : files.stream().filter(f -> f != null && !f.isEmpty()).toList();
+
+        if (!newValidFiles.isEmpty()) {
+            for (MultipartFile file : newValidFiles) { // 'newValidFiles' 사용
                 Attachment attachment = attachmentService.save(file, user);
                 AssignmentAttach assignmentAttach = new AssignmentAttach();
                 assignmentAttach.setAssignment(assignment);
@@ -162,9 +185,7 @@ public class AssignmentService {
                 reSaved.setAssignment(assignment);
                 reSaved.setAttachment(existingAttachment);
                 assignmentAttachRepository.save(reSaved);
-
             }
-
         }
     }
 

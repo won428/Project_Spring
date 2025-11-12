@@ -17,4 +17,6 @@ public interface LectureNoticeRepository extends JpaRepository<LectureNotice, Lo
 
 
     Page<LectureNotice> findByLecture(Lecture lecture, Pageable pageable);
+
+    Page<LectureNotice> findByLectureIdIn(List<Long> lectures, Pageable pageable);
 }

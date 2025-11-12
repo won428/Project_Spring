@@ -37,6 +37,12 @@ public class MajorController {
         return majorListDtos;
     }
 
+    @GetMapping("/listForLecturePage")
+    public List<ListForLectureDto> ListForLecturePage(){
+        List<ListForLectureDto> majorListDtos = majorService.ListForLecture();
+        return majorListDtos;
+    }
+
     // 단과대학에 속한 학과목록 조회
     @GetMapping("/list") // 매핑주소 수정 필요
     public List<MajorInCollegeDto> majorListByCollege(@RequestParam("college_id") Long collegeId){

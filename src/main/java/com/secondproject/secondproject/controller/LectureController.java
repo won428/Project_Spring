@@ -1,5 +1,7 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.Enum.CompletionDiv;
+import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
@@ -52,6 +54,34 @@ public class LectureController {
     // 수강신청 관련해서 나중에 수강신청 컨트롤러로 이식할게요.
 
 
+    @GetMapping("/pageList")
+    public ResponseEntity<Page<LectureDto>> lectureListPage(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) CompletionDiv searchCompletionDiv,
+            @RequestParam(required = false) Long searchMajor,
+            @RequestParam(required = false) Integer searchCredit,
+            @RequestParam(required = false) String searchStartDate,
+            @RequestParam(required = false) String searchMode,
+            @RequestParam(required = false) String searchKeyword,
+            @RequestParam(required = false) DayOfWeek searchSchedule,
+            @RequestParam(required = false) String searchYear,
+            @RequestParam(required = false) Integer searchLevel,
+            @RequestParam(required = false) Long searchUser,
+            @RequestParam(required = false) Status searchStatus
+    ) {
+        LecturePageListDto lecturePageListDto = new LecturePageListDto(pageNumber,pageSize,searchCompletionDiv, searchMajor, searchCredit, searchStartDate, searchMode,searchKeyword,searchSchedule,searchYear,searchLevel,searchUser,searchStatus);
+        Page<LectureDto> lectureList = this.lectureService.listPageLecture(lecturePageListDto, pageNumber, pageSize);
+
+        System.out.println("검색 조건 : " + lecturePageListDto);
+        System.out.println("총 상품 개수 : " + lectureList.getTotalElements());
+        System.out.println("총 페이지 번호 : " + lectureList.getTotalPages());
+        System.out.println("현재 페이지 번호 : " + lectureList.getNumber());
+
+
+        return ResponseEntity.ok(lectureList);
+    }
+
     @PatchMapping("/lectureUpdate")
     public ResponseEntity<?> updateLecture(
             @RequestPart LectureDto lecture,
@@ -59,9 +89,9 @@ public class LectureController {
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @RequestPart PercentDto percent,
             @RequestPart List<AttachmentDto> existingDtos
-    ){
+    ) {
         try {
-            this.lectureService.updateLecture(lecture, schedule, files, percent,existingDtos);
+            this.lectureService.updateLecture(lecture, schedule, files, percent, existingDtos);
             return ResponseEntity.ok(Map.of("success", true));
         } catch (ResponseStatusException ex) {
             try {
@@ -85,7 +115,7 @@ public class LectureController {
 
     //업데이트용 단일 강의 정보
     @GetMapping("/findOne/{id}")
-    public LectureDto findLectureForUpdate(@PathVariable Long id){
+    public LectureDto findLectureForUpdate(@PathVariable Long id) {
         LectureDto lectureDto = this.lectureService.findByID(id);
 
         return lectureDto;
@@ -239,8 +269,8 @@ public class LectureController {
 
     // 수강신청 후 개강, 종강, 거부된 목록
     @GetMapping("/mylist/completed")
-    public List<LectureDto> applyLectureListEnd(@RequestParam Long userId){
-        List <LectureDto> lectureList = this.lectureService.applyLecturListEnd(userId);
+    public List<LectureDto> applyLectureListEnd(@RequestParam Long userId) {
+        List<LectureDto> lectureList = this.lectureService.applyLecturListEnd(userId);
 
         return lectureList;
     }
@@ -272,10 +302,11 @@ public class LectureController {
     //강의실 목록
     @GetMapping("/List")
     @Transactional
-    public ResponseEntity<List<LectureDto>> GiveLectureList(@RequestParam String email, @RequestParam String sortKey) {
+    public ResponseEntity<List<LectureDto>> GiveLectureList(@RequestParam String username, @RequestParam String sortKey) {
         try {
             System.out.println(sortKey);
-            User user = userService.findUserByEmail(email)
+            Long userCode = Long.parseLong(username);
+            User user = userService.findByUsercode(userCode)
                     .orElseThrow(() -> (new UsernameNotFoundException("존재하지 않는 사용자 입니다.")));
 
             List<LectureDto> lectureListDto = lectureService.findByUser(user, sortKey);
@@ -289,10 +320,10 @@ public class LectureController {
     }
 
     @GetMapping("/stlist")
-    public ResponseEntity<?> StudentLecList(@RequestParam String email, @RequestParam String sortKey) {
+    public ResponseEntity<?> StudentLecList(@RequestParam String username, @RequestParam String sortKey) {
         try {
-
-            User user = userService.findUserByEmail(email)
+            Long userCode = Long.parseLong(username);
+            User user = userService.findByUsername(userCode)
                     .orElseThrow(() -> (new UsernameNotFoundException("존재하지 않는 사용자 입니다.")));
 
             List<LectureDto> lectureListDto = lectureService.findByStudent(user, sortKey);
@@ -391,7 +422,7 @@ public class LectureController {
                 String error = HttpStatus.valueOf(errStatus).name();
 
                 Map<String, Object> body = Map.of(
-                        "status", status,
+                        "status", errStatus,
                         "error", error,
                         "message", ex.getReason(),
                         "timestamp", java.time.OffsetDateTime.now().toString()
@@ -416,7 +447,7 @@ public class LectureController {
                 String error = HttpStatus.valueOf(errStatus).name();
 
                 Map<String, Object> body = Map.of(
-                        "status", status,
+                        "status", errStatus,
                         "error", error,
                         "message", ex.getReason(),
                         "timestamp", java.time.OffsetDateTime.now().toString()
@@ -442,7 +473,7 @@ public class LectureController {
                 String error = HttpStatus.valueOf(errStatus).name();
 
                 Map<String, Object> body = Map.of(
-                        "status", status,
+                        "status", errStatus,
                         "error", error,
                         "message", ex.getReason(),
                         "timestamp", java.time.OffsetDateTime.now().toString()
@@ -456,7 +487,7 @@ public class LectureController {
     }
 
     @GetMapping("/regForPro/{id}")
-    public ProRegDto proRegDto (@PathVariable Long id) {
+    public ProRegDto proRegDto(@PathVariable Long id) {
         ProRegDto proRegDto = this.userService.findProfessor(id);
 
         return proRegDto;

@@ -37,7 +37,8 @@ public class SubmitAsgmtService {
     public void assignmentSubmit(
             AssignSubmitInsertDto insertDto,
             List<MultipartFile> files) throws IOException {
-        User user = userRepository.findByEmail(insertDto.getEmail())
+        Long userCode = Long.parseLong(insertDto.getUsername());
+        User user = userRepository.findByUserCode(userCode)
                 .orElseThrow(() -> new EntityNotFoundException("유저 정보가 없다"));
 //        Lecture lecture = lectureRepository.findById(insertDto.getLectureId())
 //                .orElseThrow(() -> new EntityNotFoundException("강의 없음."));
@@ -78,7 +79,8 @@ public class SubmitAsgmtService {
 
     @Transactional
     public void assignmentUpdate(Long assignId, AssignSubmitInsertDto assignSubmitInsertDto, List<MultipartFile> files, List<String> existingFileKeys) throws IOException {
-        User user = userRepository.findByEmail(assignSubmitInsertDto.getEmail())
+        Long userCode = Long.parseLong(assignSubmitInsertDto.getUsername());
+        User user = userRepository.findByUserCode(userCode)
                 .orElseThrow(() -> new EntityNotFoundException("유저 정보 없음"));
         Assignment assignment = assignmentRepository.findById(assignId)
                 .orElseThrow(() -> new EntityNotFoundException("과제가 존재하지 않는다."));

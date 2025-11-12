@@ -16,9 +16,9 @@ public class CourseRegService {
     private final CourseRegRepository courseRegRepository;
     private final LectureRepository lectureRepository;
 
-    public void updateStatus(Long id, Status status) {
-        CourseRegistration courseRegistration = this.courseRegRepository.findByLecture_Id(id);
-        Lecture lecture = this.lectureRepository.findById(id)
+    public void updateStatus(Long lecId ,Long id, Status status) {
+        CourseRegistration courseRegistration = this.courseRegRepository.findByLecture_IdAndUser_Id(lecId,id);
+        Lecture lecture = this.lectureRepository.findById(lecId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 강의입니다."));
         Status nowStatus = lecture.getStatus();
 
@@ -35,5 +35,11 @@ public class CourseRegService {
 
         this.courseRegRepository.save(courseRegistration);
 
+    }
+
+    public void delete(Long id, Long lecId) {
+        CourseRegistration courseRegistration = this.courseRegRepository.findByLecture_IdAndUser_Id(lecId,id);
+
+        this.courseRegRepository.deleteById(courseRegistration.getId());
     }
 }

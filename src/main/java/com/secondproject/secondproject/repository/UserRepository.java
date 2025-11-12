@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.repository;
 
+import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.entity.Major;
 import com.secondproject.secondproject.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,10 +18,9 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     Optional<User> findByEmail(String email);
 
 
-
     Optional<User> getByEmail(String email);
-    Optional<User> findByUserCode(Long userCode);
 
+    Optional<User> findByUserCode(Long userCode);
 
 
     List<User> findAllByMajor(Major major);
@@ -32,7 +32,10 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     List<User> findAllByEmailIn(Collection<String> emails);
 
 
-
     boolean existsByPhone(String phone);
+
+    Optional<User> getByUserCode(Long usercode);
+
+    List<User> findAllByMajor_IdAndType(Long id, UserType userType);
 }
 

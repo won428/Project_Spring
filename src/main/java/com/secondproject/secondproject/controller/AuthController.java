@@ -36,28 +36,29 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
 
-            String email = loginRequest.getEmail();
-            System.out.println("로그인 이메일 : " + email);
+            String username = loginRequest.getUsername();
+            System.out.println("로그인 이메일 : " + username);
             String password = loginRequest.getPassword();
             System.out.println("로그인 패스워드 : " + password);
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(email, password)
+                    new UsernamePasswordAuthenticationToken(username, password)
             );
             com.secondproject.secondproject.entity.User user = (com.secondproject.secondproject.entity.User) authentication.getPrincipal();
 
             Long id = user.getId();
             String role = user.getType().name();
+            String uname = user.getName();
             System.out.println("역할  :" + role);
-            String access = jwtTokenProvider.createAccessToken(id,email, role);
-            String refresh = jwtTokenProvider.createRefreshToken(id,email);
+            String access = jwtTokenProvider.createAccessToken(id, username, role, uname);
+            String refresh = jwtTokenProvider.createRefreshToken(id, username);
 
-            refreshTokenRepo.findByEmail(email)
+            refreshTokenRepo.findByUsername(username)
                     .ifPresentOrElse(
                             r -> {
                                 r.setToken(refresh);
                                 refreshTokenRepo.save(r);
                             },
-                            () -> refreshTokenRepo.save(new RefreshToken(null, email, refresh))
+                            () -> refreshTokenRepo.save(new RefreshToken(null, username, refresh))
 
                     );
 
@@ -70,19 +71,19 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@RequestBody RefreshRequest refreshRequest) {
 
-        String email = refreshRequest.getEmail();
-        Optional<RefreshToken> saved = refreshTokenRepo.findByEmail(email);
+        String username = refreshRequest.getUsername();
+        Optional<RefreshToken> saved = refreshTokenRepo.findByUsername(username);
         {
             if (saved.isPresent()
                     && saved.get().getToken().equals(refreshRequest.getRefreshToken())
                     && jwtTokenProvider.validateToken(refreshRequest.getRefreshToken())
             ) {
-                User user = userService.getByEmail(email)
-                        .orElseThrow(() -> new BadCredentialsException("사용자 없음")); // ★ 추가
-                Long userId = user.getId();                                           // ★ 추가
-                String role  = user.getType().name();                                 // ★ 추가
-
-                String newAccess = jwtTokenProvider.createAccessToken(userId, email, role);
+                User user = userService.getByUserCode(Long.parseLong(username))
+                        .orElseThrow(() -> new BadCredentialsException("사용자 없음"));
+                Long userId = user.getId();
+                String role = user.getType().name();
+                String uname = user.getName();
+                String newAccess = jwtTokenProvider.createAccessToken(userId, username, role, uname);
                 return ResponseEntity.ok(new TokenResponse(newAccess, refreshRequest.getRefreshToken()));
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token 만료 / 불 일치");
@@ -92,8 +93,9 @@ public class AuthController {
     //    Pw 찾기 기능 진행중 ...
     @PostMapping("/FindPW")
     public ResponseEntity<?> findPw(@RequestBody FindRequest findRequest) {
-        String userEmail = findRequest.email;
-        Optional<User> authUser = userService.findUserByEmail(userEmail);
+        String StringUsername = findRequest.getUsername();
+        Long username = Long.parseLong(StringUsername);
+        Optional<User> authUser = userService.findByUsername(username);
         if (authUser.isPresent()) {
             return ResponseEntity.status(HttpStatus.ACCEPTED).body("Email 검증 성공");
         } else {
@@ -105,9 +107,9 @@ public class AuthController {
     @PostMapping("/SetPw")
     public ResponseEntity<?> setPw(@RequestBody PwSetRequest pwsetRequest) {
         System.out.println("Request : " + pwsetRequest);
-        String email = pwsetRequest.email;
-
-        Optional<User> authUser = userService.getByEmail(email);
+        String StringUsername = pwsetRequest.getUsername();
+        Long username = Long.parseLong(StringUsername);
+        Optional<User> authUser = userService.getByUserCode(username);
         String newPassword = (pwsetRequest.newPassword);
         String Password = authUser.get().getPassword();
         System.out.println(!passwordEncoder.matches(newPassword, Password));
@@ -135,31 +137,31 @@ public class AuthController {
     // react 에서 access token 만료로 구현
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody LoginRequest loginRequest) {
-        refreshTokenRepo.deleteByEmail(loginRequest.getEmail());
+        refreshTokenRepo.deleteByUsername(loginRequest.getUsername());
         return ResponseEntity.ok("로그아웃 완료");
     }
 
     @Data
     public static class LoginRequest {
-        private String email;
+        private String username;
         private String password;
     }
 
     @Data
     public static class RefreshRequest {
-        private String email;
+        private String username;
         private String refreshToken;
     }
 
     @Data
     public static class FindRequest {
-        private String email;
+        private String username;
 
     }
 
     @Data
     public static class PwSetRequest {
-        private String email;
+        private String username;
         private String newPassword;
     }
 
