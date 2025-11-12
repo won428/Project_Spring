@@ -12,7 +12,5 @@ public record GradeSaveRequest (
    @DecimalMin("0") BigDecimal attendance,
    @DecimalMin("0") @DecimalMax("100") BigDecimal asScore,
    @DecimalMin("0") @DecimalMax("100") BigDecimal tScore,
-   @DecimalMin("0") @DecimalMax("100") BigDecimal ftScore,
-   @DecimalMin("0") @DecimalMax("100") BigDecimal totalScore,
-   @DecimalMin("0") @DecimalMax("4.5") BigDecimal gpa
+   @DecimalMin("0") @DecimalMax("100") BigDecimal ftScore
 ){ }
