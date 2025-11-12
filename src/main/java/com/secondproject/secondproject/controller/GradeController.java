@@ -1,12 +1,10 @@
 package com.secondproject.secondproject.controller;
 
 import com.secondproject.secondproject.dto.GradeResponseDto;
+import com.secondproject.secondproject.dto.GradingResult;
 import com.secondproject.secondproject.repository.GradeRepository;
 import com.secondproject.secondproject.repository.GradingWeightsRepository;
-import com.secondproject.secondproject.service.GradeSaveRequest;
-import com.secondproject.secondproject.service.GradeService;
-import com.secondproject.secondproject.service.GradeSummaryDto;
-import com.secondproject.secondproject.service.GradingWeightsDto;
+import com.secondproject.secondproject.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,6 +22,7 @@ public class GradeController {
 
     private final GradeRepository gradeRepository;
     private final GradeService gradeService;
+
 
     // 성적 점수 저장하기
     @PostMapping("/insertGrades")
