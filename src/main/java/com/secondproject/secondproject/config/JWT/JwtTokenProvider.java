@@ -25,22 +25,23 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String createAccessToken(Long id, String email, String role) {
+    public String createAccessToken(Long id, String username, String role, String uname) {
         Date now = new Date();
         return Jwts.builder()
-                .setSubject(email)
+                .setSubject(username)
                 .claim("uid", String.valueOf(id))
                 .claim("role", role)
+                .claim("uname", uname)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + accessExp))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String createRefreshToken(Long id, String email) {
+    public String createRefreshToken(Long id, String username) {
         Date now = new Date();
         return Jwts.builder()
-                .setSubject(email)
+                .setSubject(username)
                 .claim("uid", String.valueOf(id))
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + refreshExp))
@@ -62,18 +63,7 @@ public class JwtTokenProvider {
         }
     }
 
-    public String getEmail(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
-
-
-
-//    public String getUsername(String token) {
+//    public String getEmail(String token) {
 //        return Jwts.parserBuilder()
 //                .setSigningKey(getSigningKey())
 //                .build()
@@ -81,5 +71,15 @@ public class JwtTokenProvider {
 //                .getBody()
 //                .getSubject();
 //    }
+
+
+    public String getUsername(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
 
 }

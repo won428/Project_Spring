@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class LectureNoticeUploadDto {
 
-    private String email;
+    private String username;
     private Long id;
     private String title;
     private String content;

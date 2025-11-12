@@ -30,7 +30,7 @@ public class OnlineLecture {
     private User user; // 유저(교수)아이디가 들어갑니다
 
     @Column(name = "ol_username")
-    private String username; // 작성자 이름
+    private String uname; // 작성자 이름
 
     @Column(name = "ol_path", nullable = false)
     private String path; // 온라인 로컬주소 << 매핑관련 확인해주세요

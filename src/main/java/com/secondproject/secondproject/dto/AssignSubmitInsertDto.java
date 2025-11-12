@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 public class AssignSubmitInsertDto {
-    private String email; //user 호출용 email
+    private String username; //user 호출용 email
 
     private Long lectureId; //강의 아이디
 

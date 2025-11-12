@@ -18,10 +18,9 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     Optional<User> findByEmail(String email);
 
 
-
     Optional<User> getByEmail(String email);
-    Optional<User> findByUserCode(Long userCode);
 
+    Optional<User> findByUserCode(Long userCode);
 
 
     List<User> findAllByMajor(Major major);
@@ -33,8 +32,9 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     List<User> findAllByEmailIn(Collection<String> emails);
 
 
-
     boolean existsByPhone(String phone);
+
+    Optional<User> getByUserCode(Long usercode);
 
     List<User> findAllByMajor_IdAndType(Long id, UserType userType);
 }

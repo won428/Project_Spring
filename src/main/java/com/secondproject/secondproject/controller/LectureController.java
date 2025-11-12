@@ -89,9 +89,9 @@ public class LectureController {
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @RequestPart PercentDto percent,
             @RequestPart List<AttachmentDto> existingDtos
-    ){
+    ) {
         try {
-            this.lectureService.updateLecture(lecture, schedule, files, percent,existingDtos);
+            this.lectureService.updateLecture(lecture, schedule, files, percent, existingDtos);
             return ResponseEntity.ok(Map.of("success", true));
         } catch (ResponseStatusException ex) {
             try {
@@ -115,7 +115,7 @@ public class LectureController {
 
     //업데이트용 단일 강의 정보
     @GetMapping("/findOne/{id}")
-    public LectureDto findLectureForUpdate(@PathVariable Long id){
+    public LectureDto findLectureForUpdate(@PathVariable Long id) {
         LectureDto lectureDto = this.lectureService.findByID(id);
 
         return lectureDto;
@@ -269,8 +269,8 @@ public class LectureController {
 
     // 수강신청 후 개강, 종강, 거부된 목록
     @GetMapping("/mylist/completed")
-    public List<LectureDto> applyLectureListEnd(@RequestParam Long userId){
-        List <LectureDto> lectureList = this.lectureService.applyLecturListEnd(userId);
+    public List<LectureDto> applyLectureListEnd(@RequestParam Long userId) {
+        List<LectureDto> lectureList = this.lectureService.applyLecturListEnd(userId);
 
         return lectureList;
     }
@@ -302,10 +302,11 @@ public class LectureController {
     //강의실 목록
     @GetMapping("/List")
     @Transactional
-    public ResponseEntity<List<LectureDto>> GiveLectureList(@RequestParam String email, @RequestParam String sortKey) {
+    public ResponseEntity<List<LectureDto>> GiveLectureList(@RequestParam String username, @RequestParam String sortKey) {
         try {
             System.out.println(sortKey);
-            User user = userService.findUserByEmail(email)
+            Long userCode = Long.parseLong(username);
+            User user = userService.findByUsercode(userCode)
                     .orElseThrow(() -> (new UsernameNotFoundException("존재하지 않는 사용자 입니다.")));
 
             List<LectureDto> lectureListDto = lectureService.findByUser(user, sortKey);
@@ -319,10 +320,10 @@ public class LectureController {
     }
 
     @GetMapping("/stlist")
-    public ResponseEntity<?> StudentLecList(@RequestParam String email, @RequestParam String sortKey) {
+    public ResponseEntity<?> StudentLecList(@RequestParam String username, @RequestParam String sortKey) {
         try {
-
-            User user = userService.findUserByEmail(email)
+            Long userCode = Long.parseLong(username);
+            User user = userService.findByUsername(userCode)
                     .orElseThrow(() -> (new UsernameNotFoundException("존재하지 않는 사용자 입니다.")));
 
             List<LectureDto> lectureListDto = lectureService.findByStudent(user, sortKey);
@@ -489,7 +490,7 @@ public class LectureController {
     }
 
     @GetMapping("/regForPro/{id}")
-    public ProRegDto proRegDto (@PathVariable Long id) {
+    public ProRegDto proRegDto(@PathVariable Long id) {
         ProRegDto proRegDto = this.userService.findProfessor(id);
 
         return proRegDto;

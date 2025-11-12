@@ -21,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -34,16 +36,19 @@ public class OnlineLectureService {
     private final OnlineLectureAttachRepository onlineLectureAttachRepository;
     private final ProgressRepository progressRepository;
 
+
     @Transactional
     public void createOnLec(OnlineLectureDto dto, MultipartFile file) throws IOException {
-        User user = userRepository.findByEmail(dto.getEmail())
+
+        Long userCode = Long.parseLong(dto.getUsername());
+        User user = userRepository.findByUserCode(userCode)
                 .orElseThrow(() -> new EntityNotFoundException("유저정보가 존재하지 않습니다."));
         Lecture lectureParent = lectureRepository.findById(dto.getLectureId())
                 .orElseThrow(() -> new EntityNotFoundException("강의가 존재하지 않습니다."));
         OnlineLecture lecture = new OnlineLecture();
         lecture.setLecture(lectureParent);
         lecture.setTitle(dto.getTitle());
-        lecture.setUsername(user.getName());
+        lecture.setUname(user.getName());
         lecture.setUpdatedDate(dto.getStartDate().atTime(0, 0, 0));
         lecture.setEndDate(dto.getEndDate().atTime(23, 59, 0));
         lecture.setDisable(true);
@@ -141,4 +146,6 @@ public class OnlineLectureService {
         attachmentService.deleteFile(attachment.getStoredKey());
         onlineLectureRepository.delete(onlineLecture);
     }
+
+
 }

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 public class AssignmentInsertDto {
-    private String email;
+    private String username;
 
     private String title; // 공지 제목
 
@@ -22,7 +22,7 @@ public class AssignmentInsertDto {
     private LocalDate openAt; // 제출 시작일
 
     private LocalDate dueAt; // 제출 마감일
-    
+
     private User user; // 공지한사람(=교수이름)
 
     private Lecture lecture; // Lecture(강의) 테이블 FK참조

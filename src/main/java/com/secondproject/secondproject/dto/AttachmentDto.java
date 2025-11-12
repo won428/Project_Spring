@@ -23,21 +23,20 @@ public class AttachmentDto {
     private String sha256;
 
 
-//    public static AttachmentDto fromEntity(
-//            LectureNotice lectureNotice,
-//            List<Attachment> attachments
-//    ) {
-//        AttachmentDto dto = new AttachmentDto();
-//        dto.setLectureNotice(lectureNotice);
-//        List<Attachment> ListAttach = new ArrayList<>();
-//        if (!attachments.isEmpty()) {
-//            for (Attachment attachment : attachments) {
-//
-//
-//                ListAttach.add(attachment);
-//            }
-//            dto.setFiles(ListAttach);
-//        }
-//        return dto;
-//    }
+    public static AttachmentDto fromEntity(Attachment attachment) {
+        if (attachment == null) {
+            return null;
+        }
+
+        AttachmentDto dto = new AttachmentDto();
+        dto.setId(attachment.getId());
+        dto.setName(attachment.getName());
+        dto.setStoredKey(attachment.getStoredKey());
+        dto.setContentType(attachment.getContentType());
+        dto.setSizeBytes(attachment.getSizeBytes());
+        dto.setUploadAt(attachment.getUploadAt());
+        dto.setSha256(attachment.getSha256());
+
+        return dto;
+    }
 }
