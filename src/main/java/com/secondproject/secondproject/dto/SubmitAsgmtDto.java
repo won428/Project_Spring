@@ -2,12 +2,16 @@ package com.secondproject.secondproject.dto;
 
 import com.secondproject.secondproject.Enum.SubmitStatus;
 import com.secondproject.secondproject.entity.Assignment;
+import com.secondproject.secondproject.entity.Attachment;
+import com.secondproject.secondproject.entity.SubmitAsgmt;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -29,27 +33,28 @@ public class SubmitAsgmtDto {
 
     private LocalDateTime updateAt; // 과제 수정일
 
+    private List<AttachmentDto> attachmentSubmittedDto;
 
-//    public static SubmitAsgmtDto fromEntity(Assignment assignment) {
-//        SubmitAsgmtDto dto = new SubmitAsgmtDto();
-//        dto.setId(assignment.getId());
-//        dto.setTitle(assignment.getTitle());
-//        dto.setContent(assignment.getContent());
-//        dto.setOpenAt(assignment.getOpenAt());
-//        dto.setDueAt(assignment.getDueAt());
-//
-//        if (assignment.getUser() != null) {
-//            dto.setUsername(assignment.getUser().getName());
-//        }
-//        dto.setCreateAt(assignment.getCreateAt());
-//        dto.setUpdateAt(assignment.getUpdateAt());
-//        return dto;
-//    }
+    public static SubmitAsgmtDto fromEntity(SubmitAsgmt submission, List<Attachment> attachments) {
+        SubmitAsgmtDto dto = new SubmitAsgmtDto();
+        dto.setId(submission.getId());
+        dto.setUsername(submission.getUser().getName());
+        dto.setTitle(submission.getTitle());
+        dto.setContent(submission.getContent());
+        dto.setSubmitStatus(submission.getSubmitStatus());
+        dto.setSubmitAt(submission.getSubmitAt());
+        dto.setUpdateAt(submission.getUpdateAt());
 
+        // '이 제출물'에 속한 파일 목록을 DTO로 변환하여 설정
+        if (attachments != null && !attachments.isEmpty()) {
+            dto.attachmentSubmittedDto = attachments.stream()
+                    .map(AttachmentDto::fromEntity) // (가정) AttachmentDto에 fromEntity
+                    .toList();
+        } else {
+            dto.attachmentSubmittedDto = new ArrayList<>();
+        }
 
-//    public static AssignmentDto fromEntity(Assignment assignment) {
-//
-//
-//    }
+        return dto;
+    }
 
 }
