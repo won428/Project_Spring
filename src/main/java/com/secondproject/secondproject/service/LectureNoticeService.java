@@ -33,14 +33,14 @@ public class LectureNoticeService {
     private final AssignmentRepository assignmentRepository;
 
 
-    @Transactional // 데이터 변경이 있으므로 트랜잭션 처리
+    @Transactional
     public void createNotice(LectureNoticeUploadDto noticeDto, List<MultipartFile> files) throws IOException {
         if (noticeDto.getId() == null || noticeDto.getId().equals("undefined")) {
             throw new IllegalArgumentException("잘못된 접근 입니다.");
         }
-
+        Long userCode = Long.parseLong(noticeDto.getUsername());
         // 1. DTO 에서 이메일을 가져와 사용자를 찾습니다.
-        User user = userRepository.findByEmail(noticeDto.getEmail())
+        User user = userRepository.findByUserCode(userCode)
                 .orElseThrow(() -> new EntityNotFoundException("해당 이메일의 사용자를 찾을 수 없습니다."));
 
 

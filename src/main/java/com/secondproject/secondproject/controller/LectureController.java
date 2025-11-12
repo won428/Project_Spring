@@ -260,10 +260,11 @@ public class LectureController {
     //강의실 목록
     @GetMapping("/List")
     @Transactional
-    public ResponseEntity<List<LectureDto>> GiveLectureList(@RequestParam String email, @RequestParam String sortKey) {
+    public ResponseEntity<List<LectureDto>> GiveLectureList(@RequestParam String username, @RequestParam String sortKey) {
         try {
             System.out.println(sortKey);
-            User user = userService.findUserByEmail(email)
+            Long userCode = Long.parseLong(username);
+            User user = userService.findByUsercode(userCode)
                     .orElseThrow(() -> (new UsernameNotFoundException("존재하지 않는 사용자 입니다.")));
 
             List<LectureDto> lectureListDto = lectureService.findByUser(user, sortKey);
@@ -277,10 +278,10 @@ public class LectureController {
     }
 
     @GetMapping("/stlist")
-    public ResponseEntity<?> StudentLecList(@RequestParam String email, @RequestParam String sortKey) {
+    public ResponseEntity<?> StudentLecList(@RequestParam String username, @RequestParam String sortKey) {
         try {
-
-            User user = userService.findUserByEmail(email)
+            Long userCode = Long.parseLong(username);
+            User user = userService.findByUsername(userCode)
                     .orElseThrow(() -> (new UsernameNotFoundException("존재하지 않는 사용자 입니다.")));
 
             List<LectureDto> lectureListDto = lectureService.findByStudent(user, sortKey);
@@ -419,7 +420,7 @@ public class LectureController {
     }
 
     @GetMapping("/regForPro/{id}")
-    public ProRegDto proRegDto (@PathVariable Long id) {
+    public ProRegDto proRegDto(@PathVariable Long id) {
         ProRegDto proRegDto = this.userService.findProfessor(id);
 
         return proRegDto;

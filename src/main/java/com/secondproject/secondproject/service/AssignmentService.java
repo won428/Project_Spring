@@ -34,12 +34,12 @@ public class AssignmentService {
 
     @Transactional
     public void insertAttachment(AssignmentInsertDto assignmentDto, List<MultipartFile> files) throws IOException {
-        if (assignmentDto.getEmail() == null || assignmentDto.getEmail().isEmpty()) {
-            throw new IllegalArgumentException("사용자 이메일이 없습니다.");
+        if (assignmentDto.getUsername() == null || assignmentDto.getUsername().isEmpty()) {
+            throw new IllegalArgumentException("사용자가 없습니다.");
         }
-        System.out.println(assignmentDto.getEmail());
-        User user = userRepository.findByEmail(assignmentDto.getEmail())
-                .orElseThrow(() -> new EntityNotFoundException("해당 이메일의 사용자를 찾을 수 없습니다."));
+        Long userCode = Long.parseLong(assignmentDto.getUsername());
+        User user = userRepository.findByUserCode(userCode)
+                .orElseThrow(() -> new EntityNotFoundException("해당 사용자를 찾을 수 없습니다."));
 
         Lecture lecture = lectureRepository.findById(assignmentDto.getLectureId())
                 .orElseThrow(() -> new EntityNotFoundException("강의명이 일치하지 않습니다."));
@@ -77,8 +77,9 @@ public class AssignmentService {
         return result.map(AssignmentDto::fromEntity);
     }
 
-    public AssignmentResDto findById(Long id, String email) {
-        User user = userRepository.findByEmail(email)
+    public AssignmentResDto findById(Long id, String username) {
+        Long userCode = Long.parseLong(username);
+        User user = userRepository.findByUserCode(userCode)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없다!"));
         //과제 매핑 테이블에서 id로 찾기
         List<AssignmentAttach> assignmentAttaches = assignmentAttachRepository.findByAssignment_Id(id);
@@ -131,8 +132,8 @@ public class AssignmentService {
             AssignSubmitInsertDto assignSubmitInsertDto,
             List<MultipartFile> files,
             List<String> existingFileKeys) throws IOException {
-
-        User user = userRepository.findByEmail(assignSubmitInsertDto.getEmail())
+        Long userCode = Long.parseLong(assignSubmitInsertDto.getUsername());
+        User user = userRepository.findByUserCode(userCode)
                 .orElseThrow(() -> new EntityNotFoundException("유저 없음"));
         Assignment assignment = assignmentRepository.findById(assignId)
                 .orElseThrow(() -> new EntityNotFoundException("과제 없음"));
