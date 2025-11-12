@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CourseRegService {
@@ -41,5 +43,35 @@ public class CourseRegService {
         CourseRegistration courseRegistration = this.courseRegRepository.findByLecture_IdAndUser_Id(lecId,id);
 
         this.courseRegRepository.deleteById(courseRegistration.getId());
+    }
+
+    public void deleteAll(Long id, List<Long> cancelSelected) {
+
+        if (cancelSelected == null || cancelSelected.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "강의는 최소 1개 이상 선택해야합니다..");
+        } else if (id == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자 없음");
+        }
+
+        for(Long lecId : cancelSelected){
+            CourseRegistration courseRegistration = this.courseRegRepository.findByLecture_IdAndUser_Id(lecId,id);
+
+            this.courseRegRepository.deleteById(courseRegistration.getId());
+        }
+    }
+
+
+    public void statusAll(Long id, List<Long> selected, Status status) {
+        if (selected == null || selected.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "강의는 최소 1개 이상 선택해야합니다..");
+        } else if (id == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자 없음");
+        }
+
+        for(Long lecId : selected){
+            CourseRegistration courseRegistration = this.courseRegRepository.findByLecture_IdAndUser_Id(lecId, id);
+            courseRegistration.setStatus(status);
+            this.courseRegRepository.save(courseRegistration);
+        }
     }
 }
