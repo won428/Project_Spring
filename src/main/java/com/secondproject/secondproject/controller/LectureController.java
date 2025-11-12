@@ -424,7 +424,7 @@ public class LectureController {
                 String error = HttpStatus.valueOf(errStatus).name();
 
                 Map<String, Object> body = Map.of(
-                        "status", status,
+                        "status", errStatus,
                         "error", error,
                         "message", ex.getReason(),
                         "timestamp", java.time.OffsetDateTime.now().toString()
@@ -449,7 +449,7 @@ public class LectureController {
                 String error = HttpStatus.valueOf(errStatus).name();
 
                 Map<String, Object> body = Map.of(
-                        "status", status,
+                        "status", errStatus,
                         "error", error,
                         "message", ex.getReason(),
                         "timestamp", java.time.OffsetDateTime.now().toString()
@@ -475,7 +475,7 @@ public class LectureController {
                 String error = HttpStatus.valueOf(errStatus).name();
 
                 Map<String, Object> body = Map.of(
-                        "status", status,
+                        "status", errStatus,
                         "error", error,
                         "message", ex.getReason(),
                         "timestamp", java.time.OffsetDateTime.now().toString()

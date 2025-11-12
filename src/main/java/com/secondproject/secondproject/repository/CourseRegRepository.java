@@ -23,4 +23,7 @@ public interface CourseRegRepository extends JpaRepository<CourseRegistration, L
     List<CourseRegistration> findByUser_IdAndLecture_Status(Long userId, Status status);
 
     List<CourseRegistration> findAllByUser_Id(Long id);
+
+
+    CourseRegistration findByLecture_IdAndUser_Id(Long lecId, Long id);
 }
