@@ -1,5 +1,7 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.Enum.CompletionDiv;
+import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
@@ -51,6 +53,34 @@ public class LectureController {
 
     // 수강신청 관련해서 나중에 수강신청 컨트롤러로 이식할게요.
 
+
+    @GetMapping("/pageList")
+    public ResponseEntity<Page<LectureDto>> lectureListPage(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) CompletionDiv searchCompletionDiv,
+            @RequestParam(required = false) Long searchMajor,
+            @RequestParam(required = false) Integer searchCredit,
+            @RequestParam(required = false) String searchStartDate,
+            @RequestParam(required = false) String searchMode,
+            @RequestParam(required = false) String searchKeyword,
+            @RequestParam(required = false) DayOfWeek searchSchedule,
+            @RequestParam(required = false) String searchYear,
+            @RequestParam(required = false) Integer searchLevel,
+            @RequestParam(required = false) Long searchUser,
+            @RequestParam(required = false) Status searchStatus
+    ) {
+        LecturePageListDto lecturePageListDto = new LecturePageListDto(pageNumber,pageSize,searchCompletionDiv, searchMajor, searchCredit, searchStartDate, searchMode,searchKeyword,searchSchedule,searchYear,searchLevel,searchUser,searchStatus);
+        Page<LectureDto> lectureList = this.lectureService.listPageLecture(lecturePageListDto, pageNumber, pageSize);
+
+        System.out.println("검색 조건 : " + lecturePageListDto);
+        System.out.println("총 상품 개수 : " + lectureList.getTotalElements());
+        System.out.println("총 페이지 번호 : " + lectureList.getTotalPages());
+        System.out.println("현재 페이지 번호 : " + lectureList.getNumber());
+
+
+        return ResponseEntity.ok(lectureList);
+    }
 
     @PatchMapping("/lectureUpdate")
     public ResponseEntity<?> updateLecture(
