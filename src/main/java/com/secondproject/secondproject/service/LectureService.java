@@ -9,6 +9,11 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cglib.core.Local;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -1078,6 +1083,98 @@ public class LectureService {
             this.enrollmentRepository.save(enrollment);
         }
 
+    }
+
+    public Page<LectureDto> listPageLecture(LecturePageListDto lecturePageListDto, int pageNumber, int pageSize) {
+        Specification<Lecture> spec = (root, query, cb) -> cb.conjunction();
+
+        if(lecturePageListDto.getSearchMajor() != null){
+            spec = spec.and(PublicSpecification.hasLecMajor(lecturePageListDto.getSearchMajor()));
+        }
+        if( lecturePageListDto.getSearchLevel() != null && lecturePageListDto.getSearchLevel() >= 0){
+            spec = spec.and(PublicSpecification.hasLecLevel(lecturePageListDto.getSearchLevel()));
+        }
+        if(lecturePageListDto.getSearchCredit() != null && lecturePageListDto.getSearchCredit() >= 0){
+            spec = spec.and(PublicSpecification.hasLecCredit(lecturePageListDto.getSearchCredit()));
+        }
+        if(lecturePageListDto.getSearchCompletionDiv() != null){
+            spec = spec.and(PublicSpecification.hasLecCompletionDiv(lecturePageListDto.getSearchCompletionDiv()));
+        }
+        if(lecturePageListDto.getSearchYear() != null){
+            spec = spec.and(PublicSpecification.hasLecYear(lecturePageListDto.getSearchYear()));
+        }
+        if(lecturePageListDto.getSearchStartDate() != null){
+            spec = spec.and(PublicSpecification.hasLecStartDate(lecturePageListDto.getSearchStartDate()));
+        }
+        if(lecturePageListDto.getSearchSchedule() != null){
+            spec = spec.and(PublicSpecification.hasScheduleDay(lecturePageListDto.getSearchSchedule()));
+        }
+        if(lecturePageListDto.getSearchUser() != null){
+            spec = spec.and(PublicSpecification.hasLecUser(lecturePageListDto.getSearchUser()));
+        }
+        if (lecturePageListDto.getSearchStatus() != null){
+            spec = spec.and(PublicSpecification.hasLecStatus(lecturePageListDto.getSearchStatus()));
+        }
+
+
+
+        String searchMode = lecturePageListDto.getSearchMode();
+        String searchKeyword = lecturePageListDto.getSearchKeyword();
+
+        boolean hasMode = searchMode != null && !searchMode.isBlank();
+        boolean hasKeyword = searchKeyword != null && !searchKeyword.isBlank();
+        if (hasMode && hasKeyword) {
+            if ("all".equalsIgnoreCase(searchMode)) {
+                spec = spec.and(PublicSpecification.keywordInAllLecture(searchKeyword));
+            } else if ("name".equalsIgnoreCase(searchMode)) {
+                spec = spec.and(PublicSpecification.hasLecName(searchKeyword));
+            } else if ("professor".equalsIgnoreCase(searchMode)) {
+                spec = spec.and(PublicSpecification.hasLecProfessorName(searchKeyword));
+            } else if ("major".equalsIgnoreCase(searchMode)) {
+                spec = spec.and(PublicSpecification.hasLecMajorName(searchKeyword));
+            }
+        }
+
+
+        Sort sort = Sort.by(Sort.Order.desc("id"));
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        Page<Lecture> lectureList = this.lectureRepository.findAll(spec, pageable);
+        Page<LectureDto> lectureListDtos = lectureList.map(lecture -> {
+            Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
+            List<LectureSchedule> lectureScheduleList = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
+            List<LectureScheduleDto> lectureScheduleDtos = new ArrayList<>();
+            for (LectureSchedule lectureSchedule : lectureScheduleList) {
+
+                LectureScheduleDto scheduleDto = new LectureScheduleDto();
+                scheduleDto.setLecture(lectureSchedule.getLecture().getId());
+                scheduleDto.setDay(lectureSchedule.getDay());
+                scheduleDto.setEndTime(lectureSchedule.getEndTime());
+                scheduleDto.setStartTime(lectureSchedule.getStartTime());
+
+                lectureScheduleDtos.add(scheduleDto);
+            }
+
+            LectureDto lectureDto = new LectureDto();
+            lectureDto.setId(lecture.getId());
+            lectureDto.setUser(lecture.getUser().getId());
+            lectureDto.setName(lecture.getName());
+            lectureDto.setCredit(lecture.getCredit());
+            lectureDto.setStartDate(lecture.getStartDate());
+            lectureDto.setEndDate(lecture.getEndDate());
+            lectureDto.setMajorName(lecture.getMajor().getName());
+            lectureDto.setUserName(lecture.getUser().getName());
+            lectureDto.setStatus(lecture.getStatus());
+            lectureDto.setTotalStudent(lecture.getTotalStudent());
+            lectureDto.setNowStudent(nowStudent);
+            lectureDto.setCompletionDiv(lecture.getCompletionDiv());
+            lectureDto.setLevel(lecture.getLevel());
+            lectureDto.setLectureSchedules(lectureScheduleDtos);
+
+            return lectureDto;
+        });
+
+        return lectureListDtos;
     }
 }
 
