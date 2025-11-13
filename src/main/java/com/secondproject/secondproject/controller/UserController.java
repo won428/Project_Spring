@@ -67,7 +67,7 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<?> insertUser(
             @ModelAttribute UserDto userinfo,
-            @RequestParam(value = "files", required = false)  MultipartFile file
+            @RequestParam(value = "files", required = false) MultipartFile file
     ) {
 
 
@@ -117,7 +117,7 @@ public class UserController {
             @RequestParam(required = false) Long searchCollege,
             @RequestParam(required = false) Integer searchLevel
     ) {
-        UserListSearchDto userListSearchDto = new UserListSearchDto(searchLevel,searchCollege,searchMajor, searchGender, searchUserType, searchMode, searchKeyword);
+        UserListSearchDto userListSearchDto = new UserListSearchDto(searchLevel, searchCollege, searchMajor, searchGender, searchUserType, searchMode, searchKeyword);
         Page<UserListDto> userList = this.userService.ListPageUser(userListSearchDto, pageNumber, pageSize);
 
         System.out.println("검색 조건 : " + userListSearchDto);
@@ -186,24 +186,24 @@ public class UserController {
     }
 
 
-//        // 4) 학적 상태 조회 (최종적으로 이 형태로 바뀌어야 함)
+    //        // 4) 학적 상태 조회 (최종적으로 이 형태로 바뀌어야 함)
 //        StatusRecords statusRecord = studentService.getStatusRecordByUserId(user.getId());
-//        // 학생 일괄 저장(DB에 저장)
-//        @PostMapping("/import")
-//        public ResponseEntity<?> inserBatchUser (@RequestBody @Valid List < UserStBatchDto > users, HttpServletRequest
-//        request){
-//            try {
-//                userService.importUsers(users);
-//                return ResponseEntity.ok().build();
-//
-//                // 서비스에서 명시적으로 던진 상태예외
-//            } catch (ResponseStatusException ex) {
-//                ProblemDetail pd = ex.getBody();
-//                pd.setProperty("path", request.getRequestURI());
-//                pd.setProperty("timestamp", Instant.now().toString());
-//                return ResponseEntity.status(ex.getStatusCode()).body(pd);
-//            }
-//        }
+    // 학생 일괄 저장(DB에 저장)
+    @PostMapping("/import")
+    public ResponseEntity<?> inserBatchUser(@RequestBody @Valid List<UserStBatchDto> users, HttpServletRequest
+            request) {
+        try {
+            userService.importUsers(users);
+            return ResponseEntity.ok().build();
+
+            // 서비스에서 명시적으로 던진 상태예외
+        } catch (ResponseStatusException ex) {
+            ProblemDetail pd = ex.getBody();
+            pd.setProperty("path", request.getRequestURI());
+            pd.setProperty("timestamp", Instant.now().toString());
+            return ResponseEntity.status(ex.getStatusCode()).body(pd);
+        }
+    }
 
 }
 

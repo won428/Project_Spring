@@ -49,7 +49,9 @@ public class BoardService {
 
 
     public void createNotice(BoardDto boardDto, List<MultipartFile> files) throws IOException {
-        User user = userRepository.findByEmail(boardDto.getEmail())
+
+        Long userCode = Long.parseLong(boardDto.getUsername());
+        User user = userRepository.findByUserCode(userCode)
                 .orElseThrow(() -> new EntityNotFoundException("해당 이메일의 사용자를 찾을 수 없습니다."));
         Notice notice = new Notice();
         notice.setUser(user);
@@ -193,14 +195,14 @@ public class BoardService {
             }
         }
         Path base = Path.of(uploadDir).toAbsolutePath().normalize();
-        for(InquiryAttach InquiryAttach : inquiryAttachList){
+        for (InquiryAttach InquiryAttach : inquiryAttachList) {
             Long attId = InquiryAttach.getAttachment().getId();
 
-            if(!keepIds.contains(attId)){
+            if (!keepIds.contains(attId)) {
 
                 this.inquiryAttRepository.deleteByInquiryIdAndAttachmentId(post.getPostNumber(), attId);
                 Attachment attachment = this.attachmentRepository.findById(attId)
-                        .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"존재하지 않는 파일입니다."));
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 파일입니다."));
 
                 Path file = base.resolve(attachment.getStoredKey()).normalize();
                 if (!file.startsWith(base)) {
@@ -221,7 +223,7 @@ public class BoardService {
 
 
         Inquiry inquiry = this.inquiryRepository.findById(post.getPostNumber())
-                        .orElseThrow((()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 게시글 입니다.")));
+                .orElseThrow((() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 게시글 입니다.")));
         inquiry.setContent(post.getContent());
         inquiry.setTitle(post.getTitle());
         inquiry.setPrivate(post.getIsPrivate());
@@ -252,8 +254,8 @@ public class BoardService {
         List<Inquiry> inquiryList = this.inquiryRepository.findAllByUser_Id(id);
         List<InquiryDto> inquiryDtoList = new ArrayList<>();
         User user = this.userRepository.findById(id)
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"유저 없음"));
-        for (Inquiry inquiry : inquiryList){
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유저 없음"));
+        for (Inquiry inquiry : inquiryList) {
             InquiryDto inquiryDto = new InquiryDto();
 
             inquiryDto.setTag(inquiry.getTag());
@@ -275,14 +277,14 @@ public class BoardService {
 
     public InquiryDto getInquiryPage(Long id) {
         Inquiry inquiry = inquiryRepository.findById(id)
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 게시글입니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 게시글입니다."));
         InquiryDto inquiryDto = new InquiryDto();
         List<InquiryAttach> inquiryAttachList = this.inquiryAttRepository.findAllByInquiry_Id(inquiry.getId());
         List<AttachmentDto> attachmentDtos = new ArrayList<>();
-        if(inquiryAttachList != null && !inquiryAttachList.isEmpty()){
-            for(InquiryAttach inquiryAttach : inquiryAttachList){
+        if (inquiryAttachList != null && !inquiryAttachList.isEmpty()) {
+            for (InquiryAttach inquiryAttach : inquiryAttachList) {
                 Attachment attachment = this.attachmentRepository.findById(inquiryAttach.getAttachment().getId())
-                        .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 파일입니다."));
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 파일입니다."));
                 AttachmentDto attachmentDto = new AttachmentDto();
 
                 attachmentDto.setUploadAt(attachment.getUploadAt());
@@ -296,7 +298,6 @@ public class BoardService {
                 attachmentDtos.add(attachmentDto);
             }
         }
-
 
 
         inquiryDto.setViewCount(inquiry.getViewCount());
@@ -317,7 +318,7 @@ public class BoardService {
 
     public void plusViewCount(Long id) {
         Inquiry inquiry = this.inquiryRepository.findById(id)
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 게시글 입니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 게시글 입니다."));
         int plusView = inquiry.getViewCount() + 1;
         inquiry.setViewCount(plusView);
 
@@ -327,9 +328,9 @@ public class BoardService {
     public void writeComment(CommentDto comment) {
         AnswerOnInquiry answerOnInquiry = new AnswerOnInquiry();
         Inquiry inquiry = this.inquiryRepository.findById(comment.getPostId())
-                        .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 게시글 입니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 게시글 입니다."));
         User user = this.userRepository.findById(comment.getUserId())
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 유저 입니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 유저 입니다."));
         answerOnInquiry.setInquiry(inquiry);
         answerOnInquiry.setUser(user);
         answerOnInquiry.setContent(comment.getContent());
@@ -341,7 +342,7 @@ public class BoardService {
         List<AnswerOnInquiry> answerOnInquiryList = this.answerOnInquiryRepo.findAllByInquiry_id(id);
         List<CommentDto> commentDtoList = new ArrayList<>();
 
-        for(AnswerOnInquiry answer : answerOnInquiryList){
+        for (AnswerOnInquiry answer : answerOnInquiryList) {
             CommentDto comment = new CommentDto();
             comment.setContent(answer.getContent());
             comment.setUserId(answer.getUser().getId());
@@ -360,10 +361,10 @@ public class BoardService {
         List<Inquiry> inquiryList = this.inquiryRepository.findAll();
         List<InquiryDto> inquiryDtoList = new ArrayList<>();
 
-        for(Inquiry inquiry : inquiryList){
+        for (Inquiry inquiry : inquiryList) {
             InquiryDto inquiryDto = new InquiryDto();
             User user = this.userRepository.findById(inquiry.getUser().getId())
-                    .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 유저 입니다."));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 유저 입니다."));
 
             inquiryDto.setTag(inquiry.getTag());
             inquiryDto.setIsPrivate(inquiry.isPrivate());
@@ -383,7 +384,7 @@ public class BoardService {
 
     public void updateComment(Long id, UpdateCommentDto editingText) {
         AnswerOnInquiry answer = this.answerOnInquiryRepo.findById(id)
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 댓글입니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 댓글입니다."));
         answer.setContent(editingText.getContent());
         this.answerOnInquiryRepo.save(answer);
     }
@@ -399,14 +400,14 @@ public class BoardService {
         List<InquiryAttach> inquiryAttachList = this.inquiryAttRepository.findAllByInquiry_Id(id);
         Path base = Path.of(uploadDir).toAbsolutePath().normalize();
 
-        for(InquiryAttach InquiryAttach : inquiryAttachList){
+        for (InquiryAttach InquiryAttach : inquiryAttachList) {
             Long attId = InquiryAttach.getAttachment().getId();
 
-            if(inquiryAttachList != null && !inquiryAttachList.isEmpty()){
+            if (inquiryAttachList != null && !inquiryAttachList.isEmpty()) {
 
                 this.inquiryAttRepository.deleteByInquiryIdAndAttachmentId(id, attId);
                 Attachment attachment = this.attachmentRepository.findById(attId)
-                        .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"존재하지 않는 파일입니다."));
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 파일입니다."));
 
                 Path file = base.resolve(attachment.getStoredKey()).normalize();
                 if (!file.startsWith(base)) {
@@ -422,8 +423,8 @@ public class BoardService {
                 this.attachmentRepository.deleteById(attId);
             }
         }
-        if(answer != null && !answer.isEmpty()){
-            for(AnswerOnInquiry answerOnInquiry : answer){
+        if (answer != null && !answer.isEmpty()) {
+            for (AnswerOnInquiry answerOnInquiry : answer) {
                 this.answerOnInquiryRepo.deleteById(answerOnInquiry.getId());
             }
         }
@@ -433,7 +434,7 @@ public class BoardService {
 
     public void updatePostStatus(Long id, InquiryStatus postStatus) {
         Inquiry inquiry = this.inquiryRepository.findById(id)
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 게시글 입니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 게시글 입니다."));
         inquiry.setInquiryStatus(postStatus);
 
         this.inquiryRepository.save(inquiry);
