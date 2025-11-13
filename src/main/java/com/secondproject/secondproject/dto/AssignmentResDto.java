@@ -49,6 +49,47 @@ public class AssignmentResDto {
 
     private SubmitAsgmtDto SubmittedOne;
 
+    public static AssignmentResDto fromProfessorEntity(
+            Assignment assignment,
+            List<Attachment> attachments,     // 1. 과제 공지 파일
+            List<SubmitAsgmtDto> submitDtos  // 2. 서비스에서 조립이 끝난 '제출물 DTO 리스트'
+    ) {
+        AssignmentResDto dto = new AssignmentResDto();
+        dto.setId(assignment.getId());
+        dto.setTitle(assignment.getTitle());
+        dto.setContent(assignment.getContent());
+        dto.setOpenAt(assignment.getOpenAt());
+        dto.setDueAt(assignment.getDueAt());
+        if (assignment.getUser() != null) {
+            dto.setUsername(assignment.getUser().getName());
+            dto.setUserId(assignment.getUser().getId());
+        }
+        dto.setCreateAt(assignment.getCreateAt());
+        dto.setUpdateAt(assignment.getUpdateAt());
+
+        // 1. 과제 공지 파일 (AttachmentDto)
+        if (attachments != null && !attachments.isEmpty()) {
+            List<AttachmentDto> listAttach = attachments.stream()
+                    .map(AttachmentDto::fromEntity) // (가정) AttachmentDto에 fromEntity가 있다고 가정
+                    .toList();
+            dto.setAttachmentDto(listAttach);
+        } else {
+            dto.setAttachmentDto(new ArrayList<>());
+        }
+
+        // 2. 학생 제출물 DTO 리스트 (SubmitAsgmtDto)
+        // [★핵심★] 서비스에서 이미 완성된 리스트를 그대로 할당합니다.
+        dto.setSubmitAsgmtDto(submitDtos);
+
+        // [참고] 교수용 뷰에서는 최상위의 attachmentSubmittedDto와 SubmittedOne은 사용하지 않습니다.
+        dto.setAttachmentSubmittedDto(new ArrayList<>());
+        dto.setSubmittedOne(null);
+
+        return dto;
+    }
+
+
+    // ... (기존의 잘못된 교수용 fromEntity는 삭제) ...
 
     public static AssignmentResDto fromEntity(
             Assignment assignment,
@@ -106,87 +147,7 @@ public class AssignmentResDto {
         }
 
         List<AttachmentDto> ListSubmittedAttach = new ArrayList<>();
-        if (attachments != null && !attachments.isEmpty()) {
-            for (Attachment attachment : attachmentSubmitted) {
-                AttachmentDto Ado = new AttachmentDto();
-                Ado.setId(attachment.getId());
-                Ado.setName(attachment.getName());
-                Ado.setId(attachment.getUser().getId());
-                Ado.setContentType(attachment.getContentType());
-                Ado.setSha256(attachment.getSha256());
-                Ado.setSizeBytes(attachment.getSizeBytes());
-                Ado.setStoredKey(attachment.getStoredKey());
-                Ado.setUploadAt(attachment.getUploadAt());
-
-                ListSubmittedAttach.add(Ado);
-            }
-            dto.setAttachmentSubmittedDto(ListSubmittedAttach);
-        } else {
-            dto.setAttachmentSubmittedDto(new ArrayList<>()); //
-        }
-
-        return dto;
-    }
-
-    public static AssignmentResDto fromEntity(
-            Assignment assignment,
-            List<Attachment> attachments,
-            List<SubmitAsgmt> submitAsgmts,
-            List<Attachment> attachmentSubmitted
-    ) {
-        AssignmentResDto dto = new AssignmentResDto();
-        dto.setId(assignment.getId());
-        dto.setTitle(assignment.getTitle());
-        dto.setContent(assignment.getContent());
-        dto.setOpenAt(assignment.getOpenAt());
-        dto.setDueAt(assignment.getDueAt());
-        if (assignment.getUser() != null) {
-            dto.setUsername(assignment.getUser().getName());
-            dto.setUserId(assignment.getUser().getId());
-        }
-        dto.setCreateAt(assignment.getCreateAt());
-        dto.setUpdateAt(assignment.getUpdateAt());
-
-
-        List<AttachmentDto> ListAttach = new ArrayList<>();
-        if (attachments != null && !attachments.isEmpty()) {
-            for (Attachment attachment : attachments) {
-                AttachmentDto Ado = new AttachmentDto();
-                Ado.setId(attachment.getId());
-                Ado.setName(attachment.getName());
-                Ado.setId(attachment.getUser().getId());
-                Ado.setContentType(attachment.getContentType());
-                Ado.setSha256(attachment.getSha256());
-                Ado.setSizeBytes(attachment.getSizeBytes());
-                Ado.setStoredKey(attachment.getStoredKey());
-                Ado.setUploadAt(attachment.getUploadAt());
-
-                ListAttach.add(Ado);
-            }
-            dto.setAttachmentDto(ListAttach);
-        } else {
-            dto.setAttachmentDto(new ArrayList<>()); //
-        }
-
-        List<SubmitAsgmtDto> asgmtDtoList = new ArrayList<>();
-        if (!submitAsgmts.isEmpty()) {
-            for (SubmitAsgmt submitAsgmt : submitAsgmts) {
-                SubmitAsgmtDto dtoS = new SubmitAsgmtDto();
-                dtoS.setId(submitAsgmt.getId());
-                dtoS.setUsername(submitAsgmt.getUser().getName());
-                dtoS.setTitle(submitAsgmt.getTitle());
-                dtoS.setContent(submitAsgmt.getContent());
-                dtoS.setSubmitStatus(submitAsgmt.getSubmitStatus());
-                dtoS.setSubmitAt(submitAsgmt.getSubmitAt());
-                dtoS.setUpdateAt(submitAsgmt.getUpdateAt());
-                asgmtDtoList.add(dtoS);
-            }
-            dto.setSubmitAsgmtDto(asgmtDtoList);
-        } else {
-            dto.setSubmitAsgmtDto(new ArrayList<>()); //
-        }
-        List<AttachmentDto> ListSubmittedAttach = new ArrayList<>();
-        if (attachments != null && !attachments.isEmpty()) {
+        if (attachmentSubmitted != null && !attachmentSubmitted.isEmpty()) {
             for (Attachment attachment : attachmentSubmitted) {
                 AttachmentDto Ado = new AttachmentDto();
                 Ado.setId(attachment.getId());

@@ -46,7 +46,7 @@ public class OnlineLectureResDto {
         OnlineLectureResDto resDto = new OnlineLectureResDto();
         resDto.setId(onlineLecture.getId());
         resDto.setUserId(onlineLecture.getUser().getId());
-        resDto.setUsername(onlineLecture.getUsername());
+        resDto.setUsername(onlineLecture.getUname());
         resDto.setTitle(onlineLecture.getTitle());
         resDto.setDisable(onlineLecture.isDisable());
         resDto.setStartDate(onlineLecture.getCreatedAt());

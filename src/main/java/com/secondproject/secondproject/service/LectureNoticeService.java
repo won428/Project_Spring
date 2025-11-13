@@ -1,9 +1,7 @@
 package com.secondproject.secondproject.service;
 
-import com.secondproject.secondproject.dto.LectureNoticeListDto;
-import com.secondproject.secondproject.dto.AttachmentDto;
-import com.secondproject.secondproject.dto.LectureNoticeUploadDto;
-import com.secondproject.secondproject.dto.NoticeResponseDto;
+import com.secondproject.secondproject.Enum.Status;
+import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.*;
 import com.secondproject.secondproject.entity.Mapping.NoticeAttach;
 import com.secondproject.secondproject.entity.Mapping.SubmitAssignAttach;
@@ -28,19 +26,21 @@ public class LectureNoticeService {
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
     private final AttachmentService attachmentService;
-    private final AttachmentRepository attachmentRepository;
     private final NoticeAttachRepository noticeAttachRepository;
     private final LectureNoticeRepository lectureNoticeRepository;
     private final LectureRepository lectureRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final AssignmentRepository assignmentRepository;
 
-    @Transactional // 데이터 변경이 있으므로 트랜잭션 처리
+
+    @Transactional
     public void createNotice(LectureNoticeUploadDto noticeDto, List<MultipartFile> files) throws IOException {
         if (noticeDto.getId() == null || noticeDto.getId().equals("undefined")) {
             throw new IllegalArgumentException("잘못된 접근 입니다.");
         }
-
+        Long userCode = Long.parseLong(noticeDto.getUsername());
         // 1. DTO 에서 이메일을 가져와 사용자를 찾습니다.
-        User user = userRepository.findByEmail(noticeDto.getEmail())
+        User user = userRepository.findByUserCode(userCode)
                 .orElseThrow(() -> new EntityNotFoundException("해당 이메일의 사용자를 찾을 수 없습니다."));
 
 
@@ -172,5 +172,29 @@ public class LectureNoticeService {
             }
 
         }
+    }
+
+
+    public ToDoListDto getPagedAllNotices(Long id, int pageNotice, int pageAssign, int size) {
+        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("user undefined"));
+        List<Enrollment> enrollment = enrollmentRepository.findByStatus(Status.INPROGRESS);
+        List<Long> lectures = enrollment.stream()
+                .map(Enrollment::getLecture)
+                .map(Lecture::getId)
+                .toList();
+
+        Pageable pageable = PageRequest.of(pageNotice, size, Sort.by((Sort.Direction.DESC), "lnCreateAt"));
+        Page<LectureNotice> result = lectureNoticeRepository.findByLectureIdIn(lectures, pageable);
+        Page<LectureNoticeListDto> map = result.map(LectureNoticeListDto::fromEntity);
+
+
+        Pageable pageableAs = PageRequest.of(pageAssign, size, Sort.by((Sort.Direction.ASC), "dueAt"));
+        Page<Assignment> resultAS = assignmentRepository.findByLectureIdIn(lectures, pageableAs);
+        Page<AssignmentDto> mapAS = resultAS.map(AssignmentDto::fromEntity);
+
+
+        return ToDoListDto.fromEntity(user, map, mapAS);
+
+
     }
 }

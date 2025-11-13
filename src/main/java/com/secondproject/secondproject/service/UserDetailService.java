@@ -12,12 +12,13 @@ import org.springframework.stereotype.Service;
 public class UserDetailService implements UserDetailsService {
     private final UserRepository userRepository;
 
-
+    //Spring 내장 Username은 String
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        System.out.println(email);
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email));
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Long userCode = Long.parseLong(username);
+        System.out.println(userCode);
+        return userRepository.findByUserCode(userCode)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + username));
     }
 
 //    //test용

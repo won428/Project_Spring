@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 public class OnlineLectureDto {
-    private String email;
+    private String username;
 
     private Long lectureId;
 
@@ -29,7 +29,7 @@ public class OnlineLectureDto {
 
     private Long id; // 온라인 강의 코드
 
-    private String username;
+    private String uname;
 
     public static OnlineLectureDto fromEntity(OnlineLecture onlineLecture) {
         OnlineLectureDto insertLecture = new OnlineLectureDto();
@@ -37,7 +37,7 @@ public class OnlineLectureDto {
         insertLecture.setTitle(onlineLecture.getTitle());
         insertLecture.setDisable(false);
         insertLecture.setLectureId(onlineLecture.getLecture().getId());
-        insertLecture.setUsername(onlineLecture.getUsername());
+        insertLecture.setUname(onlineLecture.getUname());
         insertLecture.setStartDate(onlineLecture.getUpdatedDate().toLocalDate());
         insertLecture.setEndDate(onlineLecture.getEndDate().toLocalDate());
         return insertLecture;
