@@ -1,12 +1,15 @@
 package com.secondproject.secondproject.controller;
 
 import com.secondproject.secondproject.dto.*;
+import com.secondproject.secondproject.Enum.FileType;
+import com.secondproject.secondproject.service.AttachmentService;
 import com.secondproject.secondproject.service.CreditAppealService;
 import com.secondproject.secondproject.service.LectureService;
 import com.secondproject.secondproject.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -16,6 +19,7 @@ import java.util.List;
 public class CreditAppealController {
 
     private final CreditAppealService appealService;
+    private final AttachmentService attachmentService;
     private final LectureService lectureService;
     private final UserService userService;
 
@@ -28,10 +32,22 @@ public class CreditAppealController {
 
     // POST /api/appeals
     @PostMapping("/myappeal")
-    public ResponseEntity<?> createAppeal(@RequestBody GradeAppealDto appealForm) {
+    public ResponseEntity<?> createAppeal(
+            @ModelAttribute GradeAppealDto appealForm, // Multipart 파일 포함 가능
+            @RequestParam("files") List<MultipartFile> files
+    ) {
+        // 1. 이의제기 저장
+        appealService.createGradeAppeal(appealForm);
 
-        this.appealService.createGradeAppeal(appealForm);
-
+        // 2. 파일 저장
+        if (files != null && !files.isEmpty()) {
+            attachmentService.saveFiles(
+                    appealForm.getSendingId(),
+                    appealForm.getLectureId(), // parentId
+                    FileType.APPEAL,
+                    files
+            );
+        }
 
         return ResponseEntity.ok(200);
     }
@@ -104,6 +120,13 @@ public class CreditAppealController {
     ) {
         appealService.updateAttendanceAppeal(appealId, dto);
         return ResponseEntity.ok().build();
+    }
+
+    // appealId로 출결 정보 조회
+    @GetMapping("/attendance/{appealId}")
+    public ResponseEntity<AttendanceCheckDto> getAttendanceByAppeal(@PathVariable Long appealId) {
+        AttendanceCheckDto dto = appealService.getAttendanceByAppeal(appealId);
+        return ResponseEntity.ok(dto);
     }
 }
 

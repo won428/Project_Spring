@@ -22,8 +22,7 @@ public class AppealManageDto {
     private Long receiverId;      // 교수 ID
     private Long lectureId;
     private String title;         // 이의제기 제목
-    private String studentName;
-    private Long studentCode;
+
     private String content;       // 상세 내용
     private LocalDate appealDate;
     private Status status;        // PENDING, APPROVED, REJECTED
@@ -42,8 +41,7 @@ public class AppealManageDto {
     @JsonProperty("lectureGrade")
     private BigDecimal lectureGrade;
 
-    // 현재 출결 상태
-    private LocalDate attendanceDate;   // 실제 강의일 기준 출결일
-    private AttendStudent attendStudent; // 현재 출결 상태
+
+
 }
 

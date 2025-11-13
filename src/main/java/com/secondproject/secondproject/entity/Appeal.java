@@ -56,12 +56,6 @@ public class Appeal {
     @JoinColumn(name = "lecture_id", nullable = false, foreignKey = @ForeignKey(name = "fk_appeal_lecture"))
     Lecture lecture;
 
-    @Column(name = "lecture_date")
-    private LocalDate lectureDate;
-
-    @Enumerated(EnumType.STRING)
-    private AttendStudent attendStudent;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "attendance_id")  // FK 컬럼명
     private Attendance_records attendanceRecord; // 출결 레코드 참조

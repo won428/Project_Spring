@@ -6,7 +6,8 @@ public enum FileType {
     ENTIRE_NOTICE,
     INQUIRY,
     ONE_TO_ONE,
-    ASSIGNMENT
+    ASSIGNMENT,
+    APPEAL
 
 
 }
