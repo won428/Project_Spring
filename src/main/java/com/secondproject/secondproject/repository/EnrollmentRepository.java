@@ -53,5 +53,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             where e.user.id = :studentId
             """)
     List<EnrollmentView> findDtoByUserId(@Param("studentId")Long studentId);
+
+    List<Enrollment> findAllByUser_Id(Long id);
 }
 
