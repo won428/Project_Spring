@@ -23,6 +23,8 @@ import java.util.List;
 public class UserDetailAllDto {
     private Long id;
 
+    LocalDate birthDate;
+
     private String email;
 
     private Long userCode;

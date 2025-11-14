@@ -2,6 +2,7 @@ package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.CompletionDiv;
 import com.secondproject.secondproject.Enum.Gender;
+import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.*;
@@ -35,6 +36,7 @@ import jakarta.validation.Validator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -724,6 +726,7 @@ public class UserService {
         int majorCredit = 0; // 전공 이수학점
         int generalCredit = 0; // 교양, 일반 이수학점
         BigDecimal totalGrade = BigDecimal.ZERO; // 학점 합계
+        int length = 0;
 
         if(recordsForStudent != null && !recordsForStudent.isEmpty()){
             for(StudentRecord studentRecord : recordsForStudent){
@@ -747,12 +750,19 @@ public class UserService {
                 Grade grade = this.gradeRepository.findByUser_IdAndLecture_Id(id, lecture.getId());
                 int credit = lecture.getCredit();
                 if(lecture.getCompletionDiv().equals(CompletionDiv.MAJOR_ELECTIVE) || lecture.getCompletionDiv().equals(CompletionDiv.MAJOR_REQUIRED)){
-
-                    majorCredit = majorCredit + credit;
-
+                    if(lecture.getStatus().equals(Status.COMPLETED)){
+                        majorCredit = majorCredit + credit;
+                    }
                 }else {
-                    generalCredit = generalCredit + credit;
+                    if(lecture.getStatus().equals(Status.COMPLETED)) {
+                        generalCredit = generalCredit + credit;
+                    }
                 }
+                if(grade.getLectureGrade() != null){
+                    totalGrade = totalGrade.add(grade.getLectureGrade());
+                    length = length + 1;
+                }
+
 
                 GradeForStuInfoDto gradeForStuInfo = new GradeForStuInfoDto();
 
@@ -768,12 +778,20 @@ public class UserService {
                 gradeForStuInfo.setTotalScore(grade.getTotalScore());
                 gradeForStuInfo.setLectureGrade(grade.getLectureGrade());
 
+
                 gradeList.add(gradeForStuInfo);
             }
         }
 
         int totalCredit = majorCredit + generalCredit; // 전공 + 교양
-        BigDecimal aveGrade; // 학점 평균
+        BigDecimal aveGrade = BigDecimal.ZERO; // 학점 평균
+        if (length > 0) {
+            aveGrade = totalGrade.divide(
+                    BigDecimal.valueOf(length),
+                    1,                   // 소수점 1자리
+                    RoundingMode.DOWN // 반올림
+            );
+        }
 
 
         userDetail.setId(user.getId());
@@ -790,9 +808,10 @@ public class UserService {
         userDetail.setTotalCredit(totalCredit);
         userDetail.setMajorCredit(majorCredit);
         userDetail.setGeneralCredit(generalCredit);
-        userDetail.setLectureGrade(totalGrade); // aveGrade 계산해서 바꿔야함
+        userDetail.setLectureGrade(aveGrade); // aveGrade 계산해서 바꿔야함
         userDetail.setStudentRecordList(studentRecords);
         userDetail.setGradeInfoList(gradeList);
+        userDetail.setBirthDate(user.getBirthDate());
 
 
 
