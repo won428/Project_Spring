@@ -67,6 +67,14 @@ public class UserController {
     private final StudentService studentService;
     private final LectureService lectureService;
 
+    //유저 학적 정보 가져오기
+    @GetMapping("/detailAll/{id}")
+    public UserDetailAllDto userDetailAll(@PathVariable Long id){
+        UserDetailAllDto userDetailAllDto = this.userService.userDetailAll(id);
+
+        return userDetailAllDto;
+    }
+
     // 유저 등록
     @PostMapping("/signup")
     public ResponseEntity<?> insertUser(

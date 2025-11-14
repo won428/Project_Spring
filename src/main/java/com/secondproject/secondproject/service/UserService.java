@@ -1,6 +1,8 @@
 package com.secondproject.secondproject.service;
 
+import com.secondproject.secondproject.Enum.CompletionDiv;
 import com.secondproject.secondproject.Enum.Gender;
+import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.*;
@@ -34,6 +36,7 @@ import jakarta.validation.Validator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -57,6 +60,9 @@ public class UserService {
 
     private final DataFormatter formatter = new DataFormatter();
     private final Validator validator;
+    private final StudentRecordRepository studentRecordRepository;
+    private final LectureRepository lectureRepository;
+    private final GradeRepository gradeRepository;
 
     @Transactional
     public void insertUser(UserDto userinfo, MultipartFile file) throws IOException {
@@ -688,5 +694,128 @@ public class UserService {
     public Optional<User> findByUsername(Long userCode) {
         return userRepository.findByUserCode(userCode);
     }
-    
+
+    public UserDetailAllDto userDetailAll(Long id) {
+        UserDetailAllDto userDetail = new UserDetailAllDto();
+        User user = this.userRepository.findById(id)
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 유저 입니다."));
+        StatusRecords statusRecords = this.statusRecordsRepository.findByUser_id(id);
+
+        MajorResponseDto majorResponseDto = new MajorResponseDto();
+        CollegeResponseDto collegeResponseDto = new CollegeResponseDto();
+
+        Major major =this.majorRepository.findById(user.getMajor().getId())
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 학과 입니다."));
+        College college = this.collegeRepository.findById(major.getCollege().getId())
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 대학입니다."));
+
+        majorResponseDto.setOffice(major.getOffice());
+        majorResponseDto.setName(major.getName());
+        majorResponseDto.setId(major.getId());
+        majorResponseDto.setCollegeId(major.getCollege().getId());
+
+        collegeResponseDto.setId(college.getId());
+        collegeResponseDto.setOffice(college.getOffice());
+        collegeResponseDto.setType(college.getType());
+
+
+        List<Enrollment> enrollmentList = this.enrollmentRepository.findAllByUser_Id(id);
+        List<GradeForStuInfoDto> gradeList = new ArrayList<>();
+        List<StudentRecordDto> studentRecords = new ArrayList<>();
+        List<StudentRecord> recordsForStudent = this.studentRecordRepository.findAllByUser_Id(id);
+
+        int majorCredit = 0; // 전공 이수학점
+        int generalCredit = 0; // 교양, 일반 이수학점
+        BigDecimal totalGrade = BigDecimal.ZERO; // 학점 합계
+        int length = 0;
+
+        if(recordsForStudent != null && !recordsForStudent.isEmpty()){
+            for(StudentRecord studentRecord : recordsForStudent){
+               StudentRecordDto studentRecordDto = new StudentRecordDto();
+
+               studentRecordDto.setStatus(studentRecord.getStatus());
+               studentRecordDto.setAppliedDate(studentRecord.getAppliedDate());
+               studentRecordDto.setProcessedDate(studentRecord.getProcessedDate());
+               studentRecordDto.setApplyStatus(studentRecord.getStudentStatus());
+               studentRecordDto.setId(studentRecord.getId());
+
+
+               studentRecords.add(studentRecordDto);
+            }
+        }
+
+        if(enrollmentList != null && !enrollmentList.isEmpty()){
+            for(Enrollment enrollment : enrollmentList){
+                Lecture lecture = this.lectureRepository.findById(enrollment.getLecture().getId())
+                        .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 강의입니다."));
+                Grade grade = this.gradeRepository.findByUser_IdAndLecture_Id(id, lecture.getId());
+                int credit = lecture.getCredit();
+                if(lecture.getCompletionDiv().equals(CompletionDiv.MAJOR_ELECTIVE) || lecture.getCompletionDiv().equals(CompletionDiv.MAJOR_REQUIRED)){
+                    if(lecture.getStatus().equals(Status.COMPLETED)){
+                        majorCredit = majorCredit + credit;
+                    }
+                }else {
+                    if(lecture.getStatus().equals(Status.COMPLETED)) {
+                        generalCredit = generalCredit + credit;
+                    }
+                }
+                if(grade.getLectureGrade() != null){
+                    totalGrade = totalGrade.add(grade.getLectureGrade());
+                    length = length + 1;
+                }
+
+
+                GradeForStuInfoDto gradeForStuInfo = new GradeForStuInfoDto();
+
+                gradeForStuInfo.setGradeId(grade.getId());
+                gradeForStuInfo.setLecId(lecture.getId());
+                gradeForStuInfo.setName(lecture.getName());
+                gradeForStuInfo.setStartDate(lecture.getStartDate());
+                gradeForStuInfo.setStatus(lecture.getStatus());
+                gradeForStuInfo.setAScore(grade.getAScore());
+                gradeForStuInfo.setAsScore(grade.getAsScore());
+                gradeForStuInfo.setFtScore(grade.getFtScore());
+                gradeForStuInfo.setTScore(grade.getTScore());
+                gradeForStuInfo.setTotalScore(grade.getTotalScore());
+                gradeForStuInfo.setLectureGrade(grade.getLectureGrade());
+
+
+                gradeList.add(gradeForStuInfo);
+            }
+        }
+
+        int totalCredit = majorCredit + generalCredit; // 전공 + 교양
+        BigDecimal aveGrade = BigDecimal.ZERO; // 학점 평균
+        if (length > 0) {
+            aveGrade = totalGrade.divide(
+                    BigDecimal.valueOf(length),
+                    1,                   // 소수점 1자리
+                    RoundingMode.DOWN // 반올림
+            );
+        }
+
+
+        userDetail.setId(user.getId());
+        userDetail.setEmail(user.getEmail());
+        userDetail.setUserCode(user.getUserCode());
+        userDetail.setName(user.getName());
+        userDetail.setStatus(statusRecords.getStudentStatus());
+        userDetail.setGender(user.getGender());
+        userDetail.setPhone(user.getPhone());
+        userDetail.setMajor(majorResponseDto);
+        userDetail.setCollege(collegeResponseDto);
+        userDetail.setLevel(statusRecords.getLevel());
+        userDetail.setAdmissionDate(statusRecords.getAdmissionDate());
+        userDetail.setTotalCredit(totalCredit);
+        userDetail.setMajorCredit(majorCredit);
+        userDetail.setGeneralCredit(generalCredit);
+        userDetail.setLectureGrade(aveGrade); // aveGrade 계산해서 바꿔야함
+        userDetail.setStudentRecordList(studentRecords);
+        userDetail.setGradeInfoList(gradeList);
+        userDetail.setBirthDate(user.getBirthDate());
+
+
+
+        return userDetail;
+    }
 }
