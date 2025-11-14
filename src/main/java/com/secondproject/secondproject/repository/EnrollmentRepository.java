@@ -58,6 +58,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             """)
     List<EnrollmentView> findDtoByUserId(@Param("studentId")Long studentId);
 
+    List<Enrollment> findAllByUser_Id(Long id);
+
     @Query("""
             select
             u.id as id,
