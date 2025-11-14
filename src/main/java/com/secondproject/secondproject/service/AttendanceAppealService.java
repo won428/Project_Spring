@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.service;
 
+import com.secondproject.secondproject.Enum.AttendStudent;
 import com.secondproject.secondproject.dto.AttendanceAppealDto;
 import com.secondproject.secondproject.dto.EnrollmentInfoDto;
 import com.secondproject.secondproject.dto.LectureBasicInfoDto;
@@ -23,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -35,6 +37,8 @@ public class AttendanceAppealService {
     private final LectureRepository lectureRepository;
     private final UserRepository userRepository;
     private final AppealAttachRepository appealAttachRepository;
+
+    private final AttendanceRecordsRepository attendanceRecordsRepository;
 
 
     @Value("${file.upload-dir}")
@@ -116,6 +120,26 @@ public class AttendanceAppealService {
 
             appealAttachRepository.save(attachMapping); // ⚡ AttachmentRepository 대신 AppealAttachRepository라면 그쪽으로 변경
         }
+    }
+
+    @Transactional(readOnly = true)
+    public AttendanceAppealDto getMyAppeal(Long lectureId, Long studentId) {
+        return appealRepository.findTopByLectureIdAndSendingIdOrderByAppealDateDesc(lectureId, studentId)
+                .map(appeal -> new AttendanceAppealDto(
+                        appeal.getId(),
+                        appeal.getLecture() != null ? appeal.getLecture().getId() : null,
+                        appeal.getSendingId(),
+                        appeal.getReceiverId(),
+                        appeal.getTitle(),
+                        appeal.getContent(),
+                        appeal.getAppealDate(),
+                        appeal.getStatus(),
+                        appeal.getAppealType(),
+                        appeal.getAttendanceRecord() != null ? appeal.getAttendanceRecord().getAttendanceDate() : null,
+                        appeal.getAttendanceRecord() != null ? appeal.getAttendanceRecord().getAttendStudent().name() : null,
+                        null // attendanceDetail
+                ))
+                .orElse(null);
     }
 }
 

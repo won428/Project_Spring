@@ -541,4 +541,18 @@ public class LectureController {
 
         return proRegDto;
     }
+
+    // 4️⃣ 학생 본인 출결 이의제기 조회
+    @GetMapping("/attendanceAppeal/myAppeal")
+    public ResponseEntity<AttendanceAppealDto> getMyAttendanceAppeal(
+            @RequestParam Long lectureId,
+            @RequestParam Long studentId) {
+
+        AttendanceAppealDto dto = attendanceAppealService.getMyAppeal(lectureId, studentId);
+        if (dto == null) {
+            return ResponseEntity.noContent().build(); // 데이터 없으면 204 반환
+        }
+        return ResponseEntity.ok(dto);
+    }
+
 }

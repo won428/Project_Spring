@@ -37,5 +37,13 @@ public interface AppealRepository extends JpaRepository<Appeal, Long> {
             @Param("lectureId") Long lectureId,
             @Param("receiverId") Long receiverId);
 
-
+    @Query("SELECT a FROM Appeal a " +
+            "WHERE a.lecture.id = :lectureId " +
+            "AND a.sendingId = :studentId " +
+            "AND a.appealType = 'ATTENDANCE' " +
+            "ORDER BY a.appealDate DESC")
+    Optional<Appeal> findTopByLectureIdAndSendingIdOrderByAppealDateDesc(
+            @Param("lectureId") Long lectureId,
+            @Param("studentId") Long studentId
+    );
 }
