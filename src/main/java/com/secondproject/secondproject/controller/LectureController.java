@@ -19,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -256,19 +258,71 @@ public class LectureController {
 
     // 학생 수강신청한 목록
     @GetMapping("/mylist")
-    public List<LectureDto> myLectureList(@RequestParam Long userId) {
+    public Page<LectureDto> myLectureList(
+            @RequestParam Long userId,
+            @RequestParam int pageNumber,
+            @RequestParam int pageSize,
+            @RequestParam(required = false) CompletionDiv searchCompletionDiv,
+            @RequestParam(required = false) Long searchMajor,
+            @RequestParam(required = false) Integer searchCredit,
+            @RequestParam(required = false) String searchStartDate,
+            @RequestParam(required = false) String searchMode,
+            @RequestParam(required = false) String searchKeyword,
+            @RequestParam(required = false) DayOfWeek searchSchedule,
+            @RequestParam(required = false) String searchYear,
+            @RequestParam(required = false) Integer searchLevel,
+            @RequestParam(required = false) Long searchUser
+    ) {
+        LecturePageListDto lecturePageListDto = new LecturePageListDto();
+        lecturePageListDto.setSearchCompletionDiv(searchCompletionDiv);
+        lecturePageListDto.setSearchMajor(searchMajor);
+        lecturePageListDto.setSearchCredit(searchCredit);
+        lecturePageListDto.setSearchStartDate(searchStartDate);
+        lecturePageListDto.setSearchMode(searchMode);
+        lecturePageListDto.setSearchKeyword(searchKeyword);
+        lecturePageListDto.setSearchSchedule(searchSchedule);
+        lecturePageListDto.setSearchYear(searchYear);
+        lecturePageListDto.setSearchLevel(searchLevel);
+        lecturePageListDto.setSearchUser(searchUser);
 
-        List<LectureDto> myLecture = this.lectureService.myLectureList(userId);
+        Page<LectureDto> myLecture = this.lectureService.myLectureList(userId, lecturePageListDto, pageNumber, pageSize);
+
 
         return myLecture;
     }
 
     // 학생 수강신청 가능 목록
     @GetMapping("/apply/list")
-    public List<LectureDto> applyLectureList(@RequestParam Long id) {
-        List<LectureDto> lectureList = this.lectureService.applyLecturList(id);
+    public Page<LectureDto> getApplyLecturePage(
+            @RequestParam int pageNumber,
+            @RequestParam int pageSize,
+            @RequestParam(required = false) CompletionDiv searchCompletionDiv,
+            @RequestParam(required = false) Long searchMajor,
+            @RequestParam(required = false) Integer searchCredit,
+            @RequestParam(required = false) String searchStartDate,
+            @RequestParam(required = false) String searchMode,
+            @RequestParam(required = false) String searchKeyword,
+            @RequestParam(required = false) DayOfWeek searchSchedule,
+            @RequestParam(required = false) String searchYear,
+            @RequestParam(required = false) Integer searchLevel,
+            @RequestParam(required = false) Long searchUser,
+            @RequestParam(required = false) Long id
+    ) {
+        LecturePageListDto dto = new LecturePageListDto();
+        dto.setSearchCompletionDiv(searchCompletionDiv);
+        dto.setSearchMajor(searchMajor);
+        dto.setSearchCredit(searchCredit);
+        dto.setSearchStartDate(searchStartDate);
+        dto.setSearchMode(searchMode);
+        dto.setSearchKeyword(searchKeyword);
+        dto.setSearchSchedule(searchSchedule);
+        dto.setSearchYear(searchYear);
+        dto.setSearchLevel(searchLevel);
+        dto.setSearchUser(searchUser);
 
-        return lectureList;
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        return lectureService.applyLecturList(dto, pageNumber,pageSize, id);
     }
 
     // 수강신청 후 개강, 종강, 거부된 목록
@@ -361,8 +415,10 @@ public class LectureController {
 
     // 강의 상세정보 '수강 중인' 학생 목록 (Enrollment 기준)
     @GetMapping("/detail/enrolledStudentList/{id}")
-    public List<UserDto> detailEnrolledStudentList(@PathVariable Long id) {
-        return this.userService.findEnrolledUserLectureDetail(id);
+    public Page<EnrollmentStudentDto> detailEnrolledStudentList(@PathVariable Long id,
+                                                    EnrollmentSearchDto searchDto,
+                                                    Pageable pageable) {
+        return lectureService.getEnrolledStudents(id, searchDto, pageable);
     }
 
     // 해당 강의 수강중인 학생리스트 출결 등록

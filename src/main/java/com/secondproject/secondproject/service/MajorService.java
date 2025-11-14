@@ -144,6 +144,38 @@ public class MajorService {
         return  majorListDtos;
     }
 
+    public List<MajorListUserDto> majorAllList() {
+        List<Major> majorList = this.majorRepository.findAll();
+        List<MajorListUserDto> majorListDtos = new ArrayList<>();
+
+
+
+        for(Major major : majorList){
+            MajorListUserDto majorListDto = new MajorListUserDto();
+            List<User> userList = this.userRepository.findAllByMajor_id(major.getId());
+            List<UserDto> userDtoList = new ArrayList<>();
+            for(User user : userList){
+                if(user.getType().equals(UserType.PROFESSOR)) {
+                    UserDto userDto = new UserDto();
+                    userDto.setName(user.getName());
+                    userDto.setId(user.getId());
+
+                    userDtoList.add(userDto);
+                }
+            }
+
+            majorListDto.setId(major.getId());
+            majorListDto.setName(major.getName());
+            majorListDto.setOffice(major.getOffice());
+            majorListDto.setCollegeId(major.getCollege().getId());
+            majorListDto.setUserList(userDtoList);
+
+            majorListDtos.add(majorListDto);
+        }
+
+        return  majorListDtos;
+    }
+
 
 //    public MajorListDto toDto(Major major) {
 //        MajorListDto majorListDto = new MajorListDto();

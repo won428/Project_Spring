@@ -278,4 +278,41 @@ public class PublicSpecification {
     public static Specification<Lecture> hasLecStatus(Status searchStatus) {
         return (root, query, cb) -> searchStatus == null ? cb.conjunction() : cb.equal(root.get("status"), searchStatus);
     }
+
+    public static Specification<Lecture> notRegisteredByUser(Long id) {
+        return (root, query, cb) -> {
+            if (id == null) {
+                return cb.conjunction();
+            }
+
+            // CourseRegistration 서브쿼리로 해당 학생이 이미 신청한 강의 id 목록
+            var sub = query.subquery(Long.class);
+            var cr = sub.from(CourseRegistration.class);
+            sub.select(cr.get("lecture").get("id"))
+                    .where(cb.equal(cr.get("user").get("id"), id));
+
+            // lecture.id NOT IN (subquery)
+            return cb.not(root.get("id").in(sub));
+        };
+    }
+    public static Specification<Lecture> registeredByUser(Long userId) {
+        return (root, query, cb) -> {
+            if (userId == null) {
+                // userId 없으면 결과 없게 할거면 disjunction, 전체 보이게 할거면 conjunction
+                return cb.disjunction();
+            }
+
+            Subquery<Long> sub = query.subquery(Long.class);
+            Root<CourseRegistration> cr = sub.from(CourseRegistration.class);
+            sub.select(cr.get("lecture").get("id"))
+                    .where(
+                            cb.equal(cr.get("lecture"), root),            // cr.lecture = 바깥 Lecture
+                            cb.equal(cr.get("user").get("id"), userId)    // cr.user.id = :userId
+                    );
+
+            // EXISTS (select 1 from course_registration where ..)
+            return cb.exists(sub);
+        };
+    }
+
 }
