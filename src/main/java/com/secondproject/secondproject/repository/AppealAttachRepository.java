@@ -1,25 +1,16 @@
 package com.secondproject.secondproject.repository;
 
-import com.secondproject.secondproject.entity.Attachment;
 import com.secondproject.secondproject.entity.Mapping.AppealAttach;
-import com.secondproject.secondproject.entity.OnlineLecture;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
-    static void fSave(Attachment attachment) {
+public interface AppealAttachRepository extends JpaRepository<AppealAttach, Long> {
 
-    }
-    
-    Optional<Attachment> findByStoredKey(String storedKey);
-
-    // Appeal ID로 첨부파일 조회
+    // 특정 Appeal에 연결된 Attachment 조회
     @Query("SELECT a FROM AppealAttach a WHERE a.appeal.id = :appealId")
     List<AppealAttach> findAttachmentsByAppealId(@Param("appealId") Long appealId);
-
 
 }

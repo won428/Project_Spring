@@ -3,8 +3,10 @@ package com.secondproject.secondproject.service;
 import com.secondproject.secondproject.Enum.AppealType;
 import com.secondproject.secondproject.Enum.AttendStudent;
 import com.secondproject.secondproject.Enum.Status;
+import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.entity.*;
+import com.secondproject.secondproject.entity.Mapping.AppealAttach;
 import com.secondproject.secondproject.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +30,9 @@ public class CreditAppealService {
     private final LectureRepository lectureRepository;
     private final GradeRepository gradeRepository;
     private final AttendanceRecordsRepository attendanceRecordsRepository;
+    private final UserRepository userRepository;
+    private final AttachmentRepository attachmentRepository;
+    private final AppealAttachRepository appealAttachRepository;
 
     public List<AppealListDto> getAppealsByStudentId(Long studentId) {
         List<Appeal> appeals = appealRepository.findBySendingId(studentId); // ✅ 인스턴스로 호출
@@ -38,7 +44,8 @@ public class CreditAppealService {
                         a.getTitle(),
                         a.getContent(),
                         a.getAppealDate(),
-                        a.getStatus()
+                        a.getStatus(),
+                        a.getAppealType()
                 ))
                 .toList();
     }
@@ -78,15 +85,18 @@ public class CreditAppealService {
 
     }
 
-    public void createGradeAppeal(GradeAppealDto appealForm) {
-        Appeal appeal = new Appeal(); // 새로 만들 이의제기 객체
+    @Transactional
+    public Long createGradeAppeal(GradeAppealDto appealForm) {
+        // 1. 새 이의제기 객체 생성
+        Appeal appeal = new Appeal();
 
-        // 폼에서 보낸 강의ID로 만든 객체
+        // 강의와 수강정보 조회
         Lecture lecture = this.lectureRepository.findById(appealForm.getLectureId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 강의 입니다,"));
-        // 특정된 강의와 보낸사람 ID와 일치하는 수강정보 생성
-        Enrollment enrollment = this.enrollmentRepository.findByUserIdAndLectureId(appealForm.getSendingId(), lecture.getId());
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 강의입니다"));
+        Enrollment enrollment = this.enrollmentRepository.findByUserIdAndLectureId(
+                appealForm.getSendingId(), lecture.getId());
 
+        // 이의제기 정보 설정
         appeal.setReceiverId(appealForm.getReceiverId());
         appeal.setSendingId(appealForm.getSendingId());
         appeal.setAppealDate(LocalDate.now());
@@ -97,7 +107,24 @@ public class CreditAppealService {
         appeal.setEnrollment(enrollment);
         appeal.setStatus(Status.PENDING);
 
+        // 2. 새 이의제기 저장
         this.appealRepository.save(appeal);
+
+        // 3. ID 반환 (파일 매핑 시 사용)
+        return appeal.getId();
+    }
+
+    @Transactional
+    public void mapAttachmentsToAppeal(Long appealId, List<Attachment> attachments) {
+        Appeal appeal = appealRepository.findById(appealId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appeal not found"));
+
+        for (Attachment file : attachments) {
+            AppealAttach attachMapping = new AppealAttach();
+            attachMapping.setAppeal(appeal);
+            attachMapping.setAttachment(file);
+            appealAttachRepository.save(attachMapping);
+        }
     }
 
     public StudentCreditDto getGradeForStudent(Long userId, Long lectureId) {
@@ -136,24 +163,37 @@ public class CreditAppealService {
                         "Enrollment/Grade/User 정보가 없습니다.");
             }
 
+            User sender = userRepository.findById(appeal.getSendingId())
+                    .orElse(null);
+
+            String studentName = "";
+            String studentCode = "";
+
+            if (sender != null && sender.getType() == UserType.STUDENT) {
+                studentName = sender.getName();
+                studentCode = String.valueOf(sender.getUserCode());
+            }
+
             Grade grade = enrollment.getGrade();
 
             return new AppealManageDto(
-                    appeal.getId(),
-                    appeal.getSendingId(),
-                    appeal.getReceiverId(),
-                    appeal.getLecture().getId(),
-                    appeal.getTitle(),
-                    appeal.getContent(),
-                    appeal.getAppealDate(),
-                    appeal.getStatus(),
-                    appeal.getAppealType(),
-                    grade.getAScore(),
-                    grade.getAsScore(),
-                    grade.getTScore(),
-                    grade.getFtScore(),
-                    grade.getTotalScore(),
-                    grade.getLectureGrade()
+                    appeal.getId(),                         // appealId
+                    appeal.getSendingId(),                  // sendingId
+                    appeal.getReceiverId(),                 // receiverId
+                    appeal.getLecture().getId(),            // lectureId
+                    appeal.getTitle(),                      // title
+                    studentName,                            // studentName
+                    studentCode,                            // studentCode
+                    appeal.getContent(),                    // content
+                    appeal.getAppealDate(),                 // appealDate
+                    appeal.getStatus(),                     // status
+                    appeal.getAppealType(),                 // appealType
+                    grade.getAScore(),                      // aScore
+                    grade.getAsScore(),                     // asScore
+                    grade.getTScore(),                      // tScore
+                    grade.getFtScore(),                     // ftScore
+                    grade.getTotalScore(),                  // totalScore
+                    grade.getLectureGrade()                 // lectureGrade
             );
 
         }).collect(Collectors.toList());
@@ -283,7 +323,23 @@ public class CreditAppealService {
             appealRepository.save(appeal);
         }
     }
+    @Transactional
+    public List<AttachmentDto> getAttachmentsByAppealId(Long appealId) {
+        List<AppealAttach> mappings = attachmentRepository.findAttachmentsByAppealId(appealId);
 
+        List<AttachmentDto> dtoList = new ArrayList<>();
+        for (AppealAttach mapping : mappings) {
+            Attachment att = attachmentRepository.findById(mapping.getAttachment().getId())
+                    .orElseThrow(() -> new RuntimeException("Attachment not found"));
+
+            AttachmentDto dto = new AttachmentDto();
+            dto.setId(att.getId());
+            dto.setName(att.getName());
+            dtoList.add(dto);
+        }
+
+        return dtoList;
+    }
 }
 
 

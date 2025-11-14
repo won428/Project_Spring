@@ -22,6 +22,8 @@ public class AppealManageDto {
     private Long receiverId;      // 교수 ID
     private Long lectureId;
     private String title;         // 이의제기 제목
+    private String studentName;
+    private String studentCode;
 
     private String content;       // 상세 내용
     private LocalDate appealDate;

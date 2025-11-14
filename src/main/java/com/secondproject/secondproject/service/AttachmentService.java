@@ -1,6 +1,7 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.Enum.FileType;
+import com.secondproject.secondproject.dto.AttachmentDto;
 import com.secondproject.secondproject.dto.DownloadFile;
 import com.secondproject.secondproject.entity.Attachment;
 import com.secondproject.secondproject.entity.OnlineLecture;
@@ -25,9 +26,11 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -158,9 +161,11 @@ public class AttachmentService {
     }
 
     @Transactional
-    public void saveFiles(Long userId, Long parentId, FileType fileType, List<MultipartFile> files) {
+    public List<Attachment> saveFiles(Long userId, Long parentId, FileType fileType, List<MultipartFile> files) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Attachment> savedAttachments = new ArrayList<>();
 
         for (MultipartFile file : files) {
             try {
@@ -180,18 +185,18 @@ public class AttachmentService {
                 attachment.setSizeBytes(file.getSize());
                 attachment.setSha256(sha256(file.getBytes()));
                 attachment.setUploadAt(LocalDate.now());
-                // parentId와 fileType를 필요에 맞게 저장
-                // 예: attachment 테이블에 parentId, fileType 컬럼 존재 시 set
-                // attachment.setParentId(parentId);
-                // attachment.setFileType(fileType);
 
                 // 4. DB 저장
                 attachmentRepository.save(attachment);
+
+                // 5. 리스트에 추가
+                savedAttachments.add(attachment);
 
             } catch (IOException e) {
                 throw new RuntimeException("파일 저장 실패: " + file.getOriginalFilename(), e);
             }
         }
-    }
 
+        return savedAttachments;
+    }
 }

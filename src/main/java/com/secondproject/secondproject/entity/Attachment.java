@@ -46,6 +46,10 @@ public class Attachment {
 
     private String sha256; // 해시검증용 입니다.
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "appeal_id") // FK 컬럼
+    private Appeal appeal;
+
 
     @PrePersist
         // @PrePersist: 엔티티가 처음 INSERT 되기 직전에 자동 실행

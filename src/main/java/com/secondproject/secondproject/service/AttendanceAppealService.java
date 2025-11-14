@@ -3,16 +3,11 @@ package com.secondproject.secondproject.service;
 import com.secondproject.secondproject.dto.AttendanceAppealDto;
 import com.secondproject.secondproject.dto.EnrollmentInfoDto;
 import com.secondproject.secondproject.dto.LectureBasicInfoDto;
-import com.secondproject.secondproject.entity.Appeal;
-import com.secondproject.secondproject.entity.Enrollment;
-import com.secondproject.secondproject.entity.Lecture;
-import com.secondproject.secondproject.entity.User;
+import com.secondproject.secondproject.entity.*;
+import com.secondproject.secondproject.entity.Mapping.AppealAttach;
 import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.Enum.UserType;
-import com.secondproject.secondproject.repository.AppealRepository;
-import com.secondproject.secondproject.repository.EnrollmentRepository;
-import com.secondproject.secondproject.repository.LectureRepository;
-import com.secondproject.secondproject.repository.UserRepository;
+import com.secondproject.secondproject.repository.*;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,6 +34,8 @@ public class AttendanceAppealService {
     private final AppealRepository appealRepository;
     private final LectureRepository lectureRepository;
     private final UserRepository userRepository;
+    private final AppealAttachRepository appealAttachRepository;
+
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -75,22 +72,22 @@ public class AttendanceAppealService {
 
 
     @Transactional
-    public void createAppealWithFile(AttendanceAppealDto dto, MultipartFile file) {
-
+    public Long createAttendanceAppeal(AttendanceAppealDto dto) {
         Appeal appeal = new Appeal();
 
-        // 이미 DTO에서 값을 받아와 setting
+        // 수강정보 조회
         Enrollment enrollment = enrollmentRepository.findByUserIdAndLectureId(dto.getSendingId(), dto.getLectureId());
         if (enrollment == null) {
             throw new RuntimeException("해당 유저의 수강 정보가 없습니다.");
         }
         appeal.setEnrollment(enrollment);
 
-        // 2️⃣ Lecture 객체 가져오기
+        // 강의 조회
         Lecture lecture = lectureRepository.findById(dto.getLectureId())
                 .orElseThrow(() -> new RuntimeException("강의를 찾을 수 없습니다."));
         appeal.setLecture(lecture);
 
+        // DTO 값 설정
         appeal.setSendingId(dto.getSendingId());
         appeal.setReceiverId(dto.getReceiverId());
         appeal.setAppealType(dto.getAppealType());
@@ -98,33 +95,27 @@ public class AttendanceAppealService {
         appeal.setContent(dto.getContent());
         appeal.setStatus(dto.getStatus());
         appeal.setAppealDate(dto.getAppealDate());
+        appeal.setLecture(lecture);
+        appeal.setEnrollment(enrollment);
+        appeal.setStatus(Status.PENDING);
 
-
-        if (file != null && !file.isEmpty()) {
-            try {
-                String originalFileName = file.getOriginalFilename();
-                String extension = "";
-                if (originalFileName != null && originalFileName.contains(".")) {
-                    extension = originalFileName.substring(originalFileName.lastIndexOf("."));
-                }
-                String savedFileName = UUID.randomUUID().toString() + extension;
-                Path targetLocation = Paths.get(uploadDir).resolve(savedFileName);
-
-                File dir = new File(uploadDir);
-                if (!dir.exists()) {
-                    dir.mkdirs();
-                }
-
-                Files.copy(file.getInputStream(), targetLocation);
-
-                // 파일 관련 필드 없으면 저장 안 함
-
-            } catch (IOException e) {
-                throw new RuntimeException("첨부파일 저장 실패", e);
-            }
-        }
-
+        // Appeal 저장 후 ID 반환
         appealRepository.save(appeal);
+        return appeal.getId();
+    }
+
+    @Transactional
+    public void mapAttachmentsToAttendanceAppeal(Long appealId, List<Attachment> attachments) {
+        Appeal appeal = appealRepository.findById(appealId)
+                .orElseThrow(() -> new RuntimeException("Appeal not found"));
+
+        for (Attachment file : attachments) {
+            AppealAttach attachMapping = new AppealAttach();
+            attachMapping.setAppeal(appeal);
+            attachMapping.setAttachment(file);
+
+            appealAttachRepository.save(attachMapping); // ⚡ AttachmentRepository 대신 AppealAttachRepository라면 그쪽으로 변경
+        }
     }
 }
 

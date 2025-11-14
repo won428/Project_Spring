@@ -1,16 +1,28 @@
 package com.secondproject.secondproject.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.Enum.FileType;
+import com.secondproject.secondproject.entity.Attachment;
+import com.secondproject.secondproject.entity.Mapping.AppealAttach;
 import com.secondproject.secondproject.service.AttachmentService;
 import com.secondproject.secondproject.service.CreditAppealService;
 import com.secondproject.secondproject.service.LectureService;
 import com.secondproject.secondproject.service.UserService;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -33,20 +45,23 @@ public class CreditAppealController {
     // POST /api/appeals
     @PostMapping("/myappeal")
     public ResponseEntity<?> createAppeal(
-            @ModelAttribute GradeAppealDto appealForm, // Multipart 파일 포함 가능
-            @RequestParam("files") List<MultipartFile> files
+            @ModelAttribute GradeAppealDto appealForm,
+            @RequestParam(value = "files", required = false) List<MultipartFile> files
     ) {
-        // 1. 이의제기 저장
-        appealService.createGradeAppeal(appealForm);
+        // 1. 이의제기 생성
+        Long appealId = appealService.createGradeAppeal(appealForm); // ID 반환 받기
 
-        // 2. 파일 저장
+        // 2. 새 파일 업로드 및 AppealAttach 매핑
         if (files != null && !files.isEmpty()) {
-            attachmentService.saveFiles(
+            List<Attachment> savedFiles = attachmentService.saveFiles(
                     appealForm.getSendingId(),
-                    appealForm.getLectureId(), // parentId
+                    appealForm.getLectureId(),
                     FileType.APPEAL,
                     files
             );
+
+            // AppealAttach 생성
+            appealService.mapAttachmentsToAppeal(appealId, savedFiles);
         }
 
         return ResponseEntity.ok(200);
@@ -127,6 +142,27 @@ public class CreditAppealController {
     public ResponseEntity<AttendanceCheckDto> getAttendanceByAppeal(@PathVariable Long appealId) {
         AttendanceCheckDto dto = appealService.getAttendanceByAppeal(appealId);
         return ResponseEntity.ok(dto);
+    }
+
+    // 특정 Appeal에 연결된 첨부파일 리스트 조회
+    @GetMapping("/{appealId}/attachments")
+    public ResponseEntity<List<AttachmentDto>> getAppealAttachments(@PathVariable Long appealId) {
+        List<AttachmentDto> attachments = appealService.getAttachmentsByAppealId(appealId);
+        return ResponseEntity.ok(attachments);
+    }
+
+    // 다운로드는 AttachmentService 기존 방식 그대로
+    @GetMapping("/files/download/{id}")
+    public ResponseEntity<Resource> downloadAppealFile(@PathVariable Long id) {
+        DownloadFile downloadFile = attachmentService.downloadFile(id);
+
+        InputStreamResource resource = new InputStreamResource(downloadFile.getInputStream());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + downloadFile.getName() + "\"")
+                .header(HttpHeaders.CONTENT_TYPE, downloadFile.getContentType())
+                .body(resource);
     }
 }
 

@@ -1,8 +1,10 @@
 package com.secondproject.secondproject.controller;
 
 import com.secondproject.secondproject.Enum.CompletionDiv;
+import com.secondproject.secondproject.Enum.FileType;
 import com.secondproject.secondproject.Enum.UserType;
 import com.secondproject.secondproject.dto.*;
+import com.secondproject.secondproject.entity.Attachment;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.repository.LecScheduleRepository;
@@ -48,6 +50,7 @@ public class LectureController {
     private final UserService userService;
     private final AttendanceStudentService attendanceStudentService;
     private final AttendanceAppealService attendanceAppealService;
+    private final AttachmentService attachmentService;
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
     private final LecScheduleRepository lecScheduleRepository;
@@ -505,18 +508,29 @@ public class LectureController {
     @PostMapping("/attendanceAppeal")
     public ResponseEntity<String> submitAttendanceAppeal(
             @ModelAttribute AttendanceAppealDto dto,
-            @RequestParam(required = false) MultipartFile file) {
+            @RequestParam(value = "file", required = false) MultipartFile file) {
 
-        String attendanceDetail = dto.getAttendanceDetail();
-
-        if (attendanceDetail != null && !attendanceDetail.isEmpty()) {
-            dto.setContent("[" + attendanceDetail + "] " + dto.getContent());
+        if (dto.getAttendanceDetail() != null && !dto.getAttendanceDetail().isEmpty()) {
+            dto.setContent("[" + dto.getAttendanceDetail() + "] " + dto.getContent());
         }
 
         dto.setStatus(Status.PENDING);
         dto.setAppealDate(LocalDate.now());
 
-        attendanceAppealService.createAppealWithFile(dto, file);
+        // 1️⃣ 출결 이의제기 생성
+        Long appealId = attendanceAppealService.createAttendanceAppeal(dto);
+
+        // 2️⃣ 첨부파일 처리
+        if (file != null && !file.isEmpty()) {
+            List<Attachment> savedFiles = attachmentService.saveFiles(
+                    dto.getSendingId(),
+                    dto.getLectureId(),
+                    FileType.APPEAL,
+                    List.of(file)
+            );
+
+            attendanceAppealService.mapAttachmentsToAttendanceAppeal(appealId, savedFiles);
+        }
 
         return ResponseEntity.ok("출결 이의제기 신청이 완료되었습니다.");
     }

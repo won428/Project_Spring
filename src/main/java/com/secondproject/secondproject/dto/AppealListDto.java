@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.dto;
 
+import com.secondproject.secondproject.Enum.AppealType;
 import com.secondproject.secondproject.Enum.Status;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,4 +20,5 @@ public class AppealListDto {
     private String content;
     private LocalDate appealDate;
     private Status status;
+    private AppealType appealType;
 }
