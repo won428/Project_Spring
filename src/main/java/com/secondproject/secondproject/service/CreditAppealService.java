@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,10 @@ public class CreditAppealService {
     private final UserRepository userRepository;
     private final AttachmentRepository attachmentRepository;
     private final AppealAttachRepository appealAttachRepository;
+    private final GradeService gradeService;
+    private final AttendanceStudentService attendanceStudentService;
+    private final GradingCalculator gradingCalculator;
+    private final GradingWeightsRepository gradingWeightsRepository;
 
     public List<AppealListDto> getAppealsByStudentId(Long studentId) {
         List<Appeal> appeals = appealRepository.findBySendingId(studentId); // ✅ 인스턴스로 호출
@@ -322,6 +327,33 @@ public class CreditAppealService {
             appeal.setStatus(dto.getStatus());
             appealRepository.save(appeal);
         }
+// 여기까지 완료
+        AttendanceSummary newatt = this.attendanceStudentService.getAttendanceSummary(enrollment.getLecture().getId(), enrollment.getUser().getId());
+        Grade grade = this.gradeRepository.findByUser_IdAndLecture_Id(enrollment.getUser().getId(), enrollment.getLecture().getId());
+        GradingWeights gradingWeights = this.gradingWeightsRepository.findByLecture_Id(enrollment.getLecture().getId());
+
+        BigDecimal attWeight = gradingWeights.getAttendanceScore();
+        BigDecimal asWeight = gradingWeights.getAssignmentScore();
+        BigDecimal tWeight = gradingWeights.getMidtermExam();
+        BigDecimal fWeight = gradingWeights.getFinalExam();
+
+        BigDecimal attScore  = BigDecimal.valueOf(newatt.score());
+        BigDecimal asScore = grade.getAsScore();
+        BigDecimal tScore = grade.getTScore();
+        BigDecimal ftScore = grade.getFtScore();
+
+        GradingInputs gradingInputs = new GradingInputs(attScore,asScore,tScore,ftScore);
+        GradingWeightsDto gradingWeightsDto = new GradingWeightsDto(attWeight, asWeight,tWeight,fWeight);
+        GradingResult gradingResult = gradingCalculator.gradeCalculating(gradingInputs, gradingWeightsDto);
+
+        grade.setAScore(attScore);
+        grade.setTotalScore(gradingResult.totalScore());
+        grade.setLectureGrade(gradingResult.gpa());
+
+        this.gradeRepository.save(grade);
+
+
+
     }
     @Transactional
     public List<AttachmentDto> getAttachmentsByAppealId(Long appealId) {

@@ -2,6 +2,8 @@ package com.secondproject.secondproject.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.secondproject.secondproject.Enum.AttendStudent;
+import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.dto.*;
 import com.secondproject.secondproject.Enum.FileType;
 import com.secondproject.secondproject.entity.Attachment;
@@ -21,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -131,9 +134,23 @@ public class CreditAppealController {
     @PutMapping("/{appealId}/updateStatus")
     public ResponseEntity<Void> updateAttendanceStatus(
             @PathVariable Long appealId,
-            @RequestBody AttendanceAppealDto dto
-    ) {
-        appealService.updateAttendanceAppeal(appealId, dto);
+            @RequestParam AttendStudent newStatus,
+            @RequestParam LocalDate attendanceDate,
+            @RequestParam Long sendingId,
+            @RequestParam Long receiverId,
+            @RequestParam Long lectureId,
+            @RequestParam Status status
+            ) {
+        AttendanceAppealDto dto = new AttendanceAppealDto();
+        dto.setAppealId(appealId);
+        dto.setAttendStudent(newStatus);
+        dto.setSendingId(sendingId);
+        dto.setReceiverId(receiverId);
+        dto.setLectureId(lectureId);
+        dto.setAttendanceDate(attendanceDate);
+        dto.setStatus(status);
+        this.appealService.updateAttendanceAppeal(appealId, dto);
+        System.out.println(dto.getAttendStudent());
         return ResponseEntity.ok().build();
     }
 
