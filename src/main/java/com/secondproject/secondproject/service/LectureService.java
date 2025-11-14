@@ -8,18 +8,14 @@ import com.secondproject.secondproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -31,7 +27,6 @@ import java.nio.file.Path;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
@@ -368,17 +363,70 @@ public class LectureService {
         this.courseRegRepository.save(courseRegistration);
     }
 
-    public List<LectureDto> myLectureList(Long userId) {
-        List<CourseRegistration> courseRegistrations = this.courseRegRepository.findByUser_Id(userId);
-        List<LectureDto> myLectureList = new ArrayList<>();
+    public Page<LectureDto> myLectureList(Long userId, LecturePageListDto lecturePageListDto, int pageNumber, int pageSize) {
+        Specification<Lecture> spec = (root, query, cb) -> cb.conjunction();
 
-        for (CourseRegistration courseReg : courseRegistrations) {
-            Lecture lecture = this.lectureRepository.findById(courseReg.getLecture().getId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 강의"));
 
-            Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
+        if (lecturePageListDto.getSearchMajor() != null) {
+            spec = spec.and(PublicSpecification.hasLecMajor(lecturePageListDto.getSearchMajor()));
+        }
+        if (lecturePageListDto.getSearchLevel() != null && lecturePageListDto.getSearchLevel() >= 0) {
+            spec = spec.and(PublicSpecification.hasLecLevel(lecturePageListDto.getSearchLevel()));
+        }
+        if (lecturePageListDto.getSearchCredit() != null && lecturePageListDto.getSearchCredit() >= 0) {
+            spec = spec.and(PublicSpecification.hasLecCredit(lecturePageListDto.getSearchCredit()));
+        }
+        if (lecturePageListDto.getSearchCompletionDiv() != null) {
+            spec = spec.and(PublicSpecification.hasLecCompletionDiv(lecturePageListDto.getSearchCompletionDiv()));
+        }
+        if (lecturePageListDto.getSearchYear() != null) {
+            spec = spec.and(PublicSpecification.hasLecYear(lecturePageListDto.getSearchYear()));
+        }
+        if (lecturePageListDto.getSearchStartDate() != null) {
+            spec = spec.and(PublicSpecification.hasLecStartDate(lecturePageListDto.getSearchStartDate()));
+        }
+        if (lecturePageListDto.getSearchSchedule() != null) {
+            spec = spec.and(PublicSpecification.hasScheduleDay(lecturePageListDto.getSearchSchedule()));
+        }
+        if (lecturePageListDto.getSearchUser() != null) {
+            spec = spec.and(PublicSpecification.hasLecUser(lecturePageListDto.getSearchUser()));
+        }
 
-            List<LectureSchedule> lectureScheduleList = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
+        String searchMode = lecturePageListDto.getSearchMode();
+        String searchKeyword = lecturePageListDto.getSearchKeyword();
+
+        boolean hasMode = searchMode != null && !searchMode.isBlank();
+        boolean hasKeyword = searchKeyword != null && !searchKeyword.isBlank();
+        if (hasMode && hasKeyword) {
+            if ("all".equalsIgnoreCase(searchMode)) {
+                spec = spec.and(PublicSpecification.keywordInAllLecture(searchKeyword));
+            } else if ("name".equalsIgnoreCase(searchMode)) {
+                spec = spec.and(PublicSpecification.hasLecName(searchKeyword));
+            } else if ("professor".equalsIgnoreCase(searchMode)) {
+                spec = spec.and(PublicSpecification.hasLecProfessorName(searchKeyword));
+            } else if ("major".equalsIgnoreCase(searchMode)) {
+                spec = spec.and(PublicSpecification.hasLecMajorName(searchKeyword));
+            }
+        }
+
+
+        spec = spec.and(PublicSpecification.registeredByUser(userId));
+
+        Sort sort = Sort.by(Sort.Order.desc("id"));
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        Page<Lecture> lecturePage = this.lectureRepository.findAll(spec, pageable);
+
+        return lecturePage.map(lecture -> {
+            CourseRegistration courseReg =
+                    this.courseRegRepository.findByLecture_IdAndUser_Id(lecture.getId(), userId);
+
+            Long nowStudent =
+                    this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
+
+            List<LectureSchedule> lectureScheduleList =
+                    this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
+
             List<LectureScheduleDto> lectureScheduleDtos = new ArrayList<>();
             for (LectureSchedule schedule : lectureScheduleList) {
                 LectureScheduleDto scheduleDto = new LectureScheduleDto();
@@ -387,12 +435,10 @@ public class LectureService {
                 scheduleDto.setDay(schedule.getDay());
                 scheduleDto.setStartTime(schedule.getStartTime());
                 scheduleDto.setEndTime(schedule.getEndTime());
-
                 lectureScheduleDtos.add(scheduleDto);
             }
 
             LectureDto lectureDto = new LectureDto();
-
             lectureDto.setId(lecture.getId());
             lectureDto.setName(lecture.getName());
             lectureDto.setMajorName(lecture.getMajor().getName());
@@ -401,18 +447,16 @@ public class LectureService {
             lectureDto.setEndDate(lecture.getEndDate());
             lectureDto.setTotalStudent(lecture.getTotalStudent());
             lectureDto.setCredit(lecture.getCredit());
-            lectureDto.setStatus(lecture.getStatus());
             lectureDto.setLevel(lecture.getLevel());
             lectureDto.setCompletionDiv(lecture.getCompletionDiv());
-            lectureDto.setStatus(courseReg.getStatus()); // 내 수강신청 상태(신청 확정, 장바구니 등)
-            lectureDto.setLecStatus(lecture.getStatus()); // 강의 상태(개강,종강,대기 등)
             lectureDto.setLectureSchedules(lectureScheduleDtos);
             lectureDto.setNowStudent(nowStudent);
 
-            myLectureList.add(lectureDto);
-        }
+            lectureDto.setStatus(courseReg.getStatus());    // 내 수강신청 상태 (PENDING/SUBMITTED 등)
+            lectureDto.setLecStatus(lecture.getStatus());  // 강의 상태 (APPROVED/INPROGRESS/COMPLETED 등)
 
-        return myLectureList;
+            return lectureDto;
+        });
     }
 
     public LectureDto findByID(Long id) {
@@ -553,46 +597,96 @@ public class LectureService {
         return LectureDto.fromEntity(lecture);
     }
 
-    public List<LectureDto> applyLecturList(Long id) {
-        List<Lecture> lectureList = this.lectureRepository.findAllNotRegisteredByUser(id);
-        List<LectureDto> lectureDtoList = new ArrayList<>();
+    public Page<LectureDto> applyLecturList(LecturePageListDto lecturePageListDto,  int pageNumber, int pageSize, Long id) {
+        Specification<Lecture> spec = (root, query, cb) -> cb.conjunction();
 
-        for (Lecture lecture : lectureList) {
-            LectureDto lectureDto = new LectureDto();
+        if(lecturePageListDto.getSearchMajor() != null){
+            spec = spec.and(PublicSpecification.hasLecMajor(lecturePageListDto.getSearchMajor()));
+        }
+        if( lecturePageListDto.getSearchLevel() != null && lecturePageListDto.getSearchLevel() >= 0){
+            spec = spec.and(PublicSpecification.hasLecLevel(lecturePageListDto.getSearchLevel()));
+        }
+        if(lecturePageListDto.getSearchCredit() != null && lecturePageListDto.getSearchCredit() >= 0){
+            spec = spec.and(PublicSpecification.hasLecCredit(lecturePageListDto.getSearchCredit()));
+        }
+        if(lecturePageListDto.getSearchCompletionDiv() != null){
+            spec = spec.and(PublicSpecification.hasLecCompletionDiv(lecturePageListDto.getSearchCompletionDiv()));
+        }
+        if(lecturePageListDto.getSearchYear() != null){
+            spec = spec.and(PublicSpecification.hasLecYear(lecturePageListDto.getSearchYear()));
+        }
+        if(lecturePageListDto.getSearchStartDate() != null){
+            spec = spec.and(PublicSpecification.hasLecStartDate(lecturePageListDto.getSearchStartDate()));
+        }
+        if(lecturePageListDto.getSearchSchedule() != null){
+            spec = spec.and(PublicSpecification.hasScheduleDay(lecturePageListDto.getSearchSchedule()));
+        }
+        if(lecturePageListDto.getSearchUser() != null){
+            spec = spec.and(PublicSpecification.hasLecUser(lecturePageListDto.getSearchUser()));
+        }
+        if (lecturePageListDto.getSearchStatus() != null){
+            spec = spec.and(PublicSpecification.hasLecStatus(lecturePageListDto.getSearchStatus()));
+        }
 
+
+
+        String searchMode = lecturePageListDto.getSearchMode();
+        String searchKeyword = lecturePageListDto.getSearchKeyword();
+
+        boolean hasMode = searchMode != null && !searchMode.isBlank();
+        boolean hasKeyword = searchKeyword != null && !searchKeyword.isBlank();
+        if (hasMode && hasKeyword) {
+            if ("all".equalsIgnoreCase(searchMode)) {
+                spec = spec.and(PublicSpecification.keywordInAllLecture(searchKeyword));
+            } else if ("name".equalsIgnoreCase(searchMode)) {
+                spec = spec.and(PublicSpecification.hasLecName(searchKeyword));
+            } else if ("professor".equalsIgnoreCase(searchMode)) {
+                spec = spec.and(PublicSpecification.hasLecProfessorName(searchKeyword));
+            } else if ("major".equalsIgnoreCase(searchMode)) {
+                spec = spec.and(PublicSpecification.hasLecMajorName(searchKeyword));
+            }
+        }
+        spec = spec.and(PublicSpecification.notRegisteredByUser(id));
+        spec = spec.and(PublicSpecification.hasLecStatus(Status.APPROVED));
+
+        Sort sort = Sort.by(Sort.Order.desc("id"));
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        Page<Lecture> lectureList = this.lectureRepository.findAll(spec, pageable);
+        Page<LectureDto> lectureListDtos = lectureList.map(lecture -> {
+            Long nowStudent = this.courseRegRepository.countByLecture_IdAndStatus(lecture.getId(), Status.SUBMITTED);
             List<LectureSchedule> lectureScheduleList = this.lecScheduleRepository.findAllByLecture_Id(lecture.getId());
             List<LectureScheduleDto> lectureScheduleDtos = new ArrayList<>();
-            for (LectureSchedule schedule : lectureScheduleList) {
+            for (LectureSchedule lectureSchedule : lectureScheduleList) {
+
                 LectureScheduleDto scheduleDto = new LectureScheduleDto();
-                scheduleDto.setId(schedule.getId());
-                scheduleDto.setLecture(schedule.getLecture().getId());
-                scheduleDto.setDay(schedule.getDay());
-                scheduleDto.setStartTime(schedule.getStartTime());
-                scheduleDto.setEndTime(schedule.getEndTime());
+                scheduleDto.setLecture(lectureSchedule.getLecture().getId());
+                scheduleDto.setDay(lectureSchedule.getDay());
+                scheduleDto.setEndTime(lectureSchedule.getEndTime());
+                scheduleDto.setStartTime(lectureSchedule.getStartTime());
 
                 lectureScheduleDtos.add(scheduleDto);
             }
 
-            lectureDto.setName(lecture.getName());
-            lectureDto.setStatus(lecture.getStatus());
-            lectureDto.setCredit(lecture.getCredit());
-            lectureDto.setUser(lecture.getUser().getId());
-            lectureDto.setTotalStudent(lecture.getTotalStudent());
-            lectureDto.setLevel(lecture.getLevel());
+            LectureDto lectureDto = new LectureDto();
             lectureDto.setId(lecture.getId());
-            lectureDto.setEndDate(lecture.getEndDate());
-            lectureDto.setDescription(lecture.getDescription());
+            lectureDto.setUser(lecture.getUser().getId());
+            lectureDto.setName(lecture.getName());
+            lectureDto.setCredit(lecture.getCredit());
             lectureDto.setStartDate(lecture.getStartDate());
-            lectureDto.setCompletionDiv(lecture.getCompletionDiv());
+            lectureDto.setEndDate(lecture.getEndDate());
             lectureDto.setMajorName(lecture.getMajor().getName());
             lectureDto.setUserName(lecture.getUser().getName());
-            lectureDto.setMajor(lecture.getMajor().getId());
+            lectureDto.setStatus(lecture.getStatus());
+            lectureDto.setTotalStudent(lecture.getTotalStudent());
+            lectureDto.setNowStudent(nowStudent);
+            lectureDto.setCompletionDiv(lecture.getCompletionDiv());
+            lectureDto.setLevel(lecture.getLevel());
             lectureDto.setLectureSchedules(lectureScheduleDtos);
 
-            lectureDtoList.add(lectureDto);
-        }
+            return lectureDto;
+        });
 
-        return lectureDtoList;
+        return lectureListDtos;
     }
 
     @Transactional
