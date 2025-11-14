@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -357,8 +358,10 @@ public class LectureController {
 
     // 강의 상세정보 '수강 중인' 학생 목록 (Enrollment 기준)
     @GetMapping("/detail/enrolledStudentList/{id}")
-    public List<UserDto> detailEnrolledStudentList(@PathVariable Long id) {
-        return this.userService.findEnrolledUserLectureDetail(id);
+    public Page<EnrollmentStudentDto> detailEnrolledStudentList(@PathVariable Long id,
+                                                    EnrollmentSearchDto searchDto,
+                                                    Pageable pageable) {
+        return lectureService.getEnrolledStudents(id, searchDto, pageable);
     }
 
     // 해당 강의 수강중인 학생리스트 출결 등록

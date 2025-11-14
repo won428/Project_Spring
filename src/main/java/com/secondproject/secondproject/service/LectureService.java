@@ -1176,6 +1176,20 @@ public class LectureService {
 
         return lectureListDtos;
     }
+
+    public Page<EnrollmentStudentDto> getEnrolledStudents(Long id,
+                                              EnrollmentSearchDto searchDto,
+                                              Pageable pageable) {
+        String mode = Optional.ofNullable(searchDto.getSearchMode()).orElse("ALL");
+        String keyword = searchDto.getSearchKeyword();
+
+        return enrollmentRepository.searchEnrolledStudents(
+                id,
+                mode,
+                keyword,
+                pageable
+        );
+    }
 }
 
 
