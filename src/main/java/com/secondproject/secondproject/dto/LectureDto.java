@@ -75,6 +75,7 @@ public class LectureDto {
         this.totalStudent = totalStudent;
         this.status = status;
     }
+
     private Long college;
 
     private GradingWeightsDto weightsDto;

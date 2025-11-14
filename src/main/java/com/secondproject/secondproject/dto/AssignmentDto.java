@@ -23,6 +23,8 @@ public class AssignmentDto {
 
     private String content; // 공지 본문
 
+    private Long LectureId;
+
     private boolean isEnabled = true;
     // 제출창구(제출 마감시 비활성화(0), 제출 진행중일시 활성화(1))
 
@@ -48,7 +50,7 @@ public class AssignmentDto {
         dto.setContent(assignment.getContent());
         dto.setOpenAt(assignment.getOpenAt());
         dto.setDueAt(assignment.getDueAt());
-
+        dto.setLectureId(assignment.getLecture().getId());
         if (assignment.getUser() != null) {
             dto.setUsername(assignment.getUser().getName());
         }

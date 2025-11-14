@@ -96,6 +96,7 @@ public class UserController {
         }
     }
 
+    
     // 관리자용 유저 목록 조회
     @GetMapping("/list")
     public List<UserListDto> userList() {

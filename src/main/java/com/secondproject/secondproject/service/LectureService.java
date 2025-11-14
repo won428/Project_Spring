@@ -273,7 +273,7 @@ public class LectureService {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "아직 점수가 전부 입력되지 않은 강의는 종강 할 수 없습니다.");
                 }
             }
-            for(Enrollment enrollment : enrollmentList){
+            for (Enrollment enrollment : enrollmentList) {
                 enrollment.setStatus(status);
                 this.enrollmentRepository.save(enrollment);
             }
@@ -284,7 +284,7 @@ public class LectureService {
             lecture.setStatus(status);
             this.lectureRepository.save(lecture);
 
-            for(Enrollment enrollment : enrollmentList){
+            for (Enrollment enrollment : enrollmentList) {
                 enrollment.setStatus(status);
                 this.enrollmentRepository.save(enrollment);
             }
@@ -674,7 +674,7 @@ public class LectureService {
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."));
 
 
-                Enrollment enrollment = this.enrollmentRepository.findByUserIdAndLectureId(user.getId(),lectureId);
+                Enrollment enrollment = this.enrollmentRepository.findByUserIdAndLectureId(user.getId(), lectureId);
                 enrollment.setStatus(Status.INPROGRESS);
 
                 this.enrollmentRepository.save(enrollment);
@@ -715,7 +715,7 @@ public class LectureService {
             lecture.setStatus(status);
             List<Enrollment> enrollmentList = this.enrollmentRepository.findAllByLecture_Id(lecture.getId());
 
-            for(Enrollment enrollment : enrollmentList){
+            for (Enrollment enrollment : enrollmentList) {
                 enrollment.setStatus(status);
                 this.enrollmentRepository.save(enrollment);
             }
@@ -1069,7 +1069,6 @@ public class LectureService {
     }
 
 
-
     public void lectureRestart(Long id, Status status) {
         Lecture lecture = this.lectureRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 강의입니다."));
@@ -1078,7 +1077,7 @@ public class LectureService {
         lecture.setStatus(status);
         this.lectureRepository.save(lecture);
 
-        for(Enrollment enrollment : enrollmentList){
+        for (Enrollment enrollment : enrollmentList) {
             enrollment.setStatus(status);
             this.enrollmentRepository.save(enrollment);
         }
@@ -1088,34 +1087,33 @@ public class LectureService {
     public Page<LectureDto> listPageLecture(LecturePageListDto lecturePageListDto, int pageNumber, int pageSize) {
         Specification<Lecture> spec = (root, query, cb) -> cb.conjunction();
 
-        if(lecturePageListDto.getSearchMajor() != null){
+        if (lecturePageListDto.getSearchMajor() != null) {
             spec = spec.and(PublicSpecification.hasLecMajor(lecturePageListDto.getSearchMajor()));
         }
-        if( lecturePageListDto.getSearchLevel() != null && lecturePageListDto.getSearchLevel() >= 0){
+        if (lecturePageListDto.getSearchLevel() != null && lecturePageListDto.getSearchLevel() >= 0) {
             spec = spec.and(PublicSpecification.hasLecLevel(lecturePageListDto.getSearchLevel()));
         }
-        if(lecturePageListDto.getSearchCredit() != null && lecturePageListDto.getSearchCredit() >= 0){
+        if (lecturePageListDto.getSearchCredit() != null && lecturePageListDto.getSearchCredit() >= 0) {
             spec = spec.and(PublicSpecification.hasLecCredit(lecturePageListDto.getSearchCredit()));
         }
-        if(lecturePageListDto.getSearchCompletionDiv() != null){
+        if (lecturePageListDto.getSearchCompletionDiv() != null) {
             spec = spec.and(PublicSpecification.hasLecCompletionDiv(lecturePageListDto.getSearchCompletionDiv()));
         }
-        if(lecturePageListDto.getSearchYear() != null){
+        if (lecturePageListDto.getSearchYear() != null) {
             spec = spec.and(PublicSpecification.hasLecYear(lecturePageListDto.getSearchYear()));
         }
-        if(lecturePageListDto.getSearchStartDate() != null){
+        if (lecturePageListDto.getSearchStartDate() != null) {
             spec = spec.and(PublicSpecification.hasLecStartDate(lecturePageListDto.getSearchStartDate()));
         }
-        if(lecturePageListDto.getSearchSchedule() != null){
+        if (lecturePageListDto.getSearchSchedule() != null) {
             spec = spec.and(PublicSpecification.hasScheduleDay(lecturePageListDto.getSearchSchedule()));
         }
-        if(lecturePageListDto.getSearchUser() != null){
+        if (lecturePageListDto.getSearchUser() != null) {
             spec = spec.and(PublicSpecification.hasLecUser(lecturePageListDto.getSearchUser()));
         }
-        if (lecturePageListDto.getSearchStatus() != null){
+        if (lecturePageListDto.getSearchStatus() != null) {
             spec = spec.and(PublicSpecification.hasLecStatus(lecturePageListDto.getSearchStatus()));
         }
-
 
 
         String searchMode = lecturePageListDto.getSearchMode();
