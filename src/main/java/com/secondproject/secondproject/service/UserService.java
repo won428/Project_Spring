@@ -13,10 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.math3.stat.descriptive.summary.Product;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import lombok.val;
@@ -26,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -694,7 +692,8 @@ public class UserService {
         return userRepository.findByUserCode(userCode);
     }
 
-    public UserDetailAllDto userDetailAll(Long id) {
+    public UserDetailAllDto userDetailAll(Long id,String year, String semester , int size,
+    int page) {
         UserDetailAllDto userDetail = new UserDetailAllDto();
         User user = this.userRepository.findById(id)
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 유저 입니다."));
@@ -783,6 +782,37 @@ public class UserService {
             }
         }
 
+        boolean hasYear = year != null && !year.isBlank();
+        boolean hasSemester = semester != null && !semester.isBlank();
+
+        if (hasYear) {
+            gradeList = gradeList.stream()
+                    .filter(g -> g.getStartDate() != null
+                            && String.valueOf(g.getStartDate().getYear()).equals(year))
+                    .toList();
+        }
+
+        if (hasSemester) {
+            // 프론트에서 3,9,6,12 같은 값 넘어온다고 했으니 그대로 월과 비교
+            int semMonth = Integer.parseInt(semester);
+            gradeList = gradeList.stream()
+                    .filter(g -> g.getStartDate() != null
+                            && g.getStartDate().getMonthValue() == semMonth)
+                    .toList();
+        }
+
+// ★ 여기서 페이징 적용
+        Pageable pageable = PageRequest.of(page, size);
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), gradeList.size());
+
+        List<GradeForStuInfoDto> pageContent =
+                (start > end) ? List.of() : gradeList.subList(start, end);
+
+        Page<GradeForStuInfoDto> gradePage =
+                new PageImpl<>(pageContent, pageable, gradeList.size());
+
         int totalCredit = majorCredit + generalCredit; // 전공 + 교양
         BigDecimal aveGrade = BigDecimal.ZERO; // 학점 평균
         if (length > 0) {
@@ -810,7 +840,7 @@ public class UserService {
         userDetail.setGeneralCredit(generalCredit);
         userDetail.setLectureGrade(aveGrade); // aveGrade 계산해서 바꿔야함
         userDetail.setStudentRecordList(studentRecords);
-        userDetail.setGradeInfoList(gradeList);
+        userDetail.setGradeInfoList(gradePage);
         userDetail.setBirthDate(user.getBirthDate());
 
 

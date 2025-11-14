@@ -65,8 +65,15 @@ public class UserController {
 
     //유저 학적 정보 가져오기
     @GetMapping("/detailAll/{id}")
-    public UserDetailAllDto userDetailAll(@PathVariable Long id){
-        UserDetailAllDto userDetailAllDto = this.userService.userDetailAll(id);
+    public UserDetailAllDto userDetailAll(
+            @PathVariable Long id,
+            @RequestParam String year,
+            @RequestParam String semester
+    ){
+
+        int size = 1000;
+        int page = 0;
+        UserDetailAllDto userDetailAllDto = this.userService.userDetailAll(id, year ,semester, size, page);
 
         return userDetailAllDto;
     }
