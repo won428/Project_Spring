@@ -97,6 +97,8 @@ public class LectureDto {
         lectureListDto.setUserName(lecture.getUser().getName());
         lectureListDto.setStartDate(lecture.getStartDate());
         lectureListDto.setTotalStudent(lecture.getTotalStudent());
+        lectureListDto.setCompletionDiv(lecture.getCompletionDiv());
+        lectureListDto.setStatus(lecture.getStatus());
         return lectureListDto;
     }
 

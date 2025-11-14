@@ -757,12 +757,13 @@ public class LectureService {
         lectureDto.setEndDate(lecture.getEndDate());
 
         gradingWeightsRepository.findByLectureId(id).ifPresent(gw ->
-        {lectureDto.setGradingWeightsDto(new GradingWeightsDto(
-                gw.getAttendanceScore(),
-                gw.getAssignmentScore(),
-                gw.getMidtermExam(),
-                gw.getFinalExam()
-        ));
+        {
+            lectureDto.setGradingWeightsDto(new GradingWeightsDto(
+                    gw.getAttendanceScore(),
+                    gw.getAssignmentScore(),
+                    gw.getMidtermExam(),
+                    gw.getFinalExam()
+            ));
         });
 
         return lectureDto;
@@ -1174,6 +1175,8 @@ public class LectureService {
 
         return lectureListDtos;
     }
+
+
 }
 
 

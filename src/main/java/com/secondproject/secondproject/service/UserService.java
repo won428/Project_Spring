@@ -108,7 +108,7 @@ public class UserService {
 
         StatusRecords savedRecords = statusRecordsRepository.save(userStatus);
 
-        if(file != null){
+        if (file != null) {
             //사진 저장
             Attachment attachment = attachmentService.savedImage(file, saved);
             UserAttach userAttach = new UserAttach();
@@ -126,7 +126,7 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "학번 생성 데이터 누락.");
         }
 
-        String userCode = String.format("%04d%03d%02d", year, id, majors);
+        String userCode = String.format("%04d%03d%02d", year, majors, id);
 
         Long studentId = Long.parseLong(userCode);
 
@@ -261,7 +261,7 @@ public class UserService {
 
         Specification<User> spec = (root, query, cb) -> cb.conjunction();
 
-        if(userListSearchDto.getSearchLevel() != null && userListSearchDto.getSearchLevel() > 0){
+        if (userListSearchDto.getSearchLevel() != null && userListSearchDto.getSearchLevel() > 0) {
             spec = spec.and(PublicSpecification.hasLevel(userListSearchDto.getSearchLevel()));
         }
 
@@ -698,16 +698,16 @@ public class UserService {
     public UserDetailAllDto userDetailAll(Long id) {
         UserDetailAllDto userDetail = new UserDetailAllDto();
         User user = this.userRepository.findById(id)
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 유저 입니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 유저 입니다."));
         StatusRecords statusRecords = this.statusRecordsRepository.findByUser_id(id);
 
         MajorResponseDto majorResponseDto = new MajorResponseDto();
         CollegeResponseDto collegeResponseDto = new CollegeResponseDto();
 
-        Major major =this.majorRepository.findById(user.getMajor().getId())
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 학과 입니다."));
+        Major major = this.majorRepository.findById(user.getMajor().getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 학과 입니다."));
         College college = this.collegeRepository.findById(major.getCollege().getId())
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 대학입니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 대학입니다."));
 
         majorResponseDto.setOffice(major.getOffice());
         majorResponseDto.setName(major.getName());
@@ -729,37 +729,37 @@ public class UserService {
         BigDecimal totalGrade = BigDecimal.ZERO; // 학점 합계
         int length = 0;
 
-        if(recordsForStudent != null && !recordsForStudent.isEmpty()){
-            for(StudentRecord studentRecord : recordsForStudent){
-               StudentRecordDto studentRecordDto = new StudentRecordDto();
+        if (recordsForStudent != null && !recordsForStudent.isEmpty()) {
+            for (StudentRecord studentRecord : recordsForStudent) {
+                StudentRecordDto studentRecordDto = new StudentRecordDto();
 
-               studentRecordDto.setStatus(studentRecord.getStatus());
-               studentRecordDto.setAppliedDate(studentRecord.getAppliedDate());
-               studentRecordDto.setProcessedDate(studentRecord.getProcessedDate());
-               studentRecordDto.setApplyStatus(studentRecord.getStudentStatus());
-               studentRecordDto.setId(studentRecord.getId());
+                studentRecordDto.setStatus(studentRecord.getStatus());
+                studentRecordDto.setAppliedDate(studentRecord.getAppliedDate());
+                studentRecordDto.setProcessedDate(studentRecord.getProcessedDate());
+                studentRecordDto.setApplyStatus(studentRecord.getStudentStatus());
+                studentRecordDto.setId(studentRecord.getId());
 
 
-               studentRecords.add(studentRecordDto);
+                studentRecords.add(studentRecordDto);
             }
         }
 
-        if(enrollmentList != null && !enrollmentList.isEmpty()){
-            for(Enrollment enrollment : enrollmentList){
+        if (enrollmentList != null && !enrollmentList.isEmpty()) {
+            for (Enrollment enrollment : enrollmentList) {
                 Lecture lecture = this.lectureRepository.findById(enrollment.getLecture().getId())
-                        .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"없는 강의입니다."));
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 강의입니다."));
                 Grade grade = this.gradeRepository.findByUser_IdAndLecture_Id(id, lecture.getId());
                 int credit = lecture.getCredit();
-                if(lecture.getCompletionDiv().equals(CompletionDiv.MAJOR_ELECTIVE) || lecture.getCompletionDiv().equals(CompletionDiv.MAJOR_REQUIRED)){
-                    if(lecture.getStatus().equals(Status.COMPLETED)){
+                if (lecture.getCompletionDiv().equals(CompletionDiv.MAJOR_ELECTIVE) || lecture.getCompletionDiv().equals(CompletionDiv.MAJOR_REQUIRED)) {
+                    if (lecture.getStatus().equals(Status.COMPLETED)) {
                         majorCredit = majorCredit + credit;
                     }
-                }else {
-                    if(lecture.getStatus().equals(Status.COMPLETED)) {
+                } else {
+                    if (lecture.getStatus().equals(Status.COMPLETED)) {
                         generalCredit = generalCredit + credit;
                     }
                 }
-                if(grade.getLectureGrade() != null){
+                if (grade.getLectureGrade() != null) {
                     totalGrade = totalGrade.add(grade.getLectureGrade());
                     length = length + 1;
                 }
@@ -813,7 +813,6 @@ public class UserService {
         userDetail.setStudentRecordList(studentRecords);
         userDetail.setGradeInfoList(gradeList);
         userDetail.setBirthDate(user.getBirthDate());
-
 
 
         return userDetail;

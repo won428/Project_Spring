@@ -2,14 +2,19 @@ package com.secondproject.secondproject.controller;
 
 
 import com.secondproject.secondproject.dto.*;
-import com.secondproject.secondproject.service.BoardService;
-import com.secondproject.secondproject.service.LectureNoticeService;
+import com.secondproject.secondproject.entity.AcademicCalendar;
+import com.secondproject.secondproject.entity.Lecture;
+import com.secondproject.secondproject.entity.User;
+import com.secondproject.secondproject.service.*;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -17,6 +22,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BoardController {
     private final BoardService boardService;
+    private final LectureService lectureService;
+    private final UserService userService;
+    private final AcademicCalendarService academicCalendarService;
 
     @PostMapping("/insert")
     public ResponseEntity<?> createNotice(
@@ -87,5 +95,27 @@ public class BoardController {
         }
     }
 
+    @GetMapping("/proHome")
+    public ResponseEntity<Object> PHome(
+            @RequestParam Long userCode,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        try {
+            User user = userService.findByUsercode(userCode)
+                    .orElseThrow(() -> new EntityNotFoundException("유저 없음"));
+            String sortedKey = LocalDate.now().getYear() + "-" + (LocalDate.now().getMonthValue() / 3);
 
+            System.out.println("Sorted Key : " + sortedKey);
+
+            List<LectureDto> lectureDtoList = lectureService.findByUser(user, sortedKey);
+            Page<AcademicCalendar> res = academicCalendarService.getListByMonth(
+                    LocalDate.now().getYear(), LocalDate.now().getMonthValue(), page, size
+            );
+            return ResponseEntity.ok(PagePDto.fromEntity(user, lectureDtoList, res));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }
