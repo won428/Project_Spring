@@ -227,4 +227,50 @@ public class LectueInsert extends AbstractTestNGSpringContextTests {
         lecture.setCompletionDiv(CompletionDiv.MAJOR_REQUIRED);
         lectureRepository.save(lecture);                 // 강의 저장
     }
+
+    @Test
+    public void insertLectureBioTechnology() {
+        Lecture lecture = new Lecture();
+        User user = userRepository.findByEmail("qwe@qwe")
+                .orElseThrow(() -> new RuntimeException());
+
+        lecture.setName("생명공학");                     // 강의명
+        lecture.setUser(user);                          // 교수 또는 담당자 정보 (User 엔티티)
+        lecture.setCredit(3);                           // 학점
+        lecture.setStartDate(LocalDate.of(2025, 3, 2));
+        lecture.setEndDate(LocalDate.of(2025, 6, 18));
+        lecture.setDescription("생명공학 강의입니다.");  // 강의 설명
+
+        lecture.setMajor(user.getMajor());              // 담당 전공
+        lecture.setTotalStudent(40);                     // 총 수강생 수
+        lecture.setStatus(Status.COMPLETED);             // 강의 상태 (예: COMPLETED, ONGOING 등)
+
+        // 반드시 null 불가 컬럼인 completionDiv 설정 추가
+        lecture.setCompletionDiv(CompletionDiv.MAJOR_REQUIRED);
+        lectureRepository.save(lecture);                 // 강의 저장
+    }
+
+    @Test
+    public void insertLectureLifeScience() {
+        Lecture lecture = new Lecture();
+        User user = userRepository.findByEmail("qwe@qwe")
+                .orElseThrow(() -> new RuntimeException());
+
+        lecture.setName("삶과 과학");                     // 강의명
+        lecture.setUser(user);                          // 교수 또는 담당자 정보 (User 엔티티)
+        lecture.setCredit(2);                           // 학점
+        lecture.setStartDate(LocalDate.of(2025, 3, 2));
+        lecture.setEndDate(LocalDate.of(2025, 6, 18));
+        lecture.setDescription("삶과 과학 강의입니다.");  // 강의 설명
+
+        lecture.setMajor(user.getMajor());              // 담당 전공
+        lecture.setTotalStudent(30);                     // 총 수강생 수
+        lecture.setStatus(Status.INPROGRESS);             // 강의 상태 (예: COMPLETED, ONGOING 등)
+
+        // 반드시 null 불가 컬럼인 completionDiv 설정 추가
+        lecture.setCompletionDiv(CompletionDiv.LIBERAL_ELECTIVE);
+        lectureRepository.save(lecture);                 // 강의 저장
+    }
+
+
 }

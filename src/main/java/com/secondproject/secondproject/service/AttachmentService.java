@@ -1,11 +1,14 @@
 package com.secondproject.secondproject.service;
 
+import com.secondproject.secondproject.Enum.FileType;
 import com.secondproject.secondproject.dto.DownloadFile;
 import com.secondproject.secondproject.entity.Attachment;
 import com.secondproject.secondproject.entity.OnlineLecture;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.publicMethod.DownloadForProject;
 import com.secondproject.secondproject.repository.AttachmentRepository;
+import com.secondproject.secondproject.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -21,6 +24,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,6 +43,7 @@ public class AttachmentService {
     private String imageDir;
 
     private final AttachmentRepository attachmentRepository;
+    private final UserRepository userRepository;
 
     public Attachment save(MultipartFile file, User user) throws IOException {
         String storedKey = UUID.randomUUID() + "_" + file.getOriginalFilename(); // 스토리지키 생성 + 뒤에 오리지널 이름 붙임
@@ -148,6 +154,43 @@ public class AttachmentService {
         } catch (IOException e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "파일 삭제 실패 ");
+        }
+    }
+
+    @Transactional
+    public void saveFiles(Long userId, Long parentId, FileType fileType, List<MultipartFile> files) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        for (MultipartFile file : files) {
+            try {
+                // 1. 저장 키 생성
+                String storedKey = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+                // 2. 로컬 저장
+                Path savePath = Paths.get(uploadDir + storedKey);
+                Files.copy(file.getInputStream(), savePath, StandardCopyOption.REPLACE_EXISTING);
+
+                // 3. Attachment 엔티티 생성
+                Attachment attachment = new Attachment();
+                attachment.setUser(user);
+                attachment.setName(file.getOriginalFilename());
+                attachment.setStoredKey(storedKey);
+                attachment.setContentType(file.getContentType());
+                attachment.setSizeBytes(file.getSize());
+                attachment.setSha256(sha256(file.getBytes()));
+                attachment.setUploadAt(LocalDate.now());
+                // parentId와 fileType를 필요에 맞게 저장
+                // 예: attachment 테이블에 parentId, fileType 컬럼 존재 시 set
+                // attachment.setParentId(parentId);
+                // attachment.setFileType(fileType);
+
+                // 4. DB 저장
+                attachmentRepository.save(attachment);
+
+            } catch (IOException e) {
+                throw new RuntimeException("파일 저장 실패: " + file.getOriginalFilename(), e);
+            }
         }
     }
 

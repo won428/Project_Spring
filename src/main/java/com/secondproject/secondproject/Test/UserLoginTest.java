@@ -21,6 +21,18 @@ public class UserLoginTest extends AbstractTestNGSpringContextTests {
     private PasswordEncoder passwordEncoder;
 
     @Test
+    public void insertUserList5() {
+        User user01 = new User();
+        user01.setEmail("test@test");
+        user01.setPassword(passwordEncoder.encode("1234"));
+        user01.setGender(Gender.MALE);
+        user01.setName("admin");
+        user01.setPhone("01012378453");
+        user01.setType(UserType.ADMIN);
+        userRepository.save(user01);
+    }
+
+    @Test
     public void insertUserList() {
         User user01 = new User();
         user01.setEmail("st9@test.com");
@@ -34,6 +46,9 @@ public class UserLoginTest extends AbstractTestNGSpringContextTests {
 
     @Test
     public void insertProfessor_ChulSoo() {
+        Major major = new Major();
+        major.setId(5001L); // 이 숫자가 DB FK로 들어감
+
         User prof = new User();
         prof.setEmail("chulsoo.prof@univ.com");        // 고유 이메일
         prof.setPassword(passwordEncoder.encode("Prof123!")); // 로그인용 원문 비번 예: Prof123!
@@ -42,6 +57,11 @@ public class UserLoginTest extends AbstractTestNGSpringContextTests {
         prof.setPhone("01012345678");                  // 연락처
         prof.setType(UserType.PROFESSOR);
         userRepository.save(prof);// 교수 권한
+
+        prof.setPhone("01012347777");                               // UNIQUE, length 20
+        prof.setType(UserType.STUDENT);                             // Enum: 학생
+        prof.setUserCode(202500051002L);
+        prof.setMajor(major);
     }
 
     @Test

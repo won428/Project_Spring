@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.repository;
 
+import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.entity.StudentRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -18,6 +19,9 @@ public interface StatusChangeRepository extends JpaRepository<StudentRecord, Lon
     List<StudentRecord> findByUserIdOrderByIdDesc(Long userId);
 
     List<StudentRecord> findAllByUser_Id(Long id);
+
+    // PENDING 상태의 StudentRecord 전체 조회
+    List<StudentRecord> findByStatus(Status status);
 
     // default save(...)는 제거. JpaRepository.save 사용.
 }

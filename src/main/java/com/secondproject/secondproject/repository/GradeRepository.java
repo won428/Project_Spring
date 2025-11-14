@@ -11,6 +11,7 @@ import java.util.List;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 public interface GradeRepository extends JpaRepository<Grade, Long> {
     boolean existsByUser_IdAndLecture_IdAndLectureGrade(Long userId, Long lectureId, BigDecimal lectureGrade);
@@ -36,4 +37,7 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
             """)
     List<GradeSummaryDto> findSummariesByLectureId(Long lectureId);
 
+
+
+    Optional<Grade> findByUserIdAndLectureId(Long userId, Long lectureId);
 }

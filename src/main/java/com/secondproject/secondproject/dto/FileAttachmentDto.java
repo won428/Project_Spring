@@ -17,5 +17,5 @@ public class FileAttachmentDto {
     private FileType fileType;
     private Long id;
     private User user;
-
+    private List<String> existingFiles; // 기존에 존재하는 파일 경로/이름
 }

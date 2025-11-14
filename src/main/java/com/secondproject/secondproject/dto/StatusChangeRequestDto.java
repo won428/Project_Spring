@@ -25,6 +25,9 @@ public class StatusChangeRequestDto {
     private LocalDate appliedDate;        // StudentRecord.appliedDate (요청 시 today, 서버 보정 가능)
     private LocalDate processedDate;      // StudentRecord.processedDate (응답/승인 시 세팅)
 
+    private LocalDate startDate;   // StudentRecord.startDate
+    private LocalDate endDate;     // StudentRecord.endDate
+
     private Status status;                // StudentRecord.status (생성 시 PENDING 강제 권장)
 
     // Attachment 참조(FK)
@@ -46,6 +49,8 @@ public class StatusChangeRequestDto {
         this.appliedDate = studentRecord.getAppliedDate();
         this.processedDate = studentRecord.getProcessedDate();
         this.status = studentRecord.getStatus();
+        this.startDate = studentRecord.getStartDate();
+        this.endDate = studentRecord.getEndDate();
 
         if(attachment != null) {
             this.attachmentId = attachment.getId();

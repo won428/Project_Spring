@@ -1,6 +1,6 @@
 package com.secondproject.secondproject.entity;
 
-import com.secondproject.secondproject.Enum.CompletionDiv;
+import com.secondproject.secondproject.Enum.AttendStudent;
 import com.secondproject.secondproject.Enum.Status;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -34,4 +34,6 @@ public class Enrollment {
     @Enumerated(EnumType.STRING)
     private Status status; // 수강 상태(수강중인지, 종강인지), 일단 Status Enum클래스로 한번에 관리하려고 하는데 분리 필요하면 분리하셔도 될 것 같습니다.
 
+    @Enumerated(EnumType.STRING)
+    private AttendStudent attendStudent;
 }

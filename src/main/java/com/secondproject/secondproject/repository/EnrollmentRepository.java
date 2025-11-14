@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
@@ -17,7 +18,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     @Query("SELECT e FROM Enrollment e WHERE e.lecture.id = :lectureId AND e.user.type = :userType")
     List<Enrollment> findByLectureIdAndType(@Param("lecture_id") Long id, @Param("u_Type") UserType type);
-
 
     List<Enrollment> findByUser(User user);
 

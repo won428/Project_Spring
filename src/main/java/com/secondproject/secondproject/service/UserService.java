@@ -54,6 +54,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final EnrollmentRepository enrollmentRepository;
     private final CourseRegRepository courseRegRepository;
+
     private final DataFormatter formatter = new DataFormatter();
     private final Validator validator;
 

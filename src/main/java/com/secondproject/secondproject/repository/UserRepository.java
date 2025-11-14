@@ -5,6 +5,7 @@ import com.secondproject.secondproject.entity.Major;
 import com.secondproject.secondproject.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,6 +24,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     Optional<User> findByUserCode(Long userCode);
 
 
+
     List<User> findAllByMajor(Major major);
 
     // 이메일 존재하는지 확인
@@ -32,9 +34,14 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     List<User> findAllByEmailIn(Collection<String> emails);
 
 
+
     boolean existsByPhone(String phone);
 
     Optional<User> getByUserCode(Long usercode);
+
+    List<User> findAllByType(UserType type);
+
+
 
     List<User> findAllByMajor_IdAndType(Long id, UserType userType);
 }

@@ -2,6 +2,7 @@ package com.secondproject.secondproject.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.secondproject.secondproject.Enum.AppealType;
+import com.secondproject.secondproject.Enum.AttendStudent;
 import com.secondproject.secondproject.Enum.Status;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -50,4 +51,12 @@ public class Appeal {
     @Column(name = "appeal_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private AppealType appealType; // 이의제기 타입은 이의제기가 출결, 과제, 성적등 어디에 이의제기를 하는지 정의합니다.
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lecture_id", nullable = false, foreignKey = @ForeignKey(name = "fk_appeal_lecture"))
+    Lecture lecture;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "attendance_id")  // FK 컬럼명
+    private Attendance_records attendanceRecord; // 출결 레코드 참조
 }

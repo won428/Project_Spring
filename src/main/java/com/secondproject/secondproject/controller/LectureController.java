@@ -47,6 +47,7 @@ public class LectureController {
     private final LectureService lectureService;
     private final UserService userService;
     private final AttendanceStudentService attendanceStudentService;
+    private final AttendanceAppealService attendanceAppealService;
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
     private final LecScheduleRepository lecScheduleRepository;
@@ -393,9 +394,6 @@ public class LectureController {
         return ResponseEntity.ok(attendanceStudentService.getAttendances(id, sessionDate));
     }
 
-    // 학생 1명이 수강중인 모든 강의 불러오기
-
-
     @GetMapping("/spec")
     public ResponseEntity<?> LectureSpec(@RequestParam Long id) {
         try {
@@ -425,7 +423,7 @@ public class LectureController {
                 String error = HttpStatus.valueOf(errStatus).name();
 
                 Map<String, Object> body = Map.of(
-                        "status", status,
+                        "status", errStatus,
                         "error", error,
                         "message", ex.getReason(),
                         "timestamp", java.time.OffsetDateTime.now().toString()
@@ -450,7 +448,7 @@ public class LectureController {
                 String error = HttpStatus.valueOf(errStatus).name();
 
                 Map<String, Object> body = Map.of(
-                        "status", status,
+                        "status", errStatus,
                         "error", error,
                         "message", ex.getReason(),
                         "timestamp", java.time.OffsetDateTime.now().toString()
@@ -476,7 +474,7 @@ public class LectureController {
                 String error = HttpStatus.valueOf(errStatus).name();
 
                 Map<String, Object> body = Map.of(
-                        "status", status,
+                        "status", errStatus,
                         "error", error,
                         "message", ex.getReason(),
                         "timestamp", java.time.OffsetDateTime.now().toString()
@@ -489,12 +487,44 @@ public class LectureController {
         }
     }
 
+    // 1️⃣ 학생 수강 강의 조회
+    @GetMapping("/enrollments")
+    public ResponseEntity<List<EnrollmentInfoDto>> getEnrollments(@RequestParam Long userId) {
+        List<EnrollmentInfoDto> enrollments = attendanceAppealService.findEnrollmentsByUserId(userId);
+        return ResponseEntity.ok(enrollments);
+    }
+
+    // 2️⃣ 특정 강의 담당 교수 정보 조회
+    @GetMapping("/{lectureId}")
+    public ResponseEntity<LectureBasicInfoDto> getProfessorByLecture(@PathVariable Long lectureId) {
+        LectureBasicInfoDto professor = attendanceAppealService.findProfessorByLectureId(lectureId);
+        return ResponseEntity.ok(professor);
+    }
+
+    // 3️⃣ 출결 이의제기 제출 (첨부파일 포함)
+    @PostMapping("/attendanceAppeal")
+    public ResponseEntity<String> submitAttendanceAppeal(
+            @ModelAttribute AttendanceAppealDto dto,
+            @RequestParam(required = false) MultipartFile file) {
+
+        String attendanceDetail = dto.getAttendanceDetail();
+
+        if (attendanceDetail != null && !attendanceDetail.isEmpty()) {
+            dto.setContent("[" + attendanceDetail + "] " + dto.getContent());
+        }
+
+        dto.setStatus(Status.PENDING);
+        dto.setAppealDate(LocalDate.now());
+
+        attendanceAppealService.createAppealWithFile(dto, file);
+
+        return ResponseEntity.ok("출결 이의제기 신청이 완료되었습니다.");
+    }
+
     @GetMapping("/regForPro/{id}")
     public ProRegDto proRegDto(@PathVariable Long id) {
         ProRegDto proRegDto = this.userService.findProfessor(id);
 
         return proRegDto;
     }
-
-
 }
