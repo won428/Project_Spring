@@ -44,5 +44,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
 
     List<User> findAllByMajor_IdAndType(Long id, UserType userType);
+
+    List<User> findAllByMajor_id(Long id);
 }
 

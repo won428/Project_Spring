@@ -52,9 +52,9 @@ public class MajorController {
 
     // 전체 학과조회
     @GetMapping("/all/list")
-    public List<MajorListDto> majorList(){
+    public List<MajorListUserDto> majorList(){
 
-        List<MajorListDto> listDtos = this.majorService.majorList();
+        List<MajorListUserDto> listDtos = this.majorService.majorAllList();
 
         return listDtos;
     }
