@@ -259,6 +259,18 @@ public class UserController {
 
         statusService.approveOrRejectStatus(recordId, status);
     }
+
+    @GetMapping("/{userId}/profile-image")
+    public ResponseEntity<Map<String, String>> getProfileImage(@PathVariable Long userId) {
+        String imageUrl = userService.getProfileImageUrl(userId);
+
+        // URL이 null이 아니면 반환, 없으면 null 반환
+        if (imageUrl != null) {
+            return ResponseEntity.ok(Map.of("url", imageUrl));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("url", ""));
+        }
+    }
 //        // 4) 학적 상태 조회 (최종적으로 이 형태로 바뀌어야 함)
 //        StatusRecords statusRecord = studentService.getStatusRecordByUserId(user.getId());
 //        // 학생 일괄 저장(DB에 저장)

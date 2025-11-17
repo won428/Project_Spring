@@ -1,8 +1,12 @@
 package com.secondproject.secondproject.service;
 
 import com.secondproject.secondproject.dto.StudentInfoDto;
+import com.secondproject.secondproject.entity.Attachment;
+import com.secondproject.secondproject.entity.Mapping.UserAttach;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.entity.StatusRecords;
+import com.secondproject.secondproject.repository.AttachmentRepository;
+import com.secondproject.secondproject.repository.UserAttachRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import com.secondproject.secondproject.repository.RecordStatusRepository;
 
@@ -25,6 +29,8 @@ import static com.secondproject.secondproject.Enum.UserType.STUDENT;
 public class StudentService {
     private final UserRepository userRepository;
     private final RecordStatusRepository recordStatusRepository;
+    private final AttachmentRepository attachmentRepository;
+    private final UserAttachRepository userAttachRepository;
 
     @Value("${image.upload-dir}")
     private String imageUploadDir;
@@ -81,48 +87,52 @@ public class StudentService {
     }
 
     // ====================== 학생 이미지 업로드 ======================
-    /**
-     * 학생 이미지 업로드
-     *
-     * @param userId 학생 ID
-     * @param file   업로드할 MultipartFile (이미지)
-     * @return 업데이트된 StatusRecords
-     * @throws IOException 파일 저장 중 에러
-     */
-    // 이미지 저장 경로 예시 (프로젝트 내 "uploads" 폴더)
-    private final String uploadDir = System.getProperty("user.dir") + "/uploads/";
-
     public String saveStudentImage(Long userId, MultipartFile file) throws IOException {
-
-        // 1. 유저 조회 및 학생 타입 체크
+        // 1. 사용자 존재 여부 확인
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("학생 정보 없음"));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        if (user.getType() != STUDENT) {
-            throw new IllegalArgumentException("학생이 아닌 사용자는 업로드 불가");
+        // 2. 파일 형식 검증 (이미지 파일만 허용)
+        if (file.getContentType() == null || !file.getContentType().startsWith("image/")) {
+            throw new IllegalArgumentException("이미지 파일만 업로드 가능합니다.");
         }
 
-        // 2. StatusRecords 조회, 없으면 새로 생성
-        StatusRecords record = recordStatusRepository.findByUserId(userId)
-                .orElseGet(() -> {
-                    StatusRecords r = new StatusRecords();
-                    r.setUser(user);
-                    r.setAdmissionDate(LocalDate.now());
-                    return r;
-                });
+        // 3. 파일 크기 제한 (예: 5MB)
+        long maxSize = 5 * 1024 * 1024;  // 5MB
+        if (file.getSize() > maxSize) {
+            throw new IllegalArgumentException("파일 크기는 5MB를 초과할 수 없습니다.");
+        }
 
-        // 3. 파일 저장
-        String ext = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
-        String savedFileName = UUID.randomUUID() + ext;
-        File saveFile = new File(imageUploadDir + savedFileName);
-        saveFile.getParentFile().mkdirs();
-        file.transferTo(saveFile);
+        // 4. 파일명 처리
+        String originalFilename = file.getOriginalFilename();
+        String extension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+        String savedFilename = "student_" + userId + "_" + System.currentTimeMillis() + extension;
 
-        // 4. StatusRecords에 이미지 URL 저장 (React에서 접근할 URL)
-        record.setStudentImage("/images/" + savedFileName);
-        recordStatusRepository.save(record);
+        // 5. 저장 경로 생성 (서버 내 파일 저장 경로 지정)
+        File destFile = new File(imageUploadDir, savedFilename);
+        destFile.getParentFile().mkdirs(); // 디렉토리가 없으면 생성
+        file.transferTo(destFile); // 파일을 실제 디렉토리에 저장
 
-        return record.getStudentImage();
+        // 6. Attachment 엔티티 저장
+        Attachment attachment = new Attachment();
+        attachment.setName(originalFilename); // 원본 파일 이름
+        attachment.setStoredKey(savedFilename); // 저장된 파일 이름
+        attachment.setSizeBytes(file.getSize());
+        attachment.setContentType(file.getContentType()); // 파일의 MIME 타입
+        attachmentRepository.save(attachment); // 데이터베이스에 저장
+
+        // 7. UserAttach 매핑 테이블에 연결
+        UserAttach mapping = new UserAttach();
+        mapping.setUser(user);
+        mapping.setAttachment(attachment);
+        userAttachRepository.save(mapping);
+
+        // 8. 클라이언트에서 접근할 수 있는 URL 반환
+        // 실제 서버에서 제공할 수 있는 파일 경로
+        return "/files/" + savedFilename; // 웹에서 파일 접근할 수 있는 경로
     }
 
 }

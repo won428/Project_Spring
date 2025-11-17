@@ -13,6 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.math3.stat.descriptive.summary.Product;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,7 @@ import jakarta.validation.ConstraintViolation;
 
 import jakarta.validation.Validator;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -59,8 +61,12 @@ public class UserService {
     private final DataFormatter formatter = new DataFormatter();
     private final Validator validator;
     private final StudentRecordRepository studentRecordRepository;
+    private final AttachmentRepository attachmentRepository;
     private final LectureRepository lectureRepository;
     private final GradeRepository gradeRepository;
+
+    @Value("${image.upload-dir}")
+    private String imageUploadDir;
 
     @Transactional
     public void insertUser(UserDto userinfo, MultipartFile file) throws IOException {
@@ -847,5 +853,29 @@ public class UserService {
 
 
         return userDetail;
+    }
+
+    public String getProfileImageUrl(Long userId) {
+        // MappingUser 테이블에서 userId로 attachmentId를 조회합니다.
+        Optional<UserAttach> userAttach = userAttachRepository.findByUserId(userId);
+        if (userAttach.isPresent()) {
+            // 해당하는 UserAttach가 있으면 attachmentId를 가져옵니다.
+            Long attachmentId = userAttach.get().getAttachment().getId();
+
+            // attachmentId로 Attachment 테이블에서 URL을 조회합니다.
+            Optional<Attachment> attachment = attachmentRepository.findById(attachmentId);
+            if (attachment.isPresent()) {
+                String fileName = attachment.get().getUrl();  // Attachment에서 URL을 가져옵니다.
+
+                // 서버의 imageDir 경로와 파일 이름을 결합하여 파일 경로를 생성합니다.
+                File imageFile = new File(imageUploadDir + "/" + fileName);
+
+                // 파일이 존재하는지 확인하고, 존재하면 해당 파일 경로를 반환합니다.
+                if (imageFile.exists()) {
+                    return imageFile.getAbsolutePath();
+                }
+            }
+        }
+        return null;  // 이미지 파일이 없으면 null 반환
     }
 }

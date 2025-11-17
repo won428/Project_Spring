@@ -50,6 +50,9 @@ public class Attachment {
     @JoinColumn(name = "appeal_id") // FK 컬럼
     private Appeal appeal;
 
+    public String getUrl() {
+        return "/files/" + this.storedKey;
+    }
 
     @PrePersist
         // @PrePersist: 엔티티가 처음 INSERT 되기 직전에 자동 실행

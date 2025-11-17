@@ -54,12 +54,15 @@ public class StudentController {
     /**
      * 학생 증명사진 업로드
      */
-    @PostMapping("/status/upload-image")
+    @PostMapping("/{userId}/upload-image")
     public ResponseEntity<?> uploadStudentImage(
-            @RequestParam("userId") Long userId,
+            @PathVariable Long userId,
             @RequestParam("file") MultipartFile file
     ) {
+        System.out.println("파일명: " + file.getOriginalFilename());
+        System.out.println("파일크기: " + file.getSize());
         try {
+            // 실제 이미지 저장 후 URL 또는 경로 반환
             String savedPath = studentService.saveStudentImage(userId, file);
             return ResponseEntity.ok(savedPath);
         } catch (IllegalArgumentException e) {
