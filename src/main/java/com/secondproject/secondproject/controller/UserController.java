@@ -15,6 +15,7 @@ import com.secondproject.secondproject.service.StatusService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -54,6 +55,7 @@ import java.util.*;
 
 import static com.secondproject.secondproject.Enum.UserType.STUDENT;
 
+@Slf4j
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
@@ -86,7 +88,7 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<?> insertUser(
             @ModelAttribute UserDto userinfo,
-            @RequestParam(value = "files", required = false)  MultipartFile file
+            @RequestParam(value = "files", required = false) MultipartFile file
     ) {
 
 
@@ -115,6 +117,7 @@ public class UserController {
         }
     }
 
+
     // 관리자용 유저 목록 조회
     @GetMapping("/list")
     public List<UserListDto> userList() {
@@ -136,7 +139,7 @@ public class UserController {
             @RequestParam(required = false) Long searchCollege,
             @RequestParam(required = false) Integer searchLevel
     ) {
-        UserListSearchDto userListSearchDto = new UserListSearchDto(searchLevel,searchCollege,searchMajor, searchGender, searchUserType, searchMode, searchKeyword);
+        UserListSearchDto userListSearchDto = new UserListSearchDto(searchLevel, searchCollege, searchMajor, searchGender, searchUserType, searchMode, searchKeyword);
         Page<UserListDto> userList = this.userService.ListPageUser(userListSearchDto, pageNumber, pageSize);
 
         System.out.println("검색 조건 : " + userListSearchDto);
@@ -158,10 +161,10 @@ public class UserController {
 
     // 유저코드로 유저 찾기
     @GetMapping("/selectUserCode/{id}")
-    public UserUpdateDto findByUsercode(@PathVariable Long id) {
-
+    public ResponseEntity<UserUpdateDto> findByUsercode(@PathVariable Long id) {
+        System.out.println(id);
         UserUpdateDto userDto = new UserUpdateDto();
-        Optional<User> optUser = this.userService.findByUsercode(id);
+        Optional<User> optUser = userService.findByUsercode(id);
         User user = optUser
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, id + "사용자 없음"));
@@ -175,13 +178,13 @@ public class UserController {
         userDto.setPhone(user.getPhone());
         userDto.setEmail(user.getEmail());
         userDto.setBirthdate(user.getBirthDate());
-        userDto.setPassword(user.getPassword());
+//        userDto.setPassword(user.getPassword());
         userDto.setUser_code(user.getUserCode());
         userDto.setU_type(user.getType());
 
-
-        return userDto;
+        return ResponseEntity.ok(userDto);
     }
+
 
     // 관리자용 유저 정보수정(컨트롤러 부분 나중에 서비스로 이식할겁니다.)
     @PatchMapping("/admin/update/{id}")
@@ -204,27 +207,35 @@ public class UserController {
         return userService.parse(file);
     }
 
-    /** 학적 정보 조회 */
+    /**
+     * 학적 정보 조회
+     */
     @GetMapping("/{userId}/status")
     public UpdateStatusDto getStatus(@PathVariable Long userId) {
         return statusService.getStudentStatus(userId);
     }
 
-    /** 학적 정보 신규 생성 */
+    /**
+     * 학적 정보 신규 생성
+     */
     @PostMapping("/{userId}/status")
     public UpdateStatusDto createStatus(@PathVariable Long userId,
                                         @RequestBody UpdateStatusDto dto) {
         return statusService.createStudentStatus(userId, dto);
     }
 
-    /** 학적 정보 수정 */
+    /**
+     * 학적 정보 수정
+     */
     @PutMapping("/{userId}/status")
     public UpdateStatusDto updateStatus(@PathVariable Long userId,
                                         @RequestBody UpdateStatusDto dto) {
         return statusService.updateStudentStatus(userId, dto);
     }
 
-    /** 학적 정보 삭제 */
+    /**
+     * 학적 정보 삭제
+     */
     @DeleteMapping("/{userId}/status")
     public void deleteStatus(@PathVariable Long userId) {
         statusService.deleteStudentStatus(userId);
@@ -244,7 +255,9 @@ public class UserController {
         return statusService.getPendingStudentRecords();
     }
 
-    /** 학적 변경 신청 승인/거부 처리 */
+    /**
+     * 학적 변경 신청 승인/거부 처리
+     */
     @PutMapping("/status/{recordId}")
     public void approveOrReject(@PathVariable Long recordId,
                                 @RequestBody Map<String, String> body) {
@@ -272,23 +285,25 @@ public class UserController {
         }
     }
 //        // 4) 학적 상태 조회 (최종적으로 이 형태로 바뀌어야 함)
+
+    //        // 4) 학적 상태 조회 (최종적으로 이 형태로 바뀌어야 함)
 //        StatusRecords statusRecord = studentService.getStatusRecordByUserId(user.getId());
-//        // 학생 일괄 저장(DB에 저장)
-//        @PostMapping("/import")
-//        public ResponseEntity<?> inserBatchUser (@RequestBody @Valid List < UserStBatchDto > users, HttpServletRequest
-//        request){
-//            try {
-//                userService.importUsers(users);
-//                return ResponseEntity.ok().build();
-//
-//                // 서비스에서 명시적으로 던진 상태예외
-//            } catch (ResponseStatusException ex) {
-//                ProblemDetail pd = ex.getBody();
-//                pd.setProperty("path", request.getRequestURI());
-//                pd.setProperty("timestamp", Instant.now().toString());
-//                return ResponseEntity.status(ex.getStatusCode()).body(pd);
-//            }
-//        }
+    // 학생 일괄 저장(DB에 저장)
+    @PostMapping("/import")
+    public ResponseEntity<?> inserBatchUser(@RequestBody @Valid List<UserStBatchDto> users, HttpServletRequest
+            request) {
+        try {
+            userService.importUsers(users);
+            return ResponseEntity.ok().build();
+
+            // 서비스에서 명시적으로 던진 상태예외
+        } catch (ResponseStatusException ex) {
+            ProblemDetail pd = ex.getBody();
+            pd.setProperty("path", request.getRequestURI());
+            pd.setProperty("timestamp", Instant.now().toString());
+            return ResponseEntity.status(ex.getStatusCode()).body(pd);
+        }
+    }
 
 }
 

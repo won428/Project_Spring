@@ -16,6 +16,7 @@ public class LectureNoticeListDto {
     String username;
     String title;
     String content;
+    Long LectureId;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 //    List<MultipartFile> files;
@@ -26,7 +27,7 @@ public class LectureNoticeListDto {
         dto.setId(notice.getId());
         dto.setTitle(notice.getLnTitle());
         dto.setContent(notice.getLnContent());
-
+        dto.setLectureId(notice.getLecture().getId());
         if (notice.getUser() != null) {
             dto.setUsername(notice.getUser().getName());
             System.out.println(notice.getUser().getName());

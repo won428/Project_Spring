@@ -14,11 +14,11 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 public class BoardDto {
-    private String email;
+    private String username;
 
     private User user; // 작성자 ID
 
-    private String username;
+    private String uname;
 
     private String title; // 공지사항 제목
 

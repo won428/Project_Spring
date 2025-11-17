@@ -1,5 +1,6 @@
 package com.secondproject.secondproject.repository;
 
+import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.User;
 import org.springframework.data.domain.Page;
@@ -31,4 +32,8 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
     Optional<Lecture> findByIdWithProfessor(@Param("lectureId") Long lectureId);
 
     Page<Lecture> findAll(Specification<Lecture> spec, Pageable pageable);
+
+    List<Lecture> findByUserId(Long id);
+
+    Page<Lecture> findByStatus(Status status, Pageable pageable);
 }

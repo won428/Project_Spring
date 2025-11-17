@@ -5,6 +5,7 @@ import com.secondproject.secondproject.Enum.Status;
 import com.secondproject.secondproject.entity.GradingWeights;
 import com.secondproject.secondproject.entity.Lecture;
 import com.secondproject.secondproject.entity.LectureSchedule;
+import com.secondproject.secondproject.entity.Major;
 import com.secondproject.secondproject.service.GradingWeightsDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Digits;
@@ -75,6 +76,7 @@ public class LectureDto {
         this.totalStudent = totalStudent;
         this.status = status;
     }
+
     private Long college;
 
     private GradingWeightsDto weightsDto;
@@ -96,7 +98,27 @@ public class LectureDto {
         lectureListDto.setUserName(lecture.getUser().getName());
         lectureListDto.setStartDate(lecture.getStartDate());
         lectureListDto.setTotalStudent(lecture.getTotalStudent());
+        lectureListDto.setCompletionDiv(lecture.getCompletionDiv());
+        lectureListDto.setStatus(lecture.getStatus());
         return lectureListDto;
     }
 
+
+    public static LectureDto fromEntityPage(Lecture lecture) {
+        LectureDto dto = new LectureDto();
+        dto.setId(lecture.getId());
+        dto.setName(lecture.getName());
+        dto.setCredit(lecture.getCredit());
+        dto.setUser(lecture.getUser().getId());
+        dto.setUserName(lecture.getUser().getName());
+        dto.setStartDate(lecture.getStartDate());
+        dto.setTotalStudent(lecture.getTotalStudent());
+        dto.setCompletionDiv(lecture.getCompletionDiv());
+        dto.setStatus(lecture.getStatus());
+        dto.setMajor(lecture.getMajor().getId());
+        dto.setMajorName(lecture.getMajor().getName());
+
+        return dto;
+    }
 }
+

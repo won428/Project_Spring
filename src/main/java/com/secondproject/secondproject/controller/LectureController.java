@@ -52,7 +52,6 @@ public class LectureController {
     private final UserService userService;
     private final AttendanceStudentService attendanceStudentService;
     private final AttendanceAppealService attendanceAppealService;
-    private final AttachmentService attachmentService;
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
     private final LecScheduleRepository lecScheduleRepository;
@@ -76,7 +75,7 @@ public class LectureController {
             @RequestParam(required = false) Long searchUser,
             @RequestParam(required = false) Status searchStatus
     ) {
-        LecturePageListDto lecturePageListDto = new LecturePageListDto(pageNumber,pageSize,searchCompletionDiv, searchMajor, searchCredit, searchStartDate, searchMode,searchKeyword,searchSchedule,searchYear,searchLevel,searchUser,searchStatus);
+        LecturePageListDto lecturePageListDto = new LecturePageListDto(pageNumber, pageSize, searchCompletionDiv, searchMajor, searchCredit, searchStartDate, searchMode, searchKeyword, searchSchedule, searchYear, searchLevel, searchUser, searchStatus);
         Page<LectureDto> lectureList = this.lectureService.listPageLecture(lecturePageListDto, pageNumber, pageSize);
 
         System.out.println("검색 조건 : " + lecturePageListDto);
@@ -322,7 +321,7 @@ public class LectureController {
 
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        return lectureService.applyLecturList(dto, pageNumber,pageSize, id);
+        return lectureService.applyLecturList(dto, pageNumber, pageSize, id);
     }
 
     // 수강신청 후 개강, 종강, 거부된 목록
@@ -416,8 +415,8 @@ public class LectureController {
     // 강의 상세정보 '수강 중인' 학생 목록 (Enrollment 기준)
     @GetMapping("/detail/enrolledStudentList/{id}")
     public Page<EnrollmentStudentDto> detailEnrolledStudentList(@PathVariable Long id,
-                                                    EnrollmentSearchDto searchDto,
-                                                    Pageable pageable) {
+                                                                EnrollmentSearchDto searchDto,
+                                                                Pageable pageable) {
         return lectureService.getEnrolledStudents(id, searchDto, pageable);
     }
 
@@ -611,4 +610,20 @@ public class LectureController {
         return ResponseEntity.ok(dto);
     }
 
+
+
+    @GetMapping("/lecProgress/ad")
+    public ResponseEntity<?> submittedProgress(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        try {
+            Page<LectureDto> lectureDto = lectureService.filteredLecture(page, size);
+
+            return ResponseEntity.ok(lectureDto);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }
