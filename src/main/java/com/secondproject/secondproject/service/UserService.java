@@ -693,8 +693,8 @@ public class UserService {
         return userRepository.findByUserCode(userCode);
     }
 
-    public UserDetailAllDto userDetailAll(Long id,String year, String semester , int size,
-    int page) {
+    public UserDetailAllDto userDetailAll(Long id, String year, String semester, int size,
+                                          int page) {
         UserDetailAllDto userDetail = new UserDetailAllDto();
         User user = this.userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 유저 입니다."));

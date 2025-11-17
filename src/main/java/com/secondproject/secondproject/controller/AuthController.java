@@ -1,10 +1,12 @@
 package com.secondproject.secondproject.controller;
 
+import com.secondproject.secondproject.dto.PasswordChangeReqDto;
 import com.secondproject.secondproject.entity.RefreshToken;
 import com.secondproject.secondproject.config.JWT.JwtTokenProvider;
 import com.secondproject.secondproject.entity.User;
 import com.secondproject.secondproject.repository.RefreshTokenRepo;
 import com.secondproject.secondproject.service.UserService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +18,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -37,7 +42,7 @@ public class AuthController {
         try {
 
             String username = loginRequest.getUsername();
-            System.out.println("로그인 이메일 : " + username);
+            System.out.println("로그인 학번 : " + username);
             String password = loginRequest.getPassword();
             System.out.println("로그인 패스워드 : " + password);
             Authentication authentication = authenticationManager.authenticate(
@@ -90,7 +95,6 @@ public class AuthController {
         }
     }
 
-    //    Pw 찾기 기능 진행중 ...
     @PostMapping("/FindPW")
     public ResponseEntity<?> findPw(@RequestBody FindRequest findRequest) {
         String StringUsername = findRequest.getUsername();
@@ -105,27 +109,28 @@ public class AuthController {
 
 
     @PostMapping("/SetPw")
-    public ResponseEntity<?> setPw(@RequestBody PwSetRequest pwsetRequest) {
-        System.out.println("Request : " + pwsetRequest);
-        String StringUsername = pwsetRequest.getUsername();
+    public ResponseEntity<?> setPw(@Valid @RequestBody PasswordChangeReqDto pwSetRequest) {
+        System.out.println("Request : " + pwSetRequest);
+        String StringUsername = pwSetRequest.getUsername();
         Long username = Long.parseLong(StringUsername);
         Optional<User> authUser = userService.getByUserCode(username);
-        String newPassword = (pwsetRequest.newPassword);
+        if (authUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("사용자를 찾을 수 없습니다.");
+        }
+
+
+        String newPassword = (pwSetRequest.getNewPassword());
         String Password = authUser.get().getPassword();
         System.out.println(!passwordEncoder.matches(newPassword, Password));
         try {
             if (!passwordEncoder.matches(newPassword, Password)) {
-                String encodedPassword = passwordEncoder.encode(pwsetRequest.newPassword);
-                if (authUser.isEmpty()) {
-                    return ResponseEntity.notFound().build();
-                } else {
-                    User user = authUser.get();
-                    user.setPassword(encodedPassword);
-                    userService.setPassword(user);
-                    return ResponseEntity.ok(HttpStatus.ACCEPTED);
-                }
+                String encodedPassword = passwordEncoder.encode(pwSetRequest.getNewPassword());
+                User user = authUser.get();
+                user.setPassword(encodedPassword);
+                userService.setPassword(user);
+                return ResponseEntity.ok(HttpStatus.ACCEPTED);
             } else {
-                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("중복되는 Pw 입니다.");
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("이전에 사용하는 Pw는 사용할 수 없습니다.");
 
             }
         } catch (Exception e) {
@@ -159,11 +164,6 @@ public class AuthController {
 
     }
 
-    @Data
-    public static class PwSetRequest {
-        private String username;
-        private String newPassword;
-    }
 
     @Data
     @AllArgsConstructor
@@ -171,5 +171,31 @@ public class AuthController {
         private String accessToken;
         private String refreshToken;
     }
+
+
+//    //비밀번호 제약 오류
+//    @ExceptionHandler(MethodArgumentNotValidException.class)
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    public ResponseEntity<Map<String, String>> handleValidationExceptions(
+//            MethodArgumentNotValidException ex) {
+//
+//        Map<String, String> errors = new HashMap<>();
+//
+//        // 1. DTO의 '필드' 오류 (예: @Pattern, @NotBlank)
+//        ex.getBindingResult().getFieldErrors().forEach(error -> {
+//            String fieldName = error.getField();
+//            String errorMessage = error.getDefaultMessage();
+//            errors.put(fieldName, errorMessage);
+//        });
+//
+//        // 2. DTO의 '클래스 레벨' 오류 (예: @AssertTrue - 비밀번호 일치)
+//        ex.getBindingResult().getGlobalErrors().forEach(error -> {
+//            String objectName = error.getObjectName();
+//            String errorMessage = error.getDefaultMessage();
+//            errors.put("passwordConfirmError", errorMessage); // 키 이름은 프론트와 협의
+//        });
+//
+//        return ResponseEntity.badRequest().body(errors);
+//    }
 
 }

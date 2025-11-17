@@ -597,37 +597,36 @@ public class LectureService {
         return LectureDto.fromEntity(lecture);
     }
 
-    public Page<LectureDto> applyLecturList(LecturePageListDto lecturePageListDto,  int pageNumber, int pageSize, Long id) {
+    public Page<LectureDto> applyLecturList(LecturePageListDto lecturePageListDto, int pageNumber, int pageSize, Long id) {
         Specification<Lecture> spec = (root, query, cb) -> cb.conjunction();
 
-        if(lecturePageListDto.getSearchMajor() != null){
+        if (lecturePageListDto.getSearchMajor() != null) {
             spec = spec.and(PublicSpecification.hasLecMajor(lecturePageListDto.getSearchMajor()));
         }
-        if( lecturePageListDto.getSearchLevel() != null && lecturePageListDto.getSearchLevel() >= 0){
+        if (lecturePageListDto.getSearchLevel() != null && lecturePageListDto.getSearchLevel() >= 0) {
             spec = spec.and(PublicSpecification.hasLecLevel(lecturePageListDto.getSearchLevel()));
         }
-        if(lecturePageListDto.getSearchCredit() != null && lecturePageListDto.getSearchCredit() >= 0){
+        if (lecturePageListDto.getSearchCredit() != null && lecturePageListDto.getSearchCredit() >= 0) {
             spec = spec.and(PublicSpecification.hasLecCredit(lecturePageListDto.getSearchCredit()));
         }
-        if(lecturePageListDto.getSearchCompletionDiv() != null){
+        if (lecturePageListDto.getSearchCompletionDiv() != null) {
             spec = spec.and(PublicSpecification.hasLecCompletionDiv(lecturePageListDto.getSearchCompletionDiv()));
         }
-        if(lecturePageListDto.getSearchYear() != null){
+        if (lecturePageListDto.getSearchYear() != null) {
             spec = spec.and(PublicSpecification.hasLecYear(lecturePageListDto.getSearchYear()));
         }
-        if(lecturePageListDto.getSearchStartDate() != null){
+        if (lecturePageListDto.getSearchStartDate() != null) {
             spec = spec.and(PublicSpecification.hasLecStartDate(lecturePageListDto.getSearchStartDate()));
         }
-        if(lecturePageListDto.getSearchSchedule() != null){
+        if (lecturePageListDto.getSearchSchedule() != null) {
             spec = spec.and(PublicSpecification.hasScheduleDay(lecturePageListDto.getSearchSchedule()));
         }
-        if(lecturePageListDto.getSearchUser() != null){
+        if (lecturePageListDto.getSearchUser() != null) {
             spec = spec.and(PublicSpecification.hasLecUser(lecturePageListDto.getSearchUser()));
         }
-        if (lecturePageListDto.getSearchStatus() != null){
+        if (lecturePageListDto.getSearchStatus() != null) {
             spec = spec.and(PublicSpecification.hasLecStatus(lecturePageListDto.getSearchStatus()));
         }
-
 
 
         String searchMode = lecturePageListDto.getSearchMode();
@@ -1188,7 +1187,7 @@ public class LectureService {
         if (lecturePageListDto.getSearchLevel() != null && lecturePageListDto.getSearchLevel() >= 0) {
             spec = spec.and(PublicSpecification.hasLecLevel(lecturePageListDto.getSearchLevel()));
         }
-        if(lecturePageListDto.getSearchCredit() != null && lecturePageListDto.getSearchCredit() >= 0){
+        if (lecturePageListDto.getSearchCredit() != null && lecturePageListDto.getSearchCredit() >= 0) {
             spec = spec.and(PublicSpecification.hasLecCredit(lecturePageListDto.getSearchCredit()));
         }
         if (lecturePageListDto.getSearchCompletionDiv() != null) {
@@ -1271,8 +1270,8 @@ public class LectureService {
     }
 
     public Page<EnrollmentStudentDto> getEnrolledStudents(Long id,
-                                              EnrollmentSearchDto searchDto,
-                                              Pageable pageable) {
+                                                          EnrollmentSearchDto searchDto,
+                                                          Pageable pageable) {
         String mode = Optional.ofNullable(searchDto.getSearchMode()).orElse("ALL");
         String keyword = searchDto.getSearchKeyword();
 
@@ -1282,6 +1281,14 @@ public class LectureService {
                 keyword,
                 pageable
         );
+    }
+
+    public Page<LectureDto> filteredLecture(int page, int size) {
+        Status status = Status.PENDING;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        Page<Lecture> lecturePage = lectureRepository.findByStatus(status, pageable);
+        return lecturePage.map(LectureDto::fromEntityPage);
+
     }
 }
 

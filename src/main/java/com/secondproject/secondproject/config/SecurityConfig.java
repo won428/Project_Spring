@@ -40,7 +40,7 @@ public class SecurityConfig {
             /* JWT 토큰 방식 Json Web Token
             {header h2256 type jwt}
             {
-              "sub": "teacher1@example.com",
+              "sub": "로그인 시 입력한 내용",
               "roles": ["ROLE_TEACHER"],
               "exp": 1726765200
             }
