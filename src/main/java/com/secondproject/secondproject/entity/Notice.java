@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Cleanup;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 
@@ -41,6 +42,10 @@ public class Notice {
 
     @Column(name = "file_type")
     private FileType filetype;
+
+    @Column(name ="view_count")
+    @ColumnDefault("0")
+    int viewCount = 0;
 
     @PrePersist
         // @PrePersist: 엔티티가 처음 INSERT 되기 직전에 자동 실행

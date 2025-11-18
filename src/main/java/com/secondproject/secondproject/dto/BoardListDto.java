@@ -18,6 +18,7 @@ public class BoardListDto {
     String content;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
+    int viewCount;
 //    List<MultipartFile> files;
 
 
@@ -26,6 +27,7 @@ public class BoardListDto {
         dto.setId(notice.getId());
         dto.setTitle(notice.getTitle());
         dto.setContent(notice.getContent());
+        dto.setViewCount(notice.getViewCount());
 
         if (notice.getUser() != null) {
             dto.setUsername(notice.getUser().getName());

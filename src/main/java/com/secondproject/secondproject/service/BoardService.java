@@ -439,4 +439,16 @@ public class BoardService {
 
         this.inquiryRepository.save(inquiry);
     }
+
+    public void clickTitle(Long id) {
+        Notice notice = this.boardRepository.findById(id)
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 게시글 입니다."));
+        int viewCount = notice.getViewCount();
+        int newViewCount = viewCount + 1;
+
+        notice.setViewCount(newViewCount);
+
+        this.boardRepository.save(notice);
+
+    }
 }

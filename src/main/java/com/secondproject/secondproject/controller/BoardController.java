@@ -9,13 +9,16 @@ import com.secondproject.secondproject.service.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/Entire")
@@ -25,6 +28,31 @@ public class BoardController {
     private final LectureService lectureService;
     private final UserService userService;
     private final AcademicCalendarService academicCalendarService;
+
+    @PatchMapping("/clickTitle/{item}")
+    public ResponseEntity<?> clickTitle(@PathVariable Long item){
+        try {
+            this.boardService.clickTitle(item);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (ResponseStatusException ex) {
+            try {
+
+                int status = ex.getStatusCode().value();
+                String error = HttpStatus.valueOf(status).name();
+
+                Map<String, Object> body = Map.of(
+                        "status", status,
+                        "error", error,
+                        "message", ex.getReason(),
+                        "timestamp", java.time.OffsetDateTime.now().toString()
+                );
+
+                return ResponseEntity.status(ex.getStatusCode()).body(body);
+            } catch (Exception otherEx) {
+                return ResponseEntity.status(500).body("알수없는 오류");
+            }
+        }
+    }
 
     @PostMapping("/insert")
     public ResponseEntity<?> createNotice(
