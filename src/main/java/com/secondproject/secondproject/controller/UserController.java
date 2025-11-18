@@ -17,6 +17,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -248,11 +250,17 @@ public class UserController {
     }
 
     @GetMapping("/student/record/all")
-    public List<StatusChangeRequestDto> getAllPendingRecords(@RequestParam(value = "status", required = false) String status) {
+    public Page<StatusChangeRequestDto> getAllPendingRecords(
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "page", defaultValue = "0") int page,  // 페이지 번호 (기본값 0)
+            @RequestParam(value = "size", defaultValue = "10") int size  // 페이지 크기 (기본값 10)
+    ) {
         if (!"PENDING".equalsIgnoreCase(status)) {
-            return Collections.emptyList();
+            return Page.empty();  // 상태가 "PENDING"이 아니면 빈 페이지 반환
         }
-        return statusService.getPendingStudentRecords();
+
+        Pageable pageable = PageRequest.of(page, size);  // Pageable 객체 생성
+        return statusService.getPendingStudentRecords(pageable);  // Service에서 페이징 처리된 결과 반환
     }
 
     /**

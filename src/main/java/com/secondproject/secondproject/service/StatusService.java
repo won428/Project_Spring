@@ -14,6 +14,8 @@ import com.secondproject.secondproject.repository.StatusChangeRepository;
 import com.secondproject.secondproject.repository.StatusRecordsRepository;
 import com.secondproject.secondproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,7 +99,6 @@ public class StatusService {
         d.setEndDate(sr.getEndDate());
         d.setStatus(sr.getStatus());
 
-        // 필요 시 첨부 id 매핑: d.setAttachmentId(sr.getAttachment() != null ? sr.getAttachment().getId() : null);
         return d;
     }
 
@@ -258,12 +259,12 @@ public class StatusService {
     /**
      * PENDING 상태 StudentRecord 목록을 StatusChangeRequestDto로 반환
      */
-    public List<StatusChangeRequestDto> getPendingStudentRecords() {
-        List<StudentRecord> pendingRecords = statusChangeRepository.findByStatus(Status.PENDING);
+    public Page<StatusChangeRequestDto> getPendingStudentRecords(Pageable pageable) {
+        // 상태가 PENDING인 데이터를 페이지 처리하여 반환
+        Page<StudentRecord> pendingRecordsPage = statusChangeRepository.findByStatus(Status.PENDING, pageable);
 
-        return pendingRecords.stream()
-                .map(record -> new StatusChangeRequestDto(record, null)) // Attachment는 필요 시 연결
-                .collect(Collectors.toList());
+        // 페이지 객체를 DTO로 변환하여 반환
+        return pendingRecordsPage.map(record -> new StatusChangeRequestDto(record, null));
     }
 
     /**

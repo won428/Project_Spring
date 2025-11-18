@@ -160,48 +160,40 @@ public class CreditAppealService {
 
         List<Appeal> appeals = appealRepository.findByLectureAndReceiverWithDetails(lectureId, receiverId);
 
-        return appeals.stream().map(appeal -> {
+        return appeals.stream()
+                .map(appeal -> {
 
-            Enrollment enrollment = appeal.getEnrollment();
-            if (enrollment == null || enrollment.getUser() == null || enrollment.getGrade() == null) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                        "Enrollment/Grade/User 정보가 없습니다.");
-            }
+                    Enrollment enrollment = appeal.getEnrollment();
+                    Grade grade = (enrollment != null) ? enrollment.getGrade() : null;
 
-            User sender = userRepository.findById(appeal.getSendingId())
-                    .orElse(null);
+                    // sender 정보
+                    User sender = userRepository.findById(appeal.getSendingId()).orElse(null);
+                    String studentName = (sender != null) ? sender.getName() : "";
+                    String studentCode = (sender != null) ? String.valueOf(sender.getUserCode()) : "";
 
-            String studentName = "";
-            String studentCode = "";
+                    return new AppealManageDto(
+                            appeal.getId(),
+                            appeal.getSendingId(),
+                            appeal.getReceiverId(),
+                            appeal.getLecture().getId(),
+                            appeal.getTitle(),
+                            studentName,
+                            studentCode,
+                            appeal.getContent(),
+                            appeal.getAppealDate(),
+                            appeal.getStatus(),
+                            appeal.getAppealType(),
 
-            if (sender != null && sender.getType() == UserType.STUDENT) {
-                studentName = sender.getName();
-                studentCode = String.valueOf(sender.getUserCode());
-            }
-
-            Grade grade = enrollment.getGrade();
-
-            return new AppealManageDto(
-                    appeal.getId(),                         // appealId
-                    appeal.getSendingId(),                  // sendingId
-                    appeal.getReceiverId(),                 // receiverId
-                    appeal.getLecture().getId(),            // lectureId
-                    appeal.getTitle(),                      // title
-                    studentName,                            // studentName
-                    studentCode,                            // studentCode
-                    appeal.getContent(),                    // content
-                    appeal.getAppealDate(),                 // appealDate
-                    appeal.getStatus(),                     // status
-                    appeal.getAppealType(),                 // appealType
-                    grade.getAScore(),                      // aScore
-                    grade.getAsScore(),                     // asScore
-                    grade.getTScore(),                      // tScore
-                    grade.getFtScore(),                     // ftScore
-                    grade.getTotalScore(),                  // totalScore
-                    grade.getLectureGrade()                 // lectureGrade
-            );
-
-        }).collect(Collectors.toList());
+                            // grade null-safe
+                            grade != null ? grade.getAScore() : null,
+                            grade != null ? grade.getAsScore() : null,
+                            grade != null ? grade.getTScore() : null,
+                            grade != null ? grade.getFtScore() : null,
+                            grade != null ? grade.getTotalScore() : null,
+                            grade != null ? grade.getLectureGrade() : null
+                    );
+                })
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -327,7 +319,7 @@ public class CreditAppealService {
             appeal.setStatus(dto.getStatus());
             appealRepository.save(appeal);
         }
-// 여기까지 완료
+
         AttendanceSummary newatt = this.attendanceStudentService.getAttendanceSummary(enrollment.getLecture().getId(), enrollment.getUser().getId());
         Grade grade = this.gradeRepository.findByUser_IdAndLecture_Id(enrollment.getUser().getId(), enrollment.getLecture().getId());
         GradingWeights gradingWeights = this.gradingWeightsRepository.findByLecture_Id(enrollment.getLecture().getId());
@@ -351,10 +343,8 @@ public class CreditAppealService {
         grade.setLectureGrade(gradingResult.gpa());
 
         this.gradeRepository.save(grade);
-
-
-
     }
+
     @Transactional
     public List<AttachmentDto> getAttachmentsByAppealId(Long appealId) {
         List<AppealAttach> mappings = attachmentRepository.findAttachmentsByAppealId(appealId);

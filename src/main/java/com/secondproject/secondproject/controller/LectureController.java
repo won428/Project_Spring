@@ -52,6 +52,7 @@ public class LectureController {
     private final UserService userService;
     private final AttendanceStudentService attendanceStudentService;
     private final AttendanceAppealService attendanceAppealService;
+    private final AttachmentService attachmentService;
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
     private final LecScheduleRepository lecScheduleRepository;

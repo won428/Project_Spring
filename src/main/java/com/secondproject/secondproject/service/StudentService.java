@@ -131,8 +131,8 @@ public class StudentService {
         userAttachRepository.save(mapping);
 
         // 8. 클라이언트에서 접근할 수 있는 URL 반환
-        // 실제 서버에서 제공할 수 있는 파일 경로
-        return "/files/" + savedFilename; // 웹에서 파일 접근할 수 있는 경로
+        // 실제 서버에서 제공할 수 있는 파일 경로 (서버의 주소를 포함한 절대 URL 반환)
+        return "/images/" + savedFilename; // 실제 웹에서 파일 접근 가능하도록 URL 반환
     }
 
 }

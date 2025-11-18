@@ -61,10 +61,13 @@ public class StudentController {
     ) {
         System.out.println("파일명: " + file.getOriginalFilename());
         System.out.println("파일크기: " + file.getSize());
+
         try {
             // 실제 이미지 저장 후 URL 또는 경로 반환
-            String savedPath = studentService.saveStudentImage(userId, file);
-            return ResponseEntity.ok(savedPath);
+            String savedFileUrl = studentService.saveStudentImage(userId, file);
+
+            // 반환된 URL을 클라이언트에게 전달
+            return ResponseEntity.ok(savedFileUrl);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (IOException e) {
