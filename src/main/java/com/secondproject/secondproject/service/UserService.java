@@ -104,7 +104,7 @@ public class UserService {
         userStatus.setUser(saved);
         userStatus.setAdmissionDate(LocalDate.now());
 
-        StatusRecords savedRecords = statusRecordsRepository.save(userStatus);
+        statusRecordsRepository.save(userStatus);
 
         if (file != null) {
             //사진 저장
